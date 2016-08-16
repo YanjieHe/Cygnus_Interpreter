@@ -7,7 +7,7 @@ Users can easily extend its functions by importing C# functions, and maybe embed
 ### Constant
 	Cygnus constant can represent integer, double, Boolean,and string. 
 	It doesn't support char type currently. 
-	To declare a string, you may use “” or '' to enclose its content.
+	To declare a string, you may use "" or '' to enclose its content.
 	Example 1:
 		x = 12
 		y = 23.1
