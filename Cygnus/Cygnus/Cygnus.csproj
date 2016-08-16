@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8B4CE68E-DF0B-4AD7-97FD-F7C510BEA413}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Cygnus</RootNamespace>
+    <AssemblyName>Cygnus</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyImporter\CSharpAssembly.cs" />
+    <Compile Include="AssemblyImporter\CSharpWrapper.cs" />
+    <Compile Include="Errors\InterpreterException.cs" />
+    <Compile Include="Errors\LexicalException.cs" />
+    <Compile Include="Errors\SyntaxException.cs" />
+    <Compile Include="Executors\ExecuteFromFile.cs" />
+    <Compile Include="Executors\ExecuteFromString.cs" />
+    <Compile Include="Executors\ExecuteInConsole.cs" />
+    <Compile Include="Extensions\ExpressionExtension.cs" />
+    <Compile Include="LexicalAnalyzer\FuncTuple.cs" />
+    <Compile Include="LexicalAnalyzer\Lexical.cs" />
+    <Compile Include="LexicalAnalyzer\Lexeme.cs" />
+    <Compile Include="LexicalAnalyzer\Token.cs" />
+    <Compile Include="LexicalAnalyzer\TokenDefinition.cs" />
+    <Compile Include="LexicalAnalyzer\TokenMatcher.cs" />
+    <Compile Include="Libraries\BuiltInFunctions.cs" />
+    <Compile Include="Libraries\ConvertFunctions.cs" />
+    <Compile Include="Libraries\DictionaryFunctions.cs" />
+    <Compile Include="Libraries\ListFunctions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SymbolTable\BuiltInMethodTable.cs" />
+    <Compile Include="SymbolTable\FunctionTable.cs" />
+    <Compile Include="SymbolTable\VariableTable.cs" />
+    <Compile Include="SyntaxAnalyzer\AST.cs" />
+    <Compile Include="SyntaxAnalyzer\ASTParser.cs" />
+    <Compile Include="SyntaxAnalyzer\RPN.cs" />
+    <Compile Include="SyntaxTree\ArrayExpression.cs" />
+    <Compile Include="SyntaxTree\BinaryExpression.cs" />
+    <Compile Include="SyntaxTree\BlockExpression.cs" />
+    <Compile Include="SyntaxTree\BreakExpression.cs" />
+    <Compile Include="SyntaxTree\ConstantExpression.cs" />
+    <Compile Include="SyntaxTree\DefaultExpression.cs" />
+    <Compile Include="SyntaxTree\DictionaryExpression.cs" />
+    <Compile Include="SyntaxTree\Expression.cs" />
+    <Compile Include="SyntaxTree\ForEachExpression.cs" />
+    <Compile Include="SyntaxTree\FunctionCallExpression.cs" />
+    <Compile Include="SyntaxTree\FunctionExpression.cs" />
+    <Compile Include="SyntaxTree\ICollectionExpression.cs" />
+    <Compile Include="SyntaxTree\IEnumerableExpression.cs" />
+    <Compile Include="SyntaxTree\IfThenElseExpression.cs" />
+    <Compile Include="SyntaxTree\IfThenExpression.cs" />
+    <Compile Include="SyntaxTree\IndexExpression.cs" />
+    <Compile Include="SyntaxTree\ListExpression.cs" />
+    <Compile Include="SyntaxTree\MethodCallExpression.cs" />
+    <Compile Include="SyntaxTree\ParameterExpression.cs" />
+    <Compile Include="SyntaxTree\ReturnExpression.cs" />
+    <Compile Include="SyntaxTree\TreeViewer.cs" />
+    <Compile Include="SyntaxTree\UnaryExpression.cs" />
+    <Compile Include="SyntaxTree\WhileExpression.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
