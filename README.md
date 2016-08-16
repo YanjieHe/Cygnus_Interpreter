@@ -1,4 +1,4 @@
-# Cygnus_Interpreter
+# Cygnus Interpreter
 A simple interpreter for a script language Cygnus, written in C#
 ##What is Cygnus?
 Cygnus is a procedure-oriented, light weight, and interactive programming language, written in C#.
