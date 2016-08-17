@@ -58,6 +58,7 @@ Every structure here needs an 'end' for closure.
 		i = 0
 		while i < 10 do
 			print(i)
+			i = i + 1
 		end
 ### For 
 	The 'for' loop in Cygnus is like 'foreach' in C#. 
