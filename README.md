@@ -68,8 +68,7 @@ The syntax of Cygnus is as followings:
 			for i in range(10) do
 				print(i)
 			end
-	The 'range' function here is a lazy function, 
-	which is the same as 'xrange' in Python. 
+	The 'range' function here is a lazy function, which is the same as 'xrange' in Python. 
 	So don't worry about generating a large set for the loop, it won't :)
 	Also,  you may use the for loop to traverse every element in a collection.
 		Example 8:
