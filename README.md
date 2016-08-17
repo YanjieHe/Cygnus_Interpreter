@@ -36,16 +36,16 @@ Users can easily extend its functions by importing C# functions, and maybe embed
 		mydict = dict({'John',21},{'Marry',27})
 ## Control Statement
 The grammar of the control statement is referred to Lua, Python and Pascal. 
-The syntax of Cygnus is as followings:
+Every structure here needs an 'end' for closure.
 ### If
 	In Cygnus, there are two types of decision structure. 
 	One is 'If-Then', and another is 'If-Then-Else'. 
 	There is no 'elseif' or 'elif' in Cygnus. 
-	The decision structure needs an 'end' for closure.
 	Example 5:
 		if a > b then 
 			print(a)
 		end
+		
 		if a > b then
 			print(a)
 		else
@@ -53,7 +53,6 @@ The syntax of Cygnus is as followings:
 		end
 ### While
 	While statement is really useful when you need a loop which will continuously execute under the condition given.
-	Its also needs an 'end' for closure. 
 	You can easily learn how to use while loop in Cygnus by the following example:
 	Example 6:
 		i = 0
@@ -64,15 +63,15 @@ The syntax of Cygnus is as followings:
 	The 'for' loop in Cygnus is like 'foreach' in C#. 
 	The grammar is inspired by 'for' in Python. 
 	Let's  take a look at this example:
-		Example 7:
-			for i in range(10) do
-				print(i)
-			end
+	Example 7:
+		for i in range(10) do
+			print(i)
+		end
 	The 'range' function here is a lazy function, which is the same as 'xrange' in Python. 
 	So don't worry about generating a large set for the loop, it won't :)
 	Also,  you may use the for loop to traverse every element in a collection.
-		Example 8:
-			sum = 0
-			for i in {1,2,3} do
-				sum = sum + I
-			end
+	Example 8:
+		sum = 0
+		for i in {1,2,3} do
+			sum = sum + i
+		end
