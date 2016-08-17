@@ -4,30 +4,31 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Cygnus.SyntaxTree;
+using Cygnus.SymbolTable;
 namespace Cygnus.Libraries
 {
     public static class ListFunctions
     {
-        public static Expression Append(Expression[] args)
+        public static Expression Append(Expression[] args, Scope scope)
         {
-            args[0].GetValue<ListExpression>(ExpressionType.List).Values.AddRange(args.Skip(1));
-            return new DefaultExpression(ConstantType.Void);
+            args[0].GetValue<ListExpression>(ExpressionType.List, scope).Values.AddRange(args.Skip(1));
+            return new ConstantExpression(null, ConstantType.Void);
         }
-        public static Expression Remove(Expression[] args)
+        public static Expression Remove(Expression[] args, Scope scope)
         {
-            return Expression.Constant(args[0].GetValue<ListExpression>(ExpressionType.List).Values.Remove(args[1]), ConstantType.Boolean);
+            return Expression.Constant(args[0].GetValue<ListExpression>(ExpressionType.List, scope).Values.Remove(args[1]), ConstantType.Boolean);
         }
-        public static Expression Insert(Expression[] args)
+        public static Expression Insert(Expression[] args, Scope scope)
         {
-            args[0].GetValue<ListExpression>(ExpressionType.List).Values.Insert(
-                (int)args[1].GetValue<ConstantExpression>(ExpressionType.Constant).Value,
+            args[0].GetValue<ListExpression>(ExpressionType.List, scope).Values.Insert(
+                (int)args[1].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value,
                 args[2]);
             return Expression.Void();
         }
-        public static Expression RemoveAt(Expression[] args)
+        public static Expression RemoveAt(Expression[] args, Scope scope)
         {
-            args[0].GetValue<ListExpression>(ExpressionType.List).Values.RemoveAt(
-                (int)args[1].GetValue<ConstantExpression>(ExpressionType.Constant).Value);
+            args[0].GetValue<ListExpression>(ExpressionType.List, scope).Values.RemoveAt(
+                (int)args[1].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value);
             return Expression.Void();
         }
     }

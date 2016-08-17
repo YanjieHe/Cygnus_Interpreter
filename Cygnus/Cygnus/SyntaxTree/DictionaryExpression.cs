@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Cygnus.Errors;
+using Cygnus.SymbolTable;
+
 namespace Cygnus.SyntaxTree
 {
     public class DictionaryExpression : Expression, ICollectionExpression, IEnumerable<Expression>, IEquatable<DictionaryExpression>
@@ -13,13 +15,16 @@ namespace Cygnus.SyntaxTree
         public DictionaryExpression(Expression[][] kvps)
         {
             Dict = new Dictionary<ConstantExpression, Expression>();
-            if (kvps != null)
-                for (int i = 0; i < kvps.Length; i++)
-                {
-                    if (kvps[i].Length != 2)
-                        throw new SyntaxException("The length of the key-value pair of the dictionary must be 2");
-                    Dict[kvps[i][0].GetValue<ConstantExpression>(ExpressionType.Constant)] = kvps[i][1];
-                }
+            for (int i = 0; i < kvps.Length; i++)
+            {
+                if (kvps[i].Length != 2)
+                    throw new SyntaxException("The length of the key-value pair of the dictionary must be 2");
+                Dict[kvps[i][0] as ConstantExpression] = kvps[i][1];
+            }
+        }
+        public DictionaryExpression(Dictionary<ConstantExpression, Expression> dict)
+        {
+            Dict = dict;
         }
         public override ExpressionType NodeType
         {
@@ -37,22 +42,17 @@ namespace Cygnus.SyntaxTree
             }
         }
 
-        public Expression this[Expression index]
+        public Expression this[Expression index, Scope scope]
         {
             get
             {
-                return Dict[index.GetValue<ConstantExpression>(ExpressionType.Constant)];
+                return Dict[index.Eval(scope).GetValue<ConstantExpression>(ExpressionType.Constant, scope)];
             }
             set
             {
-                Dict[index.GetValue<ConstantExpression>(ExpressionType.Constant)] = value;
+                Dict[index.Eval(scope).GetValue<ConstantExpression>(ExpressionType.Constant, scope)] = value;
             }
         }
-        public override Expression Eval()
-        {
-            return this;
-        }
-
         public IEnumerator<Expression> GetEnumerator()
         {
             foreach (var kvp in Dict)
@@ -83,6 +83,11 @@ namespace Cygnus.SyntaxTree
                 else return false;
             }
             return true;
+        }
+
+        public override Expression Eval(Scope scope)
+        {
+            return new DictionaryExpression(Dict);
         }
     }
 }

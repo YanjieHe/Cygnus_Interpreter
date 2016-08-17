@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {
@@ -21,11 +22,6 @@ namespace Cygnus.SyntaxTree
         {
             this.list = list;
         }
-        public override Expression Eval()
-        {
-            return this;
-        }
-
         public IEnumerator<Expression> GetEnumerator()
         {
             foreach (var item in list)
@@ -33,12 +29,10 @@ namespace Cygnus.SyntaxTree
                 yield return item;
             }
         }
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
         }
-
         public bool Equals(IEnumerableExpression other)
         {
             using (var x = this.GetEnumerator())
@@ -53,6 +47,10 @@ namespace Cygnus.SyntaxTree
                         else break;
                 }
             return true;
+        }
+        public override Expression Eval(Scope scope)
+        {
+            return this;
         }
     }
 }

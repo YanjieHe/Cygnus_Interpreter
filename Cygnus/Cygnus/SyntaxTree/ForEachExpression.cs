@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {
@@ -23,31 +24,29 @@ namespace Cygnus.SyntaxTree
             this.list = new IEnumerableExpression(list);
             this.Block = Block;
             this.Iterator = Iterator;
-            Iterator.SetBlock(Block);
         }
         public ForEachExpression(Expression Expr_list, BlockExpression Block, ParameterExpression Iterator)
         {
             this.list = Expr_list;
             this.Block = Block;
             this.Iterator = Iterator;
-            Iterator.SetBlock(Block);
-        }
-        public override Expression Eval()
-        {
-            Expression Result = null;
-            IEnumerable<Expression> Iter_List = list.Eval().GetIEnumrableList();
-            foreach (var item in Iter_List)
-            {
-                Iterator.Assgin(item);
-                Result = Block.Eval();
-                if (Result.NodeType == ExpressionType.Break) break;
-                else if (Result.NodeType == ExpressionType.Return) return Result;
-            }
-            return new DefaultExpression(ConstantType.Void);
         }
         public override string ToString()
         {
             return "(ForEach)";
+        }
+        public override Expression Eval(Scope scope)
+        {
+            Expression Result = null;
+            IEnumerable<Expression> Iter_List = list.Eval(scope) as IEnumerableExpression;
+            foreach (var item in Iter_List)
+            {
+                Iterator.Assgin(item, scope);
+                Result = Block.Eval(scope);
+                if (Result.NodeType == ExpressionType.Break) break;
+                else if (Result.NodeType == ExpressionType.Return) return Result;
+            }
+            return new ConstantExpression(null, ConstantType.Void);
         }
     }
 }

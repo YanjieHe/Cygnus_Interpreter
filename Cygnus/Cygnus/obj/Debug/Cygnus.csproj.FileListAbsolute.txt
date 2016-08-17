@@ -10,6 +10,12 @@ D:\myCode\CSharpCode\Cygnus8-15\Cygnus\Cygnus\obj\Debug\Cygnus.pdb
 D:\myCode\CSharpCode\Cygnus8-15\Cygnus\Cygnus\bin\Debug\Cygnus.exe
 D:\myCode\CSharpCode\Cygnus8-15\Cygnus\Cygnus\bin\Debug\Cygnus.pdb
 D:\myCode\CSharpCode\Cygnus8-15\Cygnus\Cygnus\obj\Debug\Cygnus.csprojResolveAssemblyReference.cache
+D:\myCode\CSharpCode\Cygnus_Scope\Cygnus\Cygnus\bin\Debug\Cygnus.exe.config
+D:\myCode\CSharpCode\Cygnus_Scope\Cygnus\Cygnus\obj\Debug\Cygnus.exe
+D:\myCode\CSharpCode\Cygnus_Scope\Cygnus\Cygnus\obj\Debug\Cygnus.pdb
+D:\myCode\CSharpCode\Cygnus_Scope\Cygnus\Cygnus\obj\Debug\Cygnus.csprojResolveAssemblyReference.cache
+D:\myCode\CSharpCode\Cygnus_Scope\Cygnus\Cygnus\bin\Debug\Cygnus.exe
+D:\myCode\CSharpCode\Cygnus_Scope\Cygnus\Cygnus\bin\Debug\Cygnus.pdb
 D:\myCode\CSharpCode\Cygnus_github\Cygnus\Cygnus\bin\Debug\Cygnus.dll.config
 D:\myCode\CSharpCode\Cygnus_github\Cygnus\Cygnus\bin\Debug\Cygnus.dll
 D:\myCode\CSharpCode\Cygnus_github\Cygnus\Cygnus\bin\Debug\Cygnus.pdb

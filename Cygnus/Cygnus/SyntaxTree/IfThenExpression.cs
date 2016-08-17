@@ -1,4 +1,5 @@
 ﻿using System;
+using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {
@@ -18,26 +19,22 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.IfThen;
             }
         }
-        public override Expression Eval()
+        public override string ToString()
         {
-            var test = (ConstantExpression)Test.Eval();
+            return "(IfThen)";
+        }
+
+        public override Expression Eval(Scope scope)
+        {
+            var test = (ConstantExpression)Test.Eval(scope);
             if (test.constantType != ConstantType.Boolean) throw new ArgumentException();
             else
             {
                 if ((bool)test.Value)
-                    return IfTrue.Eval();
+                    return IfTrue.Eval(scope);
                 else
-                    return new DefaultExpression(ConstantType.Void);
+                    return new ConstantExpression(null, ConstantType.Void);
             }
-        }
-        public void Update(Expression Test, Expression IfTrue)
-        {
-            this.Test = Test;
-            this.IfTrue = IfTrue;
-        }
-        public override string ToString()
-        {
-            return "(IfThen)";
         }
     }
 }

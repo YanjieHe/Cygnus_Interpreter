@@ -25,10 +25,10 @@ namespace Cygnus.AssemblyImporter
             {
                 if (!ExceptMethods.Contains(item.Name))
                 {
-                    var f = CSharpWrapper.WrapFunc(CreateDelegate(item)
-                        ,item.GetParameters()
-                        .Select(i=>i.ParameterType).ToArray(),item.ReturnType);
-                    MethodCallExpression.builtInMethodTable[item.Name] = f;
+                    var func = CSharpWrapper.WrapFunc(CreateDelegate(item)
+                        , item.GetParameters()
+                        .Select(i => i.ParameterType).ToArray(), item.ReturnType);
+                    FunctionExpression.builtInMethodTable[item.Name] = func;
                 }
             }
         }
@@ -36,7 +36,7 @@ namespace Cygnus.AssemblyImporter
         {
             var parameters = method.GetParameters().Select(i => i.ParameterType).Select(i => Expr.Expression.Parameter(i)).ToArray();
             var ReturnParameter = Expr.Expression.Parameter(method.ReturnParameter.ParameterType);
-            var func = Expr.Expression.Lambda(Expr.Expression.Call(method, parameters),parameters).Compile();
+            var func = Expr.Expression.Lambda(Expr.Expression.Call(method, parameters), parameters).Compile();
             return func;
         }
         private static readonly string[] ExceptMethods = new string[]

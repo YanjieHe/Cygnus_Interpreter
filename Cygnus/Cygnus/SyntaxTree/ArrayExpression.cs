@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {
@@ -18,7 +19,6 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.Array;
             }
         }
-
         public ConstantExpression Length
         {
             get
@@ -26,39 +26,32 @@ namespace Cygnus.SyntaxTree
                 return new ConstantExpression(Values.Length, ConstantType.Integer);
             }
         }
-
-        public Expression this[Expression index]
+        public Expression this[Expression index, Scope scope]
         {
             get
             {
-                return Values[(int)index.Eval().GetValue<ConstantExpression>(ExpressionType.Constant).Value];
+                return Values[(int)index.Eval(scope).GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value];
             }
             set
             {
-                Values[(int)index.Eval().GetValue<ConstantExpression>(ExpressionType.Constant).Value] = value;
+                Values[(int)index.Eval(scope).GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value] = value;
             }
         }
-        public override Expression Eval()
+        public override Expression Eval(Scope scope)
         {
             for (int i = 0; i < Values.Length; i++)
-            {
-                Values[i] = Values[i].Eval();
-            }
+                Values[i] = Values[i].Eval(scope);
             return this;
         }
         public IEnumerator<Expression> GetEnumerator()
         {
             foreach (var item in Values)
-            {
                 yield return item;
-            }
         }
-
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return this.GetEnumerator();
+            return GetEnumerator();
         }
-
         public bool Equals(ArrayExpression other)
         {
             int n = Values.Length;

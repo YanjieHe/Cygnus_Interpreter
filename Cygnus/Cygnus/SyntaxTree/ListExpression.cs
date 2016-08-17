@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {
-    public class ListExpression : Expression, ICollectionExpression, IEnumerable<Expression>,IEquatable<ListExpression>
+    public class ListExpression : Expression, ICollectionExpression, IEnumerable<Expression>, IEquatable<ListExpression>
     {
         public override ExpressionType NodeType
         {
@@ -15,12 +16,6 @@ namespace Cygnus.SyntaxTree
             {
                 return ExpressionType.List;
             }
-        }
-        public override Expression Eval()
-        {
-            for (int i = 0; i < Values.Count; i++)
-                Values[i] = Values[i].Eval();
-            return this;
         }
         public IEnumerator<Expression> GetEnumerator()
         {
@@ -45,6 +40,13 @@ namespace Cygnus.SyntaxTree
             return true;
         }
 
+        public override Expression Eval(Scope scope)
+        {
+            for (int i = 0; i < Values.Count; i++)
+                Values[i] = Values[i].Eval(scope);
+            return this;
+        }
+
         public List<Expression> Values { get; private set; }
         public ListExpression(List<Expression> Values)
         {
@@ -65,16 +67,17 @@ namespace Cygnus.SyntaxTree
             }
         }
 
-        public Expression this[Expression index]
+        public Expression this[Expression index, Scope scope]
         {
             get
             {
-                return Values[(int)index.Eval().GetValue<ConstantExpression>(ExpressionType.Constant).Value];
+                return Values[(int)index.Eval(scope).GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value];
             }
             set
             {
-                Values[(int)index.Eval().GetValue<ConstantExpression>(ExpressionType.Constant).Value] = value;
+                Values[(int)index.Eval(scope).GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value] = value;
             }
         }
+
     }
 }

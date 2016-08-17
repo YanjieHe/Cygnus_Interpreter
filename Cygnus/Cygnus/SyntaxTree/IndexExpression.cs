@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {
@@ -22,17 +23,13 @@ namespace Cygnus.SyntaxTree
             this.Collection = Collection;
             this.Index = Index;
         }
-        public void SetValue(Expression value)
+        public void SetValue(Expression value, Scope scope)
         {
-            GetCollection(Collection)[Index.Eval()] = value.GetValue();
+            GetCollection(Collection, scope)[Index.Eval(scope), scope] = value.GetValue(scope);
         }
-        public override Expression Eval()
+        public ICollectionExpression GetCollection(Expression obj, Scope scope)
         {
-            return GetCollection(Collection)[Index.Eval()];
-        }
-        public ICollectionExpression GetCollection(Expression obj)
-        {
-            var Expr = obj.Eval();
+            var Expr = obj.Eval(scope);
             switch (Expr.NodeType)
             {
                 case ExpressionType.Array:
@@ -40,17 +37,21 @@ namespace Cygnus.SyntaxTree
                 case ExpressionType.Dictionary:
                     return Expr as ICollectionExpression;
                 case ExpressionType.Parameter:
-                    return GetCollection((Expr as ParameterExpression).Value);
-                case ExpressionType.FunctionCall:
-                case ExpressionType.MethodCall:
+                    return GetCollection((Expr as ParameterExpression).Eval(scope), scope);
+                case ExpressionType.Call:
                 case ExpressionType.Binary:
                 case ExpressionType.Unary:
-                    return GetCollection(Expr.Eval());
+                    return GetCollection(Expr.Eval(scope), scope);
                 case ExpressionType.Return:
-                    return GetCollection((Expr as ReturnExpression).expression.Eval());
+                    return GetCollection((Expr as ReturnExpression).expression.Eval(scope), scope);
                 default:
                     throw new ArgumentException("Cannot get element by index");
             }
+        }
+
+        public override Expression Eval(Scope scope)
+        {
+            return GetCollection(Collection, scope)[Index.Eval(scope), scope];
         }
     }
 }

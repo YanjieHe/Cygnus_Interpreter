@@ -68,6 +68,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SymbolTable\BuiltInMethodTable.cs" />
     <Compile Include="SymbolTable\FunctionTable.cs" />
+    <Compile Include="SymbolTable\Scope.cs" />
     <Compile Include="SymbolTable\VariableTable.cs" />
     <Compile Include="SyntaxAnalyzer\AST.cs" />
     <Compile Include="SyntaxAnalyzer\ASTParser.cs" />
@@ -77,11 +78,10 @@
     <Compile Include="SyntaxTree\BlockExpression.cs" />
     <Compile Include="SyntaxTree\BreakExpression.cs" />
     <Compile Include="SyntaxTree\ConstantExpression.cs" />
-    <Compile Include="SyntaxTree\DefaultExpression.cs" />
     <Compile Include="SyntaxTree\DictionaryExpression.cs" />
     <Compile Include="SyntaxTree\Expression.cs" />
     <Compile Include="SyntaxTree\ForEachExpression.cs" />
-    <Compile Include="SyntaxTree\FunctionCallExpression.cs" />
+    <Compile Include="SyntaxTree\CallExpression.cs" />
     <Compile Include="SyntaxTree\FunctionExpression.cs" />
     <Compile Include="SyntaxTree\ICollectionExpression.cs" />
     <Compile Include="SyntaxTree\IEnumerableExpression.cs" />
@@ -89,7 +89,6 @@
     <Compile Include="SyntaxTree\IfThenExpression.cs" />
     <Compile Include="SyntaxTree\IndexExpression.cs" />
     <Compile Include="SyntaxTree\ListExpression.cs" />
-    <Compile Include="SyntaxTree\MethodCallExpression.cs" />
     <Compile Include="SyntaxTree\ParameterExpression.cs" />
     <Compile Include="SyntaxTree\ReturnExpression.cs" />
     <Compile Include="SyntaxTree\TreeViewer.cs" />

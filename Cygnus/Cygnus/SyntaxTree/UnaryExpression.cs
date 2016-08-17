@@ -1,6 +1,7 @@
 ﻿using System;
 using Cygnus.SyntaxAnalyzer;
 using Cygnus.LexicalAnalyzer;
+using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {
@@ -20,9 +21,9 @@ namespace Cygnus.SyntaxTree
             this.Op = Op;
             this.Value = Value;
         }
-        public override Expression Eval()
+        public override Expression Eval(Scope scope)
         {
-            var value = Value.Eval().GetValue<ConstantExpression>(ExpressionType.Constant);
+            var value = Value.Eval(scope) as ConstantExpression;
             return UnaryOp(value, Op);
         }
         public ConstantExpression UnaryOp(ConstantExpression expr, Operator op)
@@ -46,6 +47,7 @@ namespace Cygnus.SyntaxTree
                 default:
                     throw new NotSupportedException("Not supported unary operator '" + Op + "'");
             }
+
         }
     }
 }

@@ -7,17 +7,16 @@ using Cygnus.LexicalAnalyzer;
 using Cygnus.SyntaxAnalyzer;
 using Cygnus.SyntaxTree;
 using Cygnus.SymbolTable;
-using Expr = System.Linq.Expressions;
 namespace Cygnus.Executors
 {
     public class ExecuteInConsole
     {
-        public BlockExpression block;
+        public Scope GlobalScope;
         Stack<TokenType> stack;
         LinkedList<Token> currentList;
         public ExecuteInConsole()
         {
-            block = new BlockExpression();
+            GlobalScope = new Scope();
             stack = new Stack<TokenType>();
             currentList = new LinkedList<Token>();
         }
@@ -42,27 +41,15 @@ namespace Cygnus.Executors
                             line = Console.ReadLine();
                             goto Start;
                         }
-                        var array = Lexeme.Generate(currentList);
+                        var lex_array = Lexeme.Generate(currentList);
                         currentList.Clear();
 
                         var ast = new AST();
-                        BlockExpression Root = ast.Parse(array);
+                        BlockExpression Root = ast.Parse(lex_array, GlobalScope);
                         //  ast.Display(Root);
-                        Root.SetParent(block);
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Expression Result = Root.Eval();
-                        foreach (var item in Root.variableTable)
-                            block.variableTable[item.Key] = item.Value;
-                        foreach (var item in FunctionExpression.functionTable.Values)
-                            item.Body.SetParent(block);
-                        var current = Root.Children.First;
-                        while (current != null)
-                        {
-                            if (current.Value.NodeType == ExpressionType.Block)
-                                ((BlockExpression)current.Value).SetParent(block);
-                            block.Append(current.Value);
-                            current = current.Next;
-                        }
+                        Expression Result = Root.Eval(GlobalScope).GetValue(GlobalScope);
+                        //Console.WriteLine(Result);
                     }
                 }
                 catch (Exception ex)

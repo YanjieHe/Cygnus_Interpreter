@@ -1,21 +1,14 @@
-﻿namespace Cygnus.SyntaxTree
+﻿using System;
+using Cygnus.SymbolTable;
+
+namespace Cygnus.SyntaxTree
 {
     public class ParameterExpression : Expression
     {
         public string Name { get; private set; }
-        public BlockExpression block;
-        public ParameterExpression(string Name, BlockExpression block)
+        public ParameterExpression(string Name)
         {
             this.Name = Name;
-            this.block = block;
-        }
-        public Expression Value
-        {
-            get
-            {
-
-                return block.Find(Name);
-            }
         }
         public override ExpressionType NodeType
         {
@@ -24,21 +17,17 @@
                 return ExpressionType.Parameter;
             }
         }
-        public Expression Assgin(Expression value)
+        public Expression Assgin(Expression value, Scope scope)
         {
-            return block.Assgin(Name, value);
-        }
-        public void SetBlock(BlockExpression block)
-        {
-            this.block = block;
-        }
-        public override Expression Eval()
-        {
-            return this;
+            return scope.Assgin(Name, value);
         }
         public override string ToString()
         {
             return string.Format("(Var: {0})", Name);
+        }
+        public override Expression Eval(Scope scope)
+        {
+            return scope.Find(Name);
         }
     }
 }

@@ -55,12 +55,8 @@ namespace Cygnus.SyntaxTree
                         PrintTree(((IndexExpression)Node).Index, depth + 1);
                     }
                     break;
-                case ExpressionType.MethodCall:
-                    foreach (var item in ((MethodCallExpression)Node).arguments)
-                        PrintTree(item, depth + 1);
-                    break;
-                case ExpressionType.FunctionCall:
-                    foreach (var item in ((FunctionCallExpression)Node).Arguments)
+                case ExpressionType.Call:
+                    foreach (var item in ((CallExpression)Node).Arguments)
                         PrintTree(item, depth + 1);
                     break;
                 case ExpressionType.Return:

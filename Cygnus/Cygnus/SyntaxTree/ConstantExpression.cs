@@ -1,4 +1,5 @@
 ﻿using System;
+using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {
@@ -18,7 +19,7 @@ namespace Cygnus.SyntaxTree
             Value = value;
             constantType = type;
         }
-        public static implicit operator ConstantExpression (int value)
+        public static implicit operator ConstantExpression(int value)
         {
             return new ConstantExpression(value, ConstantType.Integer);
         }
@@ -34,10 +35,6 @@ namespace Cygnus.SyntaxTree
         {
             return new ConstantExpression(value, ConstantType.Boolean);
         }
-        public override Expression Eval()
-        {
-            return this;
-        }
         public override string ToString()
         {
             return string.Format("(Constant: {0}  Type: {1})", Value, constantType);
@@ -48,18 +45,16 @@ namespace Cygnus.SyntaxTree
                 return false;
             return Equals(obj);
         }
-
         // override object.GetHashCode
         public override int GetHashCode()
         {
             return Value.GetHashCode();
         }
-
         public bool Equals(ConstantExpression other)
         {
             return constantType == other.constantType && Value.Equals(other.Value);
         }
-        public Expression Clone()
+        public override Expression Eval(Scope scope)
         {
             return new ConstantExpression(Value, constantType);
         }

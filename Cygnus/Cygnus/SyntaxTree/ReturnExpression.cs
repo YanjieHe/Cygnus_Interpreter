@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {
@@ -20,14 +21,13 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.Return;
             }
         }
-
-        public override Expression Eval()
-        {
-            return this;
-        }
         public override string ToString()
         {
             return "(return)";
+        }
+        public override Expression Eval(Scope scope)
+        {
+            return new ReturnExpression(expression.Eval(scope));
         }
     }
 }

@@ -7,15 +7,18 @@ using Cygnus.LexicalAnalyzer;
 using Cygnus.Errors;
 using Cygnus.SyntaxTree;
 using Cygnus.Extensions;
+using Cygnus.SymbolTable;
 namespace Cygnus.SyntaxAnalyzer
 {
     public class ASTParser
     {
         Lexeme[] array;
+        public Scope GlobalScope;
         public BlockExpression program { get; private set; }
-        public ASTParser(Lexeme[] array)
+        public ASTParser(Lexeme[] array, Scope GlobalScope)
         {
             this.array = array;
+            this.GlobalScope = GlobalScope;
             program = new BlockExpression();
         }
         public ASTParser(Lexeme[] array, BlockExpression program)
@@ -70,8 +73,6 @@ namespace Cygnus.SyntaxAnalyzer
             }
             ParseLine(Block, ref ExprStart, ExprEnd);
         }
-
-
         private void ParseLine(BlockExpression Block, ref int start, int end)
         {
             if (start != end)
@@ -187,20 +188,16 @@ namespace Cygnus.SyntaxAnalyzer
                             for (int i = tuple.argsCount - 1; i >= 0; i--)
                                 arguments[i] = stack.Pop();
                             var Name = (item.Content as FuncTuple).Name;
-                            if (FunctionExpression.functionTable.ContainsKey(Name))
-                                stack.Push(new FunctionCallExpression(Name, arguments));
-                            else if (MethodCallExpression.builtInMethodTable.ContainsKey(Name))
-                                stack.Push(new MethodCallExpression(Name, arguments));
-                            else throw new NotSupportedException();
+                            stack.Push(new CallExpression(Name, arguments));
                         }
                         break;
                     case TokenType.Null:
-                        return new DefaultExpression(ConstantType.Null);
+                        return new ConstantExpression(null, ConstantType.Null);
                     case TokenType.Variable:
-                        stack.Push(new ParameterExpression(item.Content as string, Block));
+                        stack.Push(new ParameterExpression(item.Content as string));
                         break;
                     case TokenType.Void:
-                        stack.Push(new DefaultExpression(ConstantType.Void)); break;
+                        stack.Push(new ConstantExpression(null, ConstantType.Void)); break;
                     default:
                         throw new SyntaxException("Wrong element for expression: '{0}'", item);
                 }
@@ -450,7 +447,7 @@ namespace Cygnus.SyntaxAnalyzer
                 var Iter_List = ParseExpr(Block, In_Position + 1, Do_Position - 1);
                 var body = new BlockExpression(Block);
                 ParseBlock(body, Do_Position + 1, End_Position - 1);
-                var Iter_Variable = new ParameterExpression(array[For_Position + 1].Content as string, body);
+                var Iter_Variable = new ParameterExpression(array[For_Position + 1].Content as string);
                 Block.Append(new ForEachExpression(Iter_List, body, Iter_Variable));
             }
             else throw new ArgumentException();
@@ -502,13 +499,14 @@ namespace Cygnus.SyntaxAnalyzer
                 int k = 0;
                 foreach (var item in parameters.Where(j => j.tokenType == TokenType.Variable))
                 {
-                    arguments[k] = new ParameterExpression(item.Content as string, body);
+                    arguments[k] = new ParameterExpression(item.Content as string);
                     k++;
                 }
-                var FUNCTION = new FunctionExpression(funcTuple.Name, body, arguments);
-                FunctionExpression.functionTable[FUNCTION.Name] = FUNCTION;//Considering the recursive function
+                var funcScope = new Scope(GlobalScope);
+                var FUNCTION = new FunctionExpression(funcTuple.Name, body, funcScope, arguments);
+                FunctionExpression.functionTable[FUNCTION.Name] = FUNCTION;
                 ParseBlock(body, Begin_Position + 1, End_Position - 1);
-                Block.Append(new DefaultExpression(ConstantType.Void));
+                Block.Append(new ConstantExpression(null, ConstantType.Void));
             }
             else throw new ArgumentException();
         }

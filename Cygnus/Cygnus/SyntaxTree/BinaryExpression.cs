@@ -1,5 +1,7 @@
 ﻿using System;
 using Cygnus.LexicalAnalyzer;
+using Cygnus.SymbolTable;
+
 namespace Cygnus.SyntaxTree
 {
     public class BinaryExpression : Expression
@@ -20,15 +22,15 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.Binary;
             }
         }
-        public override Expression Eval()
+        public override Expression Eval(Scope scope)
         {
             if (Op == Operator.Assgin)
-                return AssginOp(Left, Right);
-            var lvalue = Left.Eval();
-            var rvalue = Right.Eval();
+                return AssginOp(Left, Right, scope);
+            var lvalue = Left.Eval(scope);
+            var rvalue = Right.Eval(scope);
 
-            var left = lvalue.GetValue<ConstantExpression>(ExpressionType.Constant);
-            var right = rvalue.GetValue<ConstantExpression>(ExpressionType.Constant);
+            var left = lvalue.GetValue<ConstantExpression>(ExpressionType.Constant, scope);
+            var right = rvalue.GetValue<ConstantExpression>(ExpressionType.Constant, scope);
 
             switch (Op)
             {
@@ -39,9 +41,9 @@ namespace Cygnus.SyntaxTree
                 case Operator.Power:
                     return ArithemeticOp(left, right, Op);
                 case Operator.And:
-                    return (bool)left.Value && (bool)right.Value;
+                    return (ConstantExpression)((bool)left.Value && (bool)right.Value);
                 case Operator.Or:
-                    return (bool)left.Value || (bool)right.Value;
+                    return (ConstantExpression)((bool)left.Value || (bool)right.Value);
                 case Operator.Less:
                 case Operator.Greater:
                 case Operator.LessOrEquals:
@@ -58,21 +60,21 @@ namespace Cygnus.SyntaxTree
             throw new NotSupportedException();
 
         }
-        public Expression AssginOp(Expression left, Expression right)
+        public Expression AssginOp(Expression left, Expression right, Scope scope)
         {
             switch (left.NodeType)
             {
                 case ExpressionType.Index:
                     {
-                        var rvalue = right.Eval();
+                        var rvalue = right.Eval(scope);
                         var lvalue = (IndexExpression)left;
-                        lvalue.SetValue(rvalue);
+                        lvalue.SetValue(rvalue, scope);
                         return rvalue;
                     }
                 case ExpressionType.Parameter:
                     {
-                        var rvalue = right.Eval();
-                        ((ParameterExpression)left).Assgin(rvalue);
+                        var rvalue = right.Eval(scope);
+                        ((ParameterExpression)left).Assgin(rvalue, scope);
                         return rvalue;
                     }
                 default:
@@ -169,5 +171,6 @@ namespace Cygnus.SyntaxTree
         {
             return string.Format("(Binary: {0})", Op);
         }
+
     }
 }

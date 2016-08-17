@@ -1,14 +1,15 @@
 ﻿using System;
 using Cygnus.SyntaxTree;
 using Cygnus.LexicalAnalyzer;
+using Cygnus.SymbolTable;
 namespace Cygnus.SyntaxAnalyzer
 {
     public class AST
     {
         public AST() { }
-        public BlockExpression Parse(Lexeme[] array)
+        public BlockExpression Parse(Lexeme[] array, Scope GlobalScope)
         {
-            var ASTparser = new ASTParser(array);
+            var ASTparser = new ASTParser(array, GlobalScope);
             ASTparser.Parse(0, array.Length - 1);
             return ASTparser.program;
         }
