@@ -175,6 +175,8 @@ namespace Cygnus.LexicalAnalyzer
                     tokenType = TokenType.In; break;
                 case "null":
                     tokenType = TokenType.Null; break;
+                case "void":
+                    tokenType = TokenType.Void; break;
                 case "do":
                     tokenType = TokenType.Do; break;
                 case "then":

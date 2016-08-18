@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Cygnus.SymbolTable;
 namespace Cygnus.SyntaxTree
 {
-    public abstract class Expression:IEquatable<Expression>
+    public abstract class Expression : IEquatable<Expression>
     {
         public abstract ExpressionType NodeType { get; }
         public abstract Expression Eval(Scope scope);
@@ -31,9 +31,11 @@ namespace Cygnus.SyntaxTree
             switch (NodeType)
             {
                 case ExpressionType.Parameter:
-                    return (this as ParameterExpression).GetValue(scope);
+                    return (this as ParameterExpression).Eval(scope).GetValue(scope);
                 case ExpressionType.Return:
                     return (this as ReturnExpression).expression.Eval(scope).GetValue(scope);
+                case ExpressionType.Index:
+                    return (this as IndexExpression).Eval(scope).GetValue(scope);
                 case ExpressionType.Default:
                 case ExpressionType.Block:
                 case ExpressionType.Binary:
@@ -58,7 +60,6 @@ namespace Cygnus.SyntaxTree
                 case ExpressionType.Block:
                 case ExpressionType.Binary:
                 case ExpressionType.Unary:
-                    Console.ReadKey();
                     return Eval(scope).GetValue<T>(expressionType, scope);
                 default:
                     throw new NotSupportedException(ToString());
@@ -161,6 +162,7 @@ namespace Cygnus.SyntaxTree
                 }
             }
         }
+
     }
     public enum ExpressionType
     {

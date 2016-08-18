@@ -9,7 +9,7 @@ namespace Cygnus.Libraries
 {
     public static class ConvertFunctions
     {
-        public static Expression ToInt(Expression[] args,Scope scope)
+        public static Expression ToInt(Expression[] args, Scope scope)
         {
             return Expression.Constant(Convert.ToInt32(args[0].GetObjectValue(scope)), ConstantType.Integer);
         }

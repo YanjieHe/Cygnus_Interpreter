@@ -38,7 +38,7 @@ namespace Cygnus.SyntaxTree
         public override Expression Eval(Scope scope)
         {
             Expression Result = null;
-            IEnumerable<Expression> Iter_List = list.Eval(scope) as IEnumerableExpression;
+            IEnumerable<Expression> Iter_List = list.Eval(scope).GetIEnumrableList(scope);
             foreach (var item in Iter_List)
             {
                 Iterator.Assgin(item, scope);

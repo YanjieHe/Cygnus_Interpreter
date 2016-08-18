@@ -50,6 +50,7 @@
     <Compile Include="AssemblyImporter\CSharpWrapper.cs" />
     <Compile Include="Errors\InterpreterException.cs" />
     <Compile Include="Errors\LexicalException.cs" />
+    <Compile Include="Errors\NotDefinedException.cs" />
     <Compile Include="Errors\SyntaxException.cs" />
     <Compile Include="Executors\ExecuteFromFile.cs" />
     <Compile Include="Executors\ExecuteFromString.cs" />
@@ -64,7 +65,9 @@
     <Compile Include="Libraries\BuiltInFunctions.cs" />
     <Compile Include="Libraries\ConvertFunctions.cs" />
     <Compile Include="Libraries\DictionaryFunctions.cs" />
+    <Compile Include="Libraries\HigherOrderFunctions.cs" />
     <Compile Include="Libraries\ListFunctions.cs" />
+    <Compile Include="Libraries\MathFunctions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SymbolTable\BuiltInMethodTable.cs" />
     <Compile Include="SymbolTable\FunctionTable.cs" />

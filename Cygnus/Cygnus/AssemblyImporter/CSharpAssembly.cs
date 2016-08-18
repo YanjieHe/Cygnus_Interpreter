@@ -17,6 +17,7 @@ namespace Cygnus.AssemblyImporter
             this.FilePath = FilePath;
             this.Name = Name;
         }
+        //import('D:\myCode\CSharpCode\DllForTest\DllForTest\bin\Debug\DllForTest.dll','DllForTest.addclass')
         public void Import()
         {
             Assembly ass = Assembly.LoadFile(FilePath);  //load dll file

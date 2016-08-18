@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Cygnus.SyntaxTree;
+using Cygnus.Errors;
 namespace Cygnus.SymbolTable
 {
     public class Scope
@@ -12,13 +9,13 @@ namespace Cygnus.SymbolTable
         public VariableTable variableTable;
         public Scope()
         {
-            this.Parent = null;
-            this.variableTable = new VariableTable();
+            Parent = null;
+            variableTable = new VariableTable();
         }
-        public Scope(Scope parent)
+        public Scope(Scope Parent)
         {
-            this.Parent = parent;
-            this.variableTable = new VariableTable();
+            this.Parent = Parent;
+            variableTable = new VariableTable();
         }
         public void Append(string Name, Expression Value)
         {
@@ -34,12 +31,59 @@ namespace Cygnus.SymbolTable
                     return Value;
                 current = current.Parent;
             }
-            throw new Exception(Name + " is not defined.");
+            if (FunctionExpression.functionTable.ContainsKey(Name)
+                || FunctionExpression.builtInMethodTable.ContainsKey(Name))
+            {
+                return new CallExpression(Name, null);
+            }
+            throw new NotDefinedException(Name);
         }
         public Expression Assgin(string Name, Expression Value)
         {
+            Scope current = this;
+            while (current != null)
+            {
+                if (current.variableTable.ContainsKey(Name))
+                {
+                    current.variableTable[Name] = Value;
+                    return Value;
+                }
+                current = current.Parent;
+            }
             variableTable[Name] = Value;
             return Value;
+        }
+        public bool TryGetValue(string Name,out Expression Value)
+        {
+            Value = null;
+            Scope current = this;
+            while (current != null)
+            {
+                if (current.variableTable.TryGetValue(Name, out Value))
+                    return true;
+                current = current.Parent;
+            }
+            if (FunctionExpression.functionTable.ContainsKey(Name)
+                || FunctionExpression.builtInMethodTable.ContainsKey(Name))
+            {
+                Value =  new CallExpression(Name, null);
+                return true;
+            }
+            return false;
+        }
+        public bool Delete(string Name)
+        {
+            Scope current = this;
+            while (current != null)
+            {
+                if (current.variableTable.ContainsKey(Name))
+                {
+                    current.variableTable.Remove(Name);
+                    return true;
+                }
+                current = current.Parent;
+            }
+            return false;
         }
         public Scope SpawnScopeWith(ParameterExpression[] parameters, Expression[] values)
         {
@@ -47,12 +91,6 @@ namespace Cygnus.SymbolTable
             for (int i = 0; i < values.Length; i++)
                 scope.variableTable.Add(parameters[i].Name, values[i]);
             return scope;
-        }
-        public Expression FindInTop(string Name)
-        {
-            if (variableTable.ContainsKey(Name))
-                return variableTable[Name];
-            else return null;
         }
         public override string ToString()
         {

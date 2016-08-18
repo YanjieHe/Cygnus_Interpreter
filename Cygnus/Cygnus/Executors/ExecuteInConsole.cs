@@ -56,6 +56,8 @@ namespace Cygnus.Executors
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(ex.ToString());
+                    currentList.Clear();
+                    stack.Clear();
                 }
             }
         }

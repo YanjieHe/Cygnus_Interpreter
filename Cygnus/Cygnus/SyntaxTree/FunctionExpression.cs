@@ -17,22 +17,37 @@ namespace Cygnus.SyntaxTree
               ["array"] = BuiltInFunctions.InitArray,
               ["length"] = BuiltInFunctions.Length,
 
+              ["import"] = BuiltInFunctions.Import,
+              ["execfile"] = BuiltInFunctions.ExecuteFile,
+              ["throw"] = BuiltInFunctions.Throw,
+              ["delete"] = BuiltInFunctions.Delete,
+              ["scan"] = BuiltInFunctions.Scan,
+              ["range"] = BuiltInFunctions.Range,
+
               ["list"] = BuiltInFunctions.InitList,
+              ["dict"] = BuiltInFunctions.InitDictionary,
+
               ["append"] = ListFunctions.Append,
               ["remove"] = ListFunctions.Remove,
               ["remove_at"] = ListFunctions.RemoveAt,
               ["insert"] = ListFunctions.Insert,
 
-              ["dict"] = BuiltInFunctions.InitDictionary,
               ["has_key"] = DictionaryFunctions.Has_Key,
 
-              ["import"] = BuiltInFunctions.Import,
-              ["range"] = BuiltInFunctions.Range,
               ["int"] = ConvertFunctions.ToInt,
               ["double"] = ConvertFunctions.ToDouble,
               ["str"] = ConvertFunctions.Str,
               ["to_array"] = ConvertFunctions.ToArray,
               ["to_list"] = ConvertFunctions.ToList,
+
+              ["exp"] = MathFunctions.Exp,
+              ["sqrt"] = MathFunctions.Sqrt,
+              ["abs"] = MathFunctions.Abs,
+              ["log"] = MathFunctions.Log,
+              ["mod"] = MathFunctions.Mod,
+
+              ["map"] = HigherOrderFunctions.Map,
+              ["filter"] = HigherOrderFunctions.Filter,
 
           };
         public ParameterExpression[] Arguments { get; private set; }
