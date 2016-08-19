@@ -17,12 +17,10 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.Break;
             }
         }
-
         public override Expression Eval(Scope scope)
         {
             return this;
         }
-
         public override string ToString()
         {
             return "(Break)";

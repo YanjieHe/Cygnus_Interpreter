@@ -32,8 +32,8 @@ namespace Cygnus.LexicalAnalyzer
             switch (token.tokenType)
             {
                 case TokenType.String:
-                    // return Regex.Unescape(token.Content.Substring(1, token.Content.Length - 2));
-                    return token.Content.Substring(1, token.Content.Length - 2);
+                    return Regex.Unescape(token.Content.Substring(1, token.Content.Length - 2));
+                    //return token.Content.Substring(1, token.Content.Length - 2);
                 case TokenType.Char:
                     return Regex.Unescape(token.Content.Substring(1, token.Content.Length - 2))[0];
                 case TokenType.Add:

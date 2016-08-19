@@ -78,6 +78,9 @@ namespace Cygnus.SyntaxTree
                 Values[(int)index.Eval(scope).GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value] = value;
             }
         }
-
+        public override string ToString()
+        {
+            return "(List)";
+        }
     }
 }

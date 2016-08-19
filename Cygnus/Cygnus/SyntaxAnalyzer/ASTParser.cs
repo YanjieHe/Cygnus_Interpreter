@@ -94,9 +94,7 @@ namespace Cygnus.SyntaxAnalyzer
         {
             Console.WriteLine("\nDisplay squence: ");
             foreach (var item in sequence)
-            {
                 Console.WriteLine(item);
-            }
             Console.WriteLine("End of display\n");
         }
         private Expression ParseRPNExpr(BlockExpression Block, IEnumerable<Lexeme> ReversePolishNotation)
@@ -192,12 +190,14 @@ namespace Cygnus.SyntaxAnalyzer
                         }
                         break;
                     case TokenType.Null:
-                        return new ConstantExpression(null, ConstantType.Null);
+                        stack.Push(new ConstantExpression(null, ConstantType.Null));
+                        break;
                     case TokenType.Variable:
                         stack.Push(new ParameterExpression(item.Content as string));
                         break;
                     case TokenType.Void:
-                        stack.Push(new ConstantExpression(null, ConstantType.Void)); break;
+                        stack.Push(new ConstantExpression(null, ConstantType.Void));
+                        break;
                     default:
                         throw new SyntaxException("Wrong element for expression: '{0}'", item);
                 }
@@ -228,54 +228,17 @@ namespace Cygnus.SyntaxAnalyzer
                     case TokenType.RightBrace:
                         var leftbrace = stack.Pop();
                         if (leftbrace.tokenType == TokenType.LeftBrace)
-                        {
                             ((FuncTuple)leftbrace.Content).argsCount = args_stack.Pop();
-                        }
                         else throw new ArgumentException();
                         break;
                     case TokenType.RightParenthesis:
                         if (stack.Peek().tokenType == TokenType.LeftParenthesis)
-                        {
                             stack.Pop();
-                        }
                         else if (stack.Peek().tokenType == TokenType.Function)
-                        {
                             ((FuncTuple)stack.Pop().Content).argsCount = args_stack.Pop();
-                        }
                         break;
                 }
             }
-        }
-        public bool IdentifyIf(int start, int end)
-        {
-            //true: If - Then
-            //false: If - Else - Then
-            var stack = new Stack<TokenType>();
-            bool success = false;
-            var result = TokenType.If;
-            for (int i = start; i <= end; i++)
-            {
-                switch (array[i].tokenType)
-                {
-                    case TokenType.Then:
-                        stack.Push(TokenType.Then);
-                        break;
-                    case TokenType.Else:
-                        stack.Push(TokenType.Else); break;
-                    case TokenType.End:
-                        result = stack.Pop();
-                        if (stack.Count == 0)
-                        {
-                            success = true;
-                            break;
-                        }
-                        else if (result == TokenType.Else)
-                            stack.Pop();
-                        break;
-                }
-                if (success) break;
-            }
-            return result == TokenType.Then;
         }
         private void ParseIf(BlockExpression Block, int start, int end, ref int EndIndex)
         {
@@ -293,6 +256,8 @@ namespace Cygnus.SyntaxAnalyzer
                         break;
                     }
                 }
+                if (Then_Position < 0)
+                    throw new SyntaxException("Missing 'then'");
                 bool success = false;
                 for (int i = Then_Position; i <= end; i++)
                 {
@@ -368,6 +333,8 @@ namespace Cygnus.SyntaxAnalyzer
                         break;
                     }
                 }
+                if (Do_Position < 0)
+                    throw new SyntaxException("Missing 'do'");
                 bool success = false;
                 for (int i = Do_Position; i <= end; i++)
                 {
@@ -420,6 +387,8 @@ namespace Cygnus.SyntaxAnalyzer
                         break;
                     }
                 }
+                if (Do_Position < 0)
+                    throw new SyntaxException("Missing 'do'");
                 bool success = false;
                 for (int i = Do_Position; i <= end; i++)
                 {
@@ -467,6 +436,8 @@ namespace Cygnus.SyntaxAnalyzer
                         break;
                     }
                 }
+                if (Begin_Position < 0)
+                    throw new SyntaxException("Missing 'begin'");
                 bool success = false;
                 for (int i = Begin_Position; i <= end; i++)
                 {

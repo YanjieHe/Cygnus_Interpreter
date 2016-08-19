@@ -35,6 +35,7 @@ namespace Cygnus.SyntaxTree
                 case ExpressionType.Array:
                 case ExpressionType.List:
                 case ExpressionType.Dictionary:
+                case ExpressionType.Table:
                     return Expr as ICollectionExpression;
                 case ExpressionType.Parameter:
                     return GetCollection((Expr as ParameterExpression).Eval(scope), scope);
@@ -44,7 +45,10 @@ namespace Cygnus.SyntaxTree
                     return GetCollection(Expr.Eval(scope), scope);
                 case ExpressionType.Return:
                     return GetCollection((Expr as ReturnExpression).expression.Eval(scope), scope);
+                case ExpressionType.Index:
+                    return GetCollection(Expr.Eval(scope), scope);
                 default:
+                    Console.WriteLine(Expr);
                     throw new ArgumentException("Cannot get element by index");
             }
         }

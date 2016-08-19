@@ -68,15 +68,33 @@ namespace Cygnus.Libraries
                         arr.GetValue<ArrayExpression>(ExpressionType.Array, scope).Values
                         .Map(i => i.GetValue<ArrayExpression>(ExpressionType.Array, scope).Values));
         }
+        public static Expression InitTable(Expression[] args, Scope scope)
+        {
+            return new TableExpression(args.Cast<ParameterExpression>()
+                .Select(i => new KeyValuePair<string, Expression>(i.Name, Expression.Null())).ToArray());
+        }
         public static Expression Length(Expression[] args, Scope scope)
         {
             return (args.Single().GetValue(scope) as ICollectionExpression).Length;
+        }
+        public static Expression Dispose(Expression[] args, Scope scope)
+        {
+            var resource = args.Single().GetValue(scope);
+            (resource as IDisposable).Dispose();
+            return Expression.Void();
         }
         public static Expression Import(Expression[] args, Scope scope)
         {
             new CSharpAssembly(args[0].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value.ToString(),
                 args[1].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value.ToString()).Import();
             return new ConstantExpression(null, ConstantType.Void);
+        }
+        public static Expression SetParent(Expression[] args, Scope scope)
+        {
+            var table = args[0].GetValue<TableExpression>(ExpressionType.Table, scope);
+            var parent_table = args[1].GetValue<TableExpression>(ExpressionType.Table, scope);
+            table.Parent = parent_table;
+            return Expression.Void();
         }
         public static Expression Range(Expression[] args, Scope scope)
         {
@@ -138,7 +156,7 @@ namespace Cygnus.Libraries
             if (args.Length != 0 && args.Length != 1) throw new ArgumentException();
             if (args.Length == 1)
                 Console.Write(args.Single().GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value);
-            return (ConstantExpression)Console.ReadLine();
+            return Console.ReadLine();
         }
         public static Expression Throw(Expression[] args, Scope scope)
         {
@@ -157,15 +175,12 @@ namespace Cygnus.Libraries
             }
             return new ConstantExpression(null, ConstantType.Void);
         }
-        //public static Expression BinarySearch(Expression[] args, Scope scope)
-        //{
-        //    if (args.Length != 2) throw new ArgumentException();
-        //    var collection = args[0].GetValue(scope);
-        //    if (collection.NodeType == ExpressionType.Array)
-        //        return (ConstantExpression)Array.BinarySearch((collection as ArrayExpression).Values, args[1].GetValue(scope));
-        //    else if (collection.NodeType == ExpressionType.List)
-        //        return (ConstantExpression)(collection as ListExpression).Values.BinarySearch(args[1].GetValue(scope));
-        //    else throw new ArgumentException();
-        //}
+        public static Expression IsNull(Expression[] args, Scope scope)
+        {
+            var value = args.Single().GetValue(scope);
+            if (value.NodeType != ExpressionType.Constant) return (ConstantExpression)false;
+            else
+                return ((value as ConstantExpression).constantType == ConstantType.Null);
+        }
     }
 }

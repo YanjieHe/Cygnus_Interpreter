@@ -3,7 +3,7 @@ using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {
-    public class ConstantExpression : Expression, IEquatable<ConstantExpression>
+    public sealed class ConstantExpression : Expression, IEquatable<ConstantExpression>
     {
         public override ExpressionType NodeType
         {
@@ -12,28 +12,22 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.Constant;
             }
         }
-        public object Value;
-        public ConstantType constantType;
+        public object Value
+        {
+            get { return value; }
+            set { this.value = value; }
+        }
+        public ConstantType constantType
+        {
+            get { return type; }
+            set { type = value; }
+        }
+        private object value;
+        private ConstantType type;
         public ConstantExpression(object value, ConstantType type)
         {
-            Value = value;
-            constantType = type;
-        }
-        public static implicit operator ConstantExpression(int value)
-        {
-            return new ConstantExpression(value, ConstantType.Integer);
-        }
-        public static implicit operator ConstantExpression(double value)
-        {
-            return new ConstantExpression(value, ConstantType.Double);
-        }
-        public static implicit operator ConstantExpression(string value)
-        {
-            return new ConstantExpression(value, ConstantType.String);
-        }
-        public static implicit operator ConstantExpression(bool value)
-        {
-            return new ConstantExpression(value, ConstantType.Boolean);
+            this.value = value;
+            this.type = type;
         }
         public override string ToString()
         {

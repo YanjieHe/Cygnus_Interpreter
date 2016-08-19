@@ -89,5 +89,9 @@ namespace Cygnus.SyntaxTree
         {
             return new DictionaryExpression(Dict);
         }
+        public override string ToString()
+        {
+            return "(Dictionary)";
+        }
     }
 }

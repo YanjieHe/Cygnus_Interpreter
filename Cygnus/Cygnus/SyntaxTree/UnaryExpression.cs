@@ -47,7 +47,10 @@ namespace Cygnus.SyntaxTree
                 default:
                     throw new NotSupportedException("Not supported unary operator '" + Op + "'");
             }
-
+        }
+        public override string ToString()
+        {
+            return string.Format("(Unary: {0})", Op);
         }
     }
 }

@@ -62,5 +62,9 @@ namespace Cygnus.SyntaxTree
                     return false;
             return true;
         }
+        public override string ToString()
+        {
+            return "(Array)";
+        }
     }
 }

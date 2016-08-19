@@ -88,15 +88,15 @@ namespace Cygnus.SyntaxTree
                 switch (op)
                 {
                     case Operator.Add:
-                        return (int)left.Value + (int)right.Value;
+                        return Constant((int)left.Value + (int)right.Value, ConstantType.Integer);
                     case Operator.Subtract:
-                        return (int)left.Value - (int)right.Value;
+                        return Constant((int)left.Value - (int)right.Value, ConstantType.Integer);
                     case Operator.Multiply:
-                        return (int)left.Value * (int)right.Value;
+                        return Constant((int)left.Value * (int)right.Value, ConstantType.Integer);
                     case Operator.Divide:
-                        return (int)left.Value / (int)right.Value;
+                        return Constant((int)left.Value / (int)right.Value, ConstantType.Integer);
                     case Operator.Power:
-                        return (int)Math.Pow((int)left.Value, (int)right.Value);
+                        return Constant((int)Math.Pow((int)left.Value, (int)right.Value), ConstantType.Integer);
                     default: throw new NotSupportedException();
                 }
 
@@ -108,15 +108,15 @@ namespace Cygnus.SyntaxTree
                 switch (op)
                 {
                     case Operator.Add:
-                        return GetDouble(left) + GetDouble(right);
+                        return Constant(GetDouble(left) + GetDouble(right), ConstantType.Double);
                     case Operator.Subtract:
-                        return GetDouble(left) - GetDouble(right);
+                        return Constant(GetDouble(left) - GetDouble(right), ConstantType.Double);
                     case Operator.Multiply:
-                        return GetDouble(left) * GetDouble(right);
+                        return Constant(GetDouble(left) * GetDouble(right), ConstantType.Double);
                     case Operator.Divide:
-                        return GetDouble(left) / GetDouble(right);
+                        return Constant(GetDouble(left) / GetDouble(right), ConstantType.Double);
                     case Operator.Power:
-                        return Math.Pow(GetDouble(left), GetDouble(right));
+                        return Constant(Math.Pow(GetDouble(left), GetDouble(right)), ConstantType.Double);
                     default: throw new NotSupportedException();
                 }
             }
@@ -124,7 +124,7 @@ namespace Cygnus.SyntaxTree
                 && (left.constantType == ConstantType.String
                 || right.constantType == ConstantType.String))
             {
-                return left.Value.ToString() + right.Value.ToString();
+                return Constant(left.Value.ToString() + right.Value.ToString(), ConstantType.String);
             }
             else throw new NotSupportedException();
         }
@@ -136,13 +136,13 @@ namespace Cygnus.SyntaxTree
             switch (op)
             {
                 case Operator.Less:
-                    return cmpLeft.CompareTo(cmpRight) < 0;
+                    return Constant(cmpLeft.CompareTo(cmpRight) < 0, ConstantType.Boolean);
                 case Operator.Greater:
-                    return cmpLeft.CompareTo(cmpRight) > 0;
+                    return Constant(cmpLeft.CompareTo(cmpRight) > 0, ConstantType.Boolean);
                 case Operator.LessOrEquals:
-                    return cmpLeft.CompareTo(cmpRight) <= 0;
+                    return Constant(cmpLeft.CompareTo(cmpRight) <= 0, ConstantType.Boolean);
                 case Operator.GreaterOrEquals:
-                    return cmpLeft.CompareTo(cmpRight) >= 0;
+                    return Constant(cmpLeft.CompareTo(cmpRight) >= 0, ConstantType.Boolean);
             }
             throw new NotSupportedException();
         }
@@ -151,9 +151,25 @@ namespace Cygnus.SyntaxTree
             switch (op)
             {
                 case Operator.Equals:
-                    return left.Value.Equals(right.Value);
+                    if (left.constantType != right.constantType)
+                        return Constant(false, ConstantType.Boolean);
+                    else
+                    {
+                        if (left.constantType == ConstantType.Null
+                            || left.constantType == ConstantType.Void)
+                            return Constant(true, ConstantType.Boolean);
+                        else return Constant(left.Value.Equals(right.Value), ConstantType.Boolean);
+                    }
                 case Operator.NotEqualTo:
-                    return !left.Value.Equals(right.Value);
+                    if (left.constantType != right.constantType)
+                        return Constant(true, ConstantType.Boolean);
+                    else
+                    {
+                        if (left.constantType == ConstantType.Null
+                         || left.constantType == ConstantType.Void)
+                            return Constant(false, ConstantType.Boolean);
+                        else return Constant(!left.Value.Equals(right.Value), ConstantType.Boolean);
+                    }
             }
             throw new NotSupportedException();
         }

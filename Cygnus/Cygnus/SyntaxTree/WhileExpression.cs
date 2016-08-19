@@ -27,7 +27,6 @@ namespace Cygnus.SyntaxTree
         {
             return "(While)";
         }
-
         public override Expression Eval(Scope scope)
         {
             Expression Result = null;

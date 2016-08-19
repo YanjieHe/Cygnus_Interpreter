@@ -10,6 +10,22 @@ namespace Cygnus.SyntaxTree
     {
         public abstract ExpressionType NodeType { get; }
         public abstract Expression Eval(Scope scope);
+        public static implicit operator Expression(int value)
+        {
+            return new ConstantExpression(value, ConstantType.Integer);
+        }
+        public static implicit operator Expression(double value)
+        {
+            return new ConstantExpression(value, ConstantType.Double);
+        }
+        public static implicit operator Expression(string value)
+        {
+            return new ConstantExpression(value, ConstantType.String);
+        }
+        public static implicit operator Expression(bool value)
+        {
+            return new ConstantExpression(value, ConstantType.Boolean);
+        }
         public static ConstantExpression Constant(object obj, ConstantType constantType)
         {
             return new ConstantExpression(obj, constantType);
@@ -169,6 +185,7 @@ namespace Cygnus.SyntaxTree
         Constant, Block, Unary, Binary,
         IfThen, IfThenElse, Default, While, Break,
         Parameter, Function, Array, List, Dictionary,
-        Index, Return, ForEach, IEnumerableList, Call
+        Index, Return, ForEach, IEnumerableList, Call,
+        Table
     }
 }
