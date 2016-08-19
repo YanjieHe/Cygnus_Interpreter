@@ -110,7 +110,7 @@ Every structure here needs an 'end' for closure.
 		end
 ### Higher-order function
 	Function in Cygnus can be used as a parameter, 
-	namely you can write a higher-order function. 
+	namely you can write higher-order functions. 
 	See the following example:
 		def mul(x,y) begin
 			return x * y
