@@ -92,11 +92,14 @@ Every structure here needs an 'end' for closure.
 			end
 		end
 ### Return
-	Keyword 'return' can let you go out of the function. Refer to example 10.
+	Keyword 'return' can let you go out of the function. 
+	Refer to example 10.
 ## Function
 ### Define a function
-	Use keyword 'def' to define a function. Notice that the function has its own scope. The variables in the functions 
-	could be out of the functions' scope, which means it is a global variable.
+	Use keyword 'def' to define a function. 
+	Notice that the function has its own scope. 
+	The variables in the functions could be out of the functions' scope,
+	which means the function can contain global variables.
 	Example 10:
 		def max(x, y) begin
 			if x > y then
@@ -106,7 +109,9 @@ Every structure here needs an 'end' for closure.
 			end
 		end
 ### Higher-order function
-	Function in Cygnus can be used as a parameter, namely you can write a higher-order function. See the following example:
+	Function in Cygnus can be used as a parameter, 
+	namely you can write a higher-order function. 
+	See the following example:
 		def mul(x,y) begin
 			return x * y
 		end
