@@ -1,26 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Cygnus.Errors;
-using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {
     public class DictionaryExpression : Expression, ICollectionExpression, IEnumerable<Expression>, IEquatable<DictionaryExpression>
     {
         public Dictionary<ConstantExpression, Expression> Dict { get; private set; }
-        public DictionaryExpression(Expression[][] kvps)
+        public DictionaryExpression(IEnumerable<KeyValuePair<ConstantExpression, Expression>> kvps)
         {
             Dict = new Dictionary<ConstantExpression, Expression>();
-            for (int i = 0; i < kvps.Length; i++)
-            {
-                if (kvps[i].Length != 2)
-                    throw new SyntaxException("The length of the key-value pair of the dictionary must be 2");
-                Dict[kvps[i][0] as ConstantExpression] = kvps[i][1];
-            }
+            foreach (var kvp in kvps)
+                Dict.Add(kvp.Key, kvp.Value);
         }
         public DictionaryExpression(Dictionary<ConstantExpression, Expression> dict)
         {
@@ -57,7 +48,7 @@ namespace Cygnus.SyntaxTree
         {
             foreach (var kvp in Dict)
             {
-                yield return new ArrayExpression(new Expression[] { kvp.Key, kvp.Value });
+                yield return Array(new Expression[] { kvp.Key, kvp.Value });
             }
         }
 
@@ -65,7 +56,7 @@ namespace Cygnus.SyntaxTree
         {
             foreach (var kvp in Dict)
             {
-                yield return new ArrayExpression(new Expression[] { kvp.Key, kvp.Value });
+                yield return Array(new Expression[] { kvp.Key, kvp.Value });
             }
         }
 

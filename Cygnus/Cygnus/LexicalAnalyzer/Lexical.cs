@@ -10,14 +10,23 @@ namespace Cygnus.LexicalAnalyzer
         TextReader CodeReader;
         TokenDefinition[] tokenDefinitions;
         public LinkedList<Token> tokenList;
+        public Stack<TokenType> BracketStack;
         public Lexical(string Code, TokenDefinition[] TokenDefinitions)
         {
             CodeReader = new StringReader(Code);
+            BracketStack = new Stack<TokenType>();
+            Initialize(TokenDefinitions);
+        }
+        public Lexical(string Code, TokenDefinition[] TokenDefinitions, Stack<TokenType> BracketStack)
+        {
+            CodeReader = new StringReader(Code);
+            this.BracketStack = BracketStack;
             Initialize(TokenDefinitions);
         }
         public Lexical(string FilePath, Encoding encoding, TokenDefinition[] TokenDefinitions)
         {
             CodeReader = new StreamReader(FilePath, encoding);
+            BracketStack = new Stack<TokenType>();
             Initialize(TokenDefinitions);
         }
         void Initialize(TokenDefinition[] TokenDefinitions)
@@ -56,7 +65,7 @@ namespace Cygnus.LexicalAnalyzer
                     else throw new LexicalException("Unrecognizable input: {0}", line);
                 }
             } while (line.Length != 0);
-            if (tokenList.Last != null && tokenList.Last.Value.tokenType != TokenType.EndOfLine)
+            if (tokenList.Last != null && tokenList.Last.Value.tokenType != TokenType.EndOfLine && tokenList.Last.Value.tokenType != TokenType.Comments && BracketStack.Count == 0)
                 tokenList.AddLast(new Token("\\n", TokenType.EndOfLine));
         }
         private string Eat(string line, string content, TokenType tokenType, int len)
@@ -78,11 +87,11 @@ namespace Cygnus.LexicalAnalyzer
                     var substr = content.TrimEnd(' ', '(');
                     CheckKeywords(substr, ref tokenType);
                     if (tokenType == TokenType.Variable)
-                        tokenList.AddLast(new Token(substr, TokenType.Function));
+                        Append(new Token(substr, TokenType.Function));
                     else
                     {
-                        tokenList.AddLast(new Token(substr, tokenType));
-                        tokenList.AddLast(new Token("(", TokenType.LeftParenthesis));
+                        Append(new Token(substr, tokenType));
+                        Append(new Token("(", TokenType.LeftParenthesis));
                     }
                     return line.Substring(len);
                 case TokenType.RightParenthesis://To identify no-arg function
@@ -93,17 +102,56 @@ namespace Cygnus.LexicalAnalyzer
                     if (AppendVoid(content, TokenType.LeftBrace, TokenType.RightBrace))
                         return line.Substring(len);
                     break;
+                case TokenType.Comments:
+                    return line.Substring(len);
             }
             var token = new Token(content, tokenType);
-            tokenList.AddLast(token);
+            Append(token);
             return line.Substring(len);
+        }
+        private void Append(Token token)
+        {
+            if (token.tokenType == TokenType.LeftBracket || token.tokenType == TokenType.LeftBrace || token.tokenType == TokenType.LeftParenthesis || token.tokenType == TokenType.Function)
+            {
+                BracketStack.Push(token.tokenType);
+            }
+            else if (token.tokenType == TokenType.RightBracket || token.tokenType == TokenType.RightBrace || token.tokenType == TokenType.RightParenthesis)
+            {
+                switch (token.tokenType)
+                {
+                    case TokenType.RightBracket:
+                        if (BracketStack.Peek() == TokenType.LeftBracket)
+                        {
+                            BracketStack.Pop();
+                            break;
+                        }
+                        else throw new SyntaxException("Mismatch for brackets");
+                    case TokenType.RightBrace:
+                        if (BracketStack.Peek() == TokenType.LeftBrace)
+                        {
+                            BracketStack.Pop();
+                            break;
+                        }
+                        else throw new SyntaxException("Mismatch for braces");
+                    case TokenType.RightParenthesis:
+                        if (BracketStack.Peek() == TokenType.LeftParenthesis || BracketStack.Peek() == TokenType.Function)
+                        {
+                            BracketStack.Pop();
+                            break;
+                        }
+                        else throw new SyntaxException("Mismatch for parenthesises");
+                    default:
+                        throw new SyntaxException("Mismatch for {0}", token.tokenType);
+                }
+            }
+            tokenList.AddLast(token);
         }
         private bool AppendVoid(string content, TokenType leftPart, TokenType rightPart)
         {
             if (tokenList.Last.Value.tokenType == leftPart)
             {
-                tokenList.AddLast(new Token("void", TokenType.Void));
-                tokenList.AddLast(new Token(content, rightPart));
+                Append(new Token("void", TokenType.Void));
+                Append(new Token(content, rightPart));
                 return true;
             }
             else return false;

@@ -1,15 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Cygnus.SyntaxTree;
-using Cygnus.Extensions;
-using Cygnus.AssemblyImporter;
-using Cygnus.SymbolTable;
-using Cygnus.LexicalAnalyzer;
-using Cygnus.SyntaxAnalyzer;
-using Cygnus.Errors;
 namespace Cygnus.Libraries
 {
     public static class HigherOrderFunctions

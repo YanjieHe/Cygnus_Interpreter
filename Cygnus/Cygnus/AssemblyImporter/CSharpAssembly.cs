@@ -24,7 +24,7 @@ namespace Cygnus.AssemblyImporter
                 if (!ExceptMethods.Contains(method.Name))
                 {
                     var func = GetFunc(method);
-                    FunctionExpression.builtInMethodTable[method.Name] = func;
+                    Scope.builtInMethodTable[method.Name] = func;
                 }
             }
         }

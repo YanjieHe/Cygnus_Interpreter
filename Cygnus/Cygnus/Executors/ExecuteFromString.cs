@@ -7,16 +7,30 @@ using Cygnus.LexicalAnalyzer;
 using Cygnus.SyntaxAnalyzer;
 using Cygnus.SyntaxTree;
 using Cygnus.SymbolTable;
+using System.IO;
 namespace Cygnus.Executors
 {
     public class ExecuteFromString
     {
         string Code;
+        Scope GlobalScope;
         public ExecuteFromString(string Code)
         {
             this.Code = Code;
+            GlobalScope = new Scope();
         }
-        public void Run()
+        public ExecuteFromString(string Code, Scope GlobalScope)
+        {
+            this.Code = Code;
+            this.GlobalScope = GlobalScope;
+        }
+        public ExecuteFromString(string Code, TextWriter tr)
+        {
+            this.Code = Code;
+            Console.SetOut(tr);
+            GlobalScope = new Scope();
+        }
+        public Expression Run()
         {
             try
             {
@@ -25,19 +39,19 @@ namespace Cygnus.Executors
                     lex.Tokenize();
                     var lex_array = Lexeme.Generate(lex.tokenList);
                     var ast = new AST();
-                    Scope GlobalScope = new Scope();
                     BlockExpression Root = ast.Parse(lex_array, GlobalScope);
                     // ast.Display(Root);
-
                     Console.ForegroundColor = ConsoleColor.Green;
                     Expression Result = Root.Eval(GlobalScope).GetValue(GlobalScope);
-                   // Console.WriteLine(Result);
+                    // Console.WriteLine(Result);
+                    return Result;
                 }
             }
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(ex.ToString());
+                return Expression.Void();
             }
         }
     }

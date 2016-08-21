@@ -1,16 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Cygnus.SyntaxTree;
-using Cygnus.Extensions;
-using Cygnus.AssemblyImporter;
-using Cygnus.SymbolTable;
-using Cygnus.LexicalAnalyzer;
-using Cygnus.SyntaxAnalyzer;
-using Cygnus.Errors;
-using System.Data;
 namespace Cygnus.Libraries
 {
     public static class StringFunctions
@@ -23,6 +12,22 @@ namespace Cygnus.Libraries
         {
             return string.Join(args.First().GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value.ToString(),
                 args.Skip(1).Select(i => i.GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value.ToString()));
+        }
+        public static Expression StrSplit(Expression[] args, Scope scope)
+        {
+            return
+                new ArrayExpression(args.First()
+                .GetValue<ConstantExpression>(ExpressionType.Constant, scope)
+                .Value.ToString()
+                .Split(
+                args.Skip(1)
+                .Select(i => i.GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value.ToString().Single()).ToArray())
+                .Select(i => (Expression)i).ToArray());
+        }
+        public static Expression StrFormat(Expression[] args, Scope scope)
+        {
+            return string.Format(args.First().GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value.ToString(),
+                args.Skip(1).Select(i => i.GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value).ToArray());
         }
     }
 }

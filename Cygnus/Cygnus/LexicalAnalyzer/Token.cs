@@ -45,6 +45,7 @@
         Symbol,
         Space,
         Variable,
-        EndOfLine
+        EndOfLine,
+        Comments,
     };
 }

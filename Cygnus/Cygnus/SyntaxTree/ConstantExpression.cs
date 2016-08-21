@@ -1,5 +1,4 @@
 ﻿using System;
-using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {

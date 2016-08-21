@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Cygnus.SymbolTable;
-using Cygnus.Errors;
+﻿using Cygnus.Errors;
 namespace Cygnus.SyntaxTree
 {
     public class CallExpression : Expression
@@ -29,14 +23,14 @@ namespace Cygnus.SyntaxTree
         }
         public override Expression Eval(Scope scope)
         {
-            if (FunctionExpression.functionTable.ContainsKey(Name))
+            if (Scope.functionTable.ContainsKey(Name))
             {
-                var func = FunctionExpression.functionTable[Name].Update(Arguments, scope);
+                var func = Scope.functionTable[Name].Update(Arguments, scope);
                 return func.Eval(func.funcScope);
             }
-            else if (FunctionExpression.builtInMethodTable.ContainsKey(Name))
+            else if (Scope.builtInMethodTable.ContainsKey(Name))
             {
-                return FunctionExpression.builtInMethodTable[Name](Arguments, scope);
+                return Scope.builtInMethodTable[Name](Arguments, scope);
             }
             Expression funcExpr;
             if (scope.TryGetValue(Name, out funcExpr))

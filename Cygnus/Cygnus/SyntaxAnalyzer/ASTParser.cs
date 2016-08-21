@@ -146,12 +146,17 @@ namespace Cygnus.SyntaxAnalyzer
                         break;
                     case TokenType.Comma: continue;
                     case TokenType.Dot:
+                        {
+                            var index = stack.Pop();
+                            var collection = stack.Pop();
+                            stack.Push(new IndexExpression(collection, index, IndexType.Dot));
+                        }
                         break;
                     case TokenType.LeftBracket:
                         {
                             var index = stack.Pop();
                             var collection = stack.Pop();
-                            stack.Push(new IndexExpression(collection, index));
+                            stack.Push(new IndexExpression(collection, index, IndexType.Bracket));
                         }
                         break;
                     case TokenType.LeftBrace:
@@ -475,7 +480,7 @@ namespace Cygnus.SyntaxAnalyzer
                 }
                 var funcScope = new Scope(GlobalScope);
                 var FUNCTION = new FunctionExpression(funcTuple.Name, body, funcScope, arguments);
-                FunctionExpression.functionTable[FUNCTION.Name] = FUNCTION;
+                Scope.functionTable[FUNCTION.Name] = FUNCTION;
                 ParseBlock(body, Begin_Position + 1, End_Position - 1);
                 Block.Append(new ConstantExpression(null, ConstantType.Void));
             }

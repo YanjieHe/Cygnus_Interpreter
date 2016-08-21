@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Cygnus.SyntaxTree;
-using Cygnus.SymbolTable;
 namespace Cygnus.Libraries
 {
     public static class ListFunctions

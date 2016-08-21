@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Cygnus.SyntaxTree;
 using Cygnus.Extensions;
 using Cygnus.AssemblyImporter;
-using Cygnus.SymbolTable;
 using Cygnus.LexicalAnalyzer;
 using Cygnus.SyntaxAnalyzer;
 using Cygnus.Errors;
@@ -66,7 +64,15 @@ namespace Cygnus.Libraries
             else
                 return new DictionaryExpression(
                         arr.GetValue<ArrayExpression>(ExpressionType.Array, scope).Values
-                        .Map(i => i.GetValue<ArrayExpression>(ExpressionType.Array, scope).Values));
+                        .Map(i =>
+                        {
+                            var kvparr = i.GetValue<ArrayExpression>(ExpressionType.Array, scope).Values;
+                            if (kvparr.Length != 2)
+                                throw new ArgumentException("The length of key-value pair must be 2");
+                            else
+                                return new KeyValuePair<ConstantExpression, Expression>(kvparr[0].GetValue<ConstantExpression>(ExpressionType.Constant, scope), kvparr[1].GetValue(scope));
+                        }
+                        ));
         }
         public static Expression InitTable(Expression[] args, Scope scope)
         {
@@ -141,12 +147,16 @@ namespace Cygnus.Libraries
         {
             var FilePath = args[0].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value as string;
             var encoding = Encoding.Default;
+            //var current = scope;
+            //while (current.Parent != null)
+            //    current = current.Parent;
             using (var lex = new Lexical(FilePath, encoding, TokenDefinition.tokenDefinitions))
             {
                 lex.Tokenize();
                 var lex_array = Lexeme.Generate(lex.tokenList);
                 var ast = new AST();
                 BlockExpression Root = ast.Parse(lex_array, scope);
+                //    ast.Display(Root);
                 Expression Result = Root.Eval(scope).GetValue(scope);
                 return Result;
             }
@@ -168,8 +178,8 @@ namespace Cygnus.Libraries
             {
                 if (!scope.Delete(item))
                 {
-                    if (FunctionExpression.functionTable.ContainsKey(item))
-                        FunctionExpression.functionTable.Remove(item);
+                    if (Scope.functionTable.ContainsKey(item))
+                        Scope.functionTable.Remove(item);
                     else throw new NotDefinedException(item);
                 }
             }
@@ -178,9 +188,17 @@ namespace Cygnus.Libraries
         public static Expression IsNull(Expression[] args, Scope scope)
         {
             var value = args.Single().GetValue(scope);
-            if (value.NodeType != ExpressionType.Constant) return (ConstantExpression)false;
+            if (value.NodeType != ExpressionType.Constant)
+            {
+                return (ConstantExpression)false;
+            }
             else
                 return ((value as ConstantExpression).constantType == ConstantType.Null);
+        }
+        public static Expression Exit(Expression[] args, Scope scope)
+        {
+            Environment.Exit(0);
+            return Expression.Void();
         }
     }
 }

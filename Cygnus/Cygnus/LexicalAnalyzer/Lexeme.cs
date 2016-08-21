@@ -33,7 +33,6 @@ namespace Cygnus.LexicalAnalyzer
             {
                 case TokenType.String:
                     return Regex.Unescape(token.Content.Substring(1, token.Content.Length - 2));
-                    //return token.Content.Substring(1, token.Content.Length - 2);
                 case TokenType.Char:
                     return Regex.Unescape(token.Content.Substring(1, token.Content.Length - 2))[0];
                 case TokenType.Add:
@@ -63,7 +62,7 @@ namespace Cygnus.LexicalAnalyzer
                 case TokenType.Comma:
                     return Operator.Comma;
                 case TokenType.Dot:
-                    break;
+                    return Operator.Dot;
 
                 case TokenType.LeftParenthesis:
                     return Operator.LeftParenthesis;
@@ -180,7 +179,7 @@ namespace Cygnus.LexicalAnalyzer
         LeftBrace, RightBrace,
         Function, Comma, Assgin,
         LeftBracket, RightBracket,
-        Return
+        Return, Dot,
     }
     public enum ControlStmt
     {

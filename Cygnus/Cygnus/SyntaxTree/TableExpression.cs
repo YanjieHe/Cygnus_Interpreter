@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Cygnus.SymbolTable;
+﻿using System.Collections.Generic;
 using Cygnus.Errors;
 namespace Cygnus.SyntaxTree
 {
-    public class TableExpression : Expression, ICollectionExpression
+    public class TableExpression : Expression
     {
         public TableExpression Parent { get; set; }
         public Dictionary<string, Expression> Properties { get; private set; }
@@ -16,29 +11,6 @@ namespace Cygnus.SyntaxTree
             get
             {
                 return ExpressionType.Table;
-            }
-        }
-
-        public ConstantExpression Length
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public Expression this[Expression index, Scope scope]
-        {
-            get
-            {
-                var key = (string)index.Eval(scope).GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value;
-                return Find(key);
-            }
-
-            set
-            {
-                var key = (string)index.Eval(scope).GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value;
-                Assign(key, value);
             }
         }
         public Expression Find(string key)

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Cygnus.SyntaxTree;
-using Cygnus.SymbolTable;
+﻿using Cygnus.SyntaxTree;
 namespace Cygnus.Libraries
 {
     public static class DictionaryFunctions

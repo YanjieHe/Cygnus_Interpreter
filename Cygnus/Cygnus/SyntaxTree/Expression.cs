@@ -30,6 +30,14 @@ namespace Cygnus.SyntaxTree
         {
             return new ConstantExpression(obj, constantType);
         }
+        public static ArrayExpression Array(Expression[] array)
+        {
+            return new ArrayExpression(array);
+        }
+        public static ListExpression List(Expression[] list)
+        {
+            return new ListExpression(list);
+        }
         public static IEnumerableExpression IEnumerable(IEnumerable<Expression> list)
         {
             return new IEnumerableExpression(list);
@@ -50,12 +58,11 @@ namespace Cygnus.SyntaxTree
                     return (this as ParameterExpression).Eval(scope).GetValue(scope);
                 case ExpressionType.Return:
                     return (this as ReturnExpression).expression.Eval(scope).GetValue(scope);
-                case ExpressionType.Index:
-                    return (this as IndexExpression).Eval(scope).GetValue(scope);
                 case ExpressionType.Default:
                 case ExpressionType.Block:
                 case ExpressionType.Binary:
                 case ExpressionType.Unary:
+                case ExpressionType.Index:
                     return this.Eval(scope).GetValue(scope);
                 default:
                     return this;
@@ -76,9 +83,10 @@ namespace Cygnus.SyntaxTree
                 case ExpressionType.Block:
                 case ExpressionType.Binary:
                 case ExpressionType.Unary:
+                case ExpressionType.Index:
                     return Eval(scope).GetValue<T>(expressionType, scope);
                 default:
-                    throw new NotSupportedException(ToString());
+                    throw new NotSupportedException(string.Format("expected {0} get {1}", expressionType, ToString()));
             }
         }
         public object GetObjectValue(Scope scope)

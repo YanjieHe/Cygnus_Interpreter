@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {

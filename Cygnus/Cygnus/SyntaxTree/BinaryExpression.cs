@@ -41,9 +41,9 @@ namespace Cygnus.SyntaxTree
                 case Operator.Power:
                     return ArithemeticOp(left, right, Op);
                 case Operator.And:
-                    return (ConstantExpression)((bool)left.Value && (bool)right.Value);
+                    return (bool)left.Value && (bool)right.Value;
                 case Operator.Or:
-                    return (ConstantExpression)((bool)left.Value || (bool)right.Value);
+                    return (bool)left.Value || (bool)right.Value;
                 case Operator.Less:
                 case Operator.Greater:
                 case Operator.LessOrEquals:
@@ -69,13 +69,13 @@ namespace Cygnus.SyntaxTree
                         var rvalue = right.Eval(scope);
                         var lvalue = (IndexExpression)left;
                         lvalue.SetValue(rvalue, scope);
-                        return rvalue;
+                        return left;
                     }
                 case ExpressionType.Parameter:
                     {
                         var rvalue = right.Eval(scope);
                         ((ParameterExpression)left).Assgin(rvalue, scope);
-                        return rvalue;
+                        return left;
                     }
                 default:
                     throw new ArgumentException("The left side of the equal-sign cannot be assigned");
@@ -151,25 +151,9 @@ namespace Cygnus.SyntaxTree
             switch (op)
             {
                 case Operator.Equals:
-                    if (left.constantType != right.constantType)
-                        return Constant(false, ConstantType.Boolean);
-                    else
-                    {
-                        if (left.constantType == ConstantType.Null
-                            || left.constantType == ConstantType.Void)
-                            return Constant(true, ConstantType.Boolean);
-                        else return Constant(left.Value.Equals(right.Value), ConstantType.Boolean);
-                    }
+                    return Expression.Constant(left.Equals(right), ConstantType.Boolean);
                 case Operator.NotEqualTo:
-                    if (left.constantType != right.constantType)
-                        return Constant(true, ConstantType.Boolean);
-                    else
-                    {
-                        if (left.constantType == ConstantType.Null
-                         || left.constantType == ConstantType.Void)
-                            return Constant(false, ConstantType.Boolean);
-                        else return Constant(!left.Value.Equals(right.Value), ConstantType.Boolean);
-                    }
+                    return Expression.Constant(!left.Equals(right), ConstantType.Boolean);
             }
             throw new NotSupportedException();
         }

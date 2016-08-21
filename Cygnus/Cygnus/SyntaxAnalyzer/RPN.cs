@@ -54,6 +54,7 @@ namespace Cygnus.SyntaxAnalyzer
                     case TokenType.And:
                     case TokenType.Or:
                     case TokenType.Assign:
+                    case TokenType.Dot:
                         {
                             var current = (Operator)item.Content;
                             while (op.Count > 0)
@@ -70,7 +71,7 @@ namespace Cygnus.SyntaxAnalyzer
                             op.Push(item);
                         }
                         break;
-                    case TokenType.EndOfLine://终止符按双目运算符考虑
+                    case TokenType.EndOfLine://Omit end of line
                         continue;
                     case TokenType.Function:
                         fstack.Push(item);
@@ -111,7 +112,7 @@ namespace Cygnus.SyntaxAnalyzer
                                 else if (GetOp(current) == Operator.Function)
                                 {
                                     var func = fstack.Pop();
-                                    Operands.Add(func);//  将函数压入栈
+                                    Operands.Add(func);//  Push the function into the function stack
                                     success = true;
                                     break;
                                 }
@@ -143,7 +144,22 @@ namespace Cygnus.SyntaxAnalyzer
                         }
                         break;
                     case TokenType.LeftBracket:
-                        op.Push(item); break;
+                        {
+                            var current = (Operator)item.Content;
+                            while (op.Count > 0)
+                            {
+                                int cmp = Priority(current) - Priority(GetOp(op.Peek()));
+                                if (cmp > 0) break;
+                                else if (cmp == 0)
+                                {
+                                    Operands.Add(op.Pop());
+                                    break;
+                                }
+                                else Operands.Add(op.Pop());
+                            }
+                            op.Push(item);
+                        }
+                        break;
                     case TokenType.RightBracket:
                         {
                             bool success = false;
@@ -172,11 +188,13 @@ namespace Cygnus.SyntaxAnalyzer
         }
         public Operator GetOp(Lexeme obj)
         {
-            return obj.tokenType == TokenType.Function
-                ? Operator.Function
-                : obj.tokenType == TokenType.LeftBrace
-                ? Operator.LeftBrace
-                : (Operator)obj.Content;
+            if (obj.tokenType == TokenType.Function)
+                return Operator.Function;
+            else if (obj.tokenType == TokenType.LeftBrace)
+                return Operator.LeftBrace;
+            else if (obj.tokenType == TokenType.LeftBracket)
+                return Operator.LeftBracket;
+            else return (Operator)obj.Content;
         }
         public void Display()
         {
@@ -184,16 +202,16 @@ namespace Cygnus.SyntaxAnalyzer
         }
         /*
         0:#        1:=        2:(        3:,        4:or        5:and
-        6:< <= > >=        7: == !=        8:+-        9:* /        10:正负,not
+        6:< <= > >=        7: == !=        8:+-        9:* /        10:unary plus,unary minus,not
         11:!%^        12:)        */
         private static int Priority(Operator op)
         {
             switch (op)
             {
                 //case Operator.Terminator: return 0;
-                case Operator.LeftBracket: return 1;//Index
                 case Operator.Return:
                 case Operator.Function:
+                case Operator.LeftBrace:
                 case Operator.LeftParenthesis: return 2;
                 case Operator.Assgin: return 3;
                 case Operator.Comma: return 3;
@@ -214,14 +232,17 @@ namespace Cygnus.SyntaxAnalyzer
                 case Operator.UnaryMinus:
                     return 10;
                 case Operator.Power: return 11;
+                case Operator.LeftBracket: //Index
                 case Operator.RightBracket: return 12;
+                case Operator.Dot:
                 case Operator.RightParenthesis: return 13;
                 default:
                     throw new NotSupportedException("not supported operator '" + op + "'");
             }
         }
-        /*
-        BL:转向某标号(为单目后缀运算符)        BT：条件为真时转移
-        BF：条件为假时转移        BR：无条件转移        */
+        public static void DisplayStack<T>(Stack<T> stack)
+        {
+            Console.WriteLine(string.Join("  ", stack));
+        }
     }
 }

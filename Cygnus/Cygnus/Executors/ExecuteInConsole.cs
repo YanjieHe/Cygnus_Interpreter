@@ -20,6 +20,12 @@ namespace Cygnus.Executors
             stack = new Stack<TokenType>();
             currentList = new LinkedList<Token>();
         }
+        public ExecuteInConsole(Scope GlobalScope)
+        {
+            this.GlobalScope = GlobalScope;
+            stack = new Stack<TokenType>();
+            currentList = new LinkedList<Token>();
+        }
         public void Run()
         {
             while (true)
@@ -46,7 +52,7 @@ namespace Cygnus.Executors
 
                         var ast = new AST();
                         BlockExpression Root = ast.Parse(lex_array, GlobalScope);
-                        //  ast.Display(Root);
+                       //   ast.Display(Root);
                         Console.ForegroundColor = ConsoleColor.Green;
                         Expression Result = Root.Eval(GlobalScope).GetValue(GlobalScope);
                         //Console.WriteLine(Result);
