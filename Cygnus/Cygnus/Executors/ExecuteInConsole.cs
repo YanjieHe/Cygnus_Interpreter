@@ -69,7 +69,7 @@ namespace Cygnus.Executors
                     case TokenType.LeftBrace:
                     case TokenType.LeftParenthesis:
                     case TokenType.LeftBracket:
-                    case TokenType.Function:
+                    case TokenType.Call:
                     case TokenType.Do:
                     case TokenType.Begin:
                     case TokenType.Then:
@@ -83,7 +83,7 @@ namespace Cygnus.Executors
                         else stack.Pop(); break;
                     case TokenType.RightParenthesis:
                         if (stack.Peek() != TokenType.LeftParenthesis
-                            && stack.Peek() != TokenType.Function)
+                            && stack.Peek() != TokenType.Call)
                             throw new ArgumentException();
                         else stack.Pop(); break;
                     case TokenType.End:

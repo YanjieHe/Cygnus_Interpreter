@@ -72,6 +72,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SymbolTable\BuiltInMethodTable.cs" />
     <Compile Include="SymbolTable\FunctionTable.cs" />
+    <Compile Include="SyntaxAnalyzer\Statements\BlockStatement.cs" />
+    <Compile Include="SyntaxAnalyzer\Statements\DefineFunctionStatement.cs" />
+    <Compile Include="SyntaxAnalyzer\Statements\ExpressionStatement.cs" />
+    <Compile Include="SyntaxAnalyzer\Statements\ForEachStatement.cs" />
+    <Compile Include="SyntaxAnalyzer\Statements\IfStatement.cs" />
+    <Compile Include="SyntaxAnalyzer\Statements\ReturnStatement.cs" />
+    <Compile Include="SyntaxAnalyzer\Statements\Statement.cs" />
+    <Compile Include="SyntaxAnalyzer\Statements\WhileStatement.cs" />
     <Compile Include="SyntaxTree\IListExpression.cs" />
     <Compile Include="SyntaxTree\IIndexable.cs" />
     <Compile Include="SyntaxTree\Scope.cs" />

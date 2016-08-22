@@ -54,7 +54,7 @@
 
                 new TokenDefinition(@"^\;", TokenType.EndOfLine),
 
-                new TokenDefinition(@"[_A-Za-z]+[_A-Za-z0-9]*[\s]*\(", TokenType.Function),
+                new TokenDefinition(@"[_A-Za-z]+[_A-Za-z0-9]*[\s]*\(", TokenType.Call),
                 new TokenDefinition(@"[_A-Za-z]+[_A-Za-z0-9]*", TokenType.Symbol),
                 new TokenDefinition(@"^[\s]+", TokenType.Space),
                 new TokenDefinition(@"^%(.*)", TokenType.Comments),

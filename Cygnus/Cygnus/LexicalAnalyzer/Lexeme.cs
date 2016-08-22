@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 namespace Cygnus.LexicalAnalyzer
 {
@@ -58,27 +55,22 @@ namespace Cygnus.LexicalAnalyzer
                 case TokenType.UnaryPlus:
                 case TokenType.UnaryMinus:
                     return ParseUnaryOperator(token);
-
                 case TokenType.Comma:
                     return Operator.Comma;
                 case TokenType.Dot:
                     return Operator.Dot;
-
                 case TokenType.LeftParenthesis:
                     return Operator.LeftParenthesis;
                 case TokenType.RightParenthesis:
                     return Operator.RightParenthesis;
-
                 case TokenType.LeftBracket:
                     return Operator.LeftBracket;
                 case TokenType.RightBracket:
                     return Operator.RightBracket;
-
                 case TokenType.LeftBrace:
                     return new FuncTuple(token.Content, 0);
                 case TokenType.RightBrace:
                     return Operator.RightBrace;
-
                 case TokenType.True:
                     return true;
                 case TokenType.False:
@@ -109,7 +101,7 @@ namespace Cygnus.LexicalAnalyzer
                     return ControlStmt.Break;
                 case TokenType.EndOfLine:
                     return ControlStmt.Terminator;
-                case TokenType.Function:
+                case TokenType.Call:
                     return new FuncTuple(token.Content, 0);
                 case TokenType.In:
                     return ControlStmt.In;
@@ -117,15 +109,16 @@ namespace Cygnus.LexicalAnalyzer
                     return null;
                 case TokenType.Void:
                     return "void";
+                case TokenType.No_Arg:
+                    return "No_Arg";
                 case TokenType.Define:
                     return ControlStmt.Define;
                 case TokenType.Begin:
                     return ControlStmt.Begin;
                 case TokenType.Variable:
                     return token.Content;
-
                 default:
-                    throw new NotSupportedException();
+                    throw new NotSupportedException(token.ToString());
             }
             throw new NotSupportedException();
         }
@@ -177,7 +170,7 @@ namespace Cygnus.LexicalAnalyzer
         Equals, NotEqualTo,
         LeftParenthesis, RightParenthesis,
         LeftBrace, RightBrace,
-        Function, Comma, Assgin,
+        Call, Comma, Assgin,
         LeftBracket, RightBracket,
         Return, Dot,
     }

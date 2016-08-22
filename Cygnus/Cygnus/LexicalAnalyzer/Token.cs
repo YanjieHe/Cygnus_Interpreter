@@ -38,7 +38,7 @@
         Do, End,
         If, Then, Else, ElseIf,
         For, While, Break,
-        Function,
+        Call,
         In,
         Null,
         Void,
@@ -47,5 +47,6 @@
         Variable,
         EndOfLine,
         Comments,
+        No_Arg,
     };
 }

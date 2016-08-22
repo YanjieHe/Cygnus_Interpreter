@@ -25,7 +25,7 @@
         }
         public override Expression Eval(Scope scope)
         {
-            var test = Test.Eval(scope).As<bool>(scope);
+            var test = Test.As<bool>(scope);
             if (test)
                 return IfTrue.Eval(scope);
             else

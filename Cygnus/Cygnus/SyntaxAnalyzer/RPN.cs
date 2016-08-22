@@ -72,9 +72,10 @@ namespace Cygnus.SyntaxAnalyzer
                             op.Push(item);
                         }
                         break;
+                    case TokenType.No_Arg:
                     case TokenType.EndOfLine://Omit end of line
                         continue;
-                    case TokenType.Function:
+                    case TokenType.Call:
                         fstack.Push(item);
                         op.Push(item); break;
                     case TokenType.Comma:
@@ -82,22 +83,19 @@ namespace Cygnus.SyntaxAnalyzer
                         while (op.Count > 0)
                         {
                             var current = GetOp(op.Peek());
-                            if (current == Operator.Comma
-                                || current == Operator.LeftBrace)//Left brace stands for initializing an array
+                            if (current == Operator.Comma || current == Operator.LeftBrace)
+                            //Left brace stands for initializing an array
                             {
                                 Operands.Add(item);
                                 break;
                             }
-                            else if (current == Operator.Function)
+                            else if (current == Operator.Call)
                             {
                                 Operands.Add(item);
                                 break;
                             }
                             else Operands.Add(op.Pop());
                         }
-                        break;
-                    case TokenType.LeftParenthesis:
-                        op.Push(item);
                         break;
                     case TokenType.RightParenthesis:
                         {
@@ -110,7 +108,7 @@ namespace Cygnus.SyntaxAnalyzer
                                     success = true;
                                     break;
                                 }
-                                else if (GetOp(current) == Operator.Function)
+                                else if (GetOp(current) == Operator.Call)
                                 {
                                     var func = fstack.Pop();
                                     Operands.Add(func);//  Push the function into the function stack
@@ -123,8 +121,10 @@ namespace Cygnus.SyntaxAnalyzer
                                 throw new SyntaxException("There are mismatched parentheses.");
                         }
                         break;
+                    case TokenType.LeftParenthesis:
                     case TokenType.LeftBrace:
-                        op.Push(item); break;
+                        op.Push(item);
+                        break;
                     case TokenType.RightBrace:
                         {
                             bool success = false;
@@ -174,8 +174,8 @@ namespace Cygnus.SyntaxAnalyzer
         {
             switch (obj.tokenType)
             {
-                case TokenType.Function:
-                    return Operator.Function;
+                case TokenType.Call:
+                    return Operator.Call;
                 case TokenType.LeftBrace:
                     return Operator.LeftBrace;
                 case TokenType.LeftBracket:
@@ -192,41 +192,43 @@ namespace Cygnus.SyntaxAnalyzer
         {
             switch (op)
             {
-                //case Operator.Terminator: return 0;
-                case Operator.Return:
-                case Operator.Function:
+                case Operator.LeftParenthesis:
+                case Operator.Call: return 0;
                 case Operator.LeftBrace:
-                case Operator.LeftParenthesis: return 2;
-                case Operator.Assgin: return 3;
-                case Operator.Comma: return 3;
-                case Operator.Or: return 4;
-                case Operator.And: return 5;
-                case Operator.Less:
-                case Operator.Greater:
-                case Operator.LessOrEquals:
-                case Operator.GreaterOrEquals: return 6;
+                case Operator.LeftBracket:
+                case Operator.Comma: return 1;
+                case Operator.Assgin: return 2;
+                case Operator.Or: return 3;
+                case Operator.And: return 4;
                 case Operator.Equals:
-                case Operator.NotEqualTo: return 7;
+                case Operator.NotEqualTo: return 5;
+                case Operator.Greater:
+                case Operator.Less:
+                case Operator.GreaterOrEquals:
+                case Operator.LessOrEquals: return 6;
                 case Operator.Add:
-                case Operator.Subtract: return 8;
+                case Operator.Subtract: return 7;
                 case Operator.Multiply:
-                case Operator.Divide: return 9;
-                case Operator.Not:
+                case Operator.Divide: return 8;
+                case Operator.Power: return 9;
                 case Operator.UnaryPlus:
                 case Operator.UnaryMinus:
-                    return 10;
-                case Operator.Power: return 11;
-                case Operator.LeftBracket: //Index
-                case Operator.RightBracket: return 12;
+                case Operator.Not: return 10;
                 case Operator.Dot:
-                case Operator.RightParenthesis: return 13;
+                case Operator.RightBrace:
+                case Operator.RightBracket:
+                case Operator.RightParenthesis: return 11;
                 default:
                     throw new NotSupportedException("not supported operator '" + op + "'");
             }
         }
         public static void DisplayStack<T>(Stack<T> stack)
         {
-            Console.WriteLine(string.Join("  ", stack));
+            Console.WriteLine("Stack: " + string.Join("  ", stack));
+        }
+        public static void DisplayOperands<T>(List<T> list)
+        {
+            Console.WriteLine("Operands: " + string.Join("  ", list));
         }
     }
 }

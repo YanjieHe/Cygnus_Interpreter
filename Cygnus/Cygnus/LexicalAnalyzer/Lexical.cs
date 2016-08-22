@@ -83,11 +83,11 @@ namespace Cygnus.LexicalAnalyzer
                 case TokenType.Symbol:
                     CheckKeywords(content, ref tokenType);
                     break;
-                case TokenType.Function:
+                case TokenType.Call:
                     var substr = content.TrimEnd(' ', '(');
                     CheckKeywords(substr, ref tokenType);
                     if (tokenType == TokenType.Variable)
-                        Append(new Token(substr, TokenType.Function));
+                        Append(new Token(substr, TokenType.Call));
                     else
                     {
                         Append(new Token(substr, tokenType));
@@ -95,11 +95,11 @@ namespace Cygnus.LexicalAnalyzer
                     }
                     return line.Substring(len);
                 case TokenType.RightParenthesis://To identify no-arg function
-                    if (AppendVoid(content, TokenType.Function, TokenType.RightParenthesis))
+                    if (No_Arg(content, TokenType.Call, TokenType.RightParenthesis))
                         return line.Substring(len);
                     break;
                 case TokenType.RightBrace://To identify no-arg array
-                    if (AppendVoid(content, TokenType.LeftBrace, TokenType.RightBrace))
+                    if (No_Arg(content, TokenType.LeftBrace, TokenType.RightBrace))
                         return line.Substring(len);
                     break;
                 case TokenType.Comments:
@@ -111,7 +111,7 @@ namespace Cygnus.LexicalAnalyzer
         }
         private void Append(Token token)
         {
-            if (token.tokenType == TokenType.LeftBracket || token.tokenType == TokenType.LeftBrace || token.tokenType == TokenType.LeftParenthesis || token.tokenType == TokenType.Function)
+            if (token.tokenType == TokenType.LeftBracket || token.tokenType == TokenType.LeftBrace || token.tokenType == TokenType.LeftParenthesis || token.tokenType == TokenType.Call)
             {
                 BracketStack.Push(token.tokenType);
             }
@@ -134,7 +134,7 @@ namespace Cygnus.LexicalAnalyzer
                         }
                         else throw new SyntaxException("Mismatch for braces");
                     case TokenType.RightParenthesis:
-                        if (BracketStack.Peek() == TokenType.LeftParenthesis || BracketStack.Peek() == TokenType.Function)
+                        if (BracketStack.Peek() == TokenType.LeftParenthesis || BracketStack.Peek() == TokenType.Call)
                         {
                             BracketStack.Pop();
                             break;
@@ -146,11 +146,11 @@ namespace Cygnus.LexicalAnalyzer
             }
             tokenList.AddLast(token);
         }
-        private bool AppendVoid(string content, TokenType leftPart, TokenType rightPart)
+        private bool No_Arg(string content, TokenType leftPart, TokenType rightPart)
         {
             if (tokenList.Last.Value.tokenType == leftPart)
             {
-                Append(new Token("void", TokenType.Void));
+                Append(new Token("no-arg", TokenType.No_Arg));
                 Append(new Token(content, rightPart));
                 return true;
             }
