@@ -202,6 +202,7 @@ Every structure here needs an 'end' for closure.
 		end
 		return void
 	end
+	
 	mylist = linkedlist()
 	link_add(mylist,12)
 	link_add(mylist,24)
