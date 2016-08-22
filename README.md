@@ -212,11 +212,11 @@ Every structure here needs an 'end' for closure.
 
 ## Built-in functions
 ### Basic Functions
-	- print(object): print the object
+	* print(object): print the object
 	
-	- array(n): initialize an array
+	* array(n): initialize an array
 	
-	- list(args): initialize a list
+	* list(args): initialize a list
 	
 	dict(args): initialize a dictionary
 	
