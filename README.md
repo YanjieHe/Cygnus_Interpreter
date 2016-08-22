@@ -218,25 +218,25 @@ Every structure here needs an 'end' for closure.
 	
 * list(args): initialize a list
 	
-	dict(args): initialize a dictionary
+* dict(args): initialize a dictionary
 	
-	table(args): initialize a table
+* table(args): initialize a table
 	
-	setparent(table,parent_table): set a table's parent table
+* setparent(table,parent_table): set a table's parent table
 	
-	length(set): return the length of a set,e.g. array,list...
+* length(set): return the length of a set,e.g. array,list...
 	
-	import(dll_path,namespace_and_class): import C# functions from a dll file
+* import(dll_path,namespace_and_class): import C# functions from a dll file
 	
-	execfile(file_path): execute code from a file
+* execfile(file_path): execute code from a file
 	
-	throw(error): throw an error
+* throw(error): throw an error
 	
-	delete(args): delete variables
+* delete(args): delete variables
 	
-	scan(str): print a sentence in the console, wait for the input, and return the input as string
+* scan(str): print a sentence in the console, wait for the input, and return the input as string
 	
-	range(start, stop, step): generate a sequence
+* range(start, stop, step): generate a sequence
 	
-	exit(): exit from the programm
+* exit(): exit from the programm
 
