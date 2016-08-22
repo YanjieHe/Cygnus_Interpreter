@@ -27,7 +27,7 @@ Users can easily extend its functions by importing C# functions, and maybe embed
 	If you input an array into it, you can initialize your list with the elements in your array.
 	Example 3:
 		mylist = list()
-		mylist = list({1,2,3,'nice','day'})
+		mylist = list(1,2,3,'nice','day')
 		print(mylist[0])
 ### Dictionary
 	Dictionary is another important data type. 
@@ -112,6 +112,7 @@ Every structure here needs an 'end' for closure.
 	Function in Cygnus can be used as a parameter, 
 	namely you can write higher-order functions. 
 	See the following example:
+	Example 11:
 		def mul(x,y) begin
 			return x * y
 		end
@@ -120,3 +121,108 @@ Every structure here needs an 'end' for closure.
 		end
 		print(mul2(mul,10))
 	Nevertheless, the lambda expression is not supported in Cygnus currently.
+
+## Advanced Features
+### Table
+	The table in Cygnus are designed for being used as a mini class :), which enables users to define a new data type.
+	It is capable of inheriting, but it can only have no more than one parent table.
+	Example 12:
+		p = table(age,job)
+		p.age = 23
+		p.job = 'doctor'
+		setparent(p,table(city))
+	I recommend writing a constructor for the table, which makes the code more readable.
+	Example 13:
+		def person(age,job) begin
+			p = table(age,job)
+			p.age = age
+			p.job = job
+			return p
+		end
+		p1 = person(23,'engineer')
+## Cygnus Code Examples
+### Find the oldest person
+	def person(name,age) begin 
+    	p = table(name,age)
+    	p.name = name
+    	p.age = age
+    	return p
+	end
+
+	people = {
+    	person('shao',23),
+        person('wang',20),
+        person('zhang',21),
+        person('he',22)
+    }
+	max_age = -1
+	max_name = ''
+	for p in people do
+    	if max_age < p.age then 
+        	max_age = p.age
+        	max_name = p.name
+    	end
+	end
+	result = strformat('name: {0}  age: {1}',max_name,max_age)
+	print(result)
+### Create a linkedlist
+	def linkednode(value,previous,next) begin
+		node = table(value,previous,next)
+		node.value = value
+		node.previous = previous
+		node.next = next
+		return node
+	end
+
+	def linkedlist() begin
+		mylist = table(first,last,count)
+		mylist.first = null
+		mylist.last = null
+		return mylist
+	end
+
+	def link_add(mylist,value) begin
+		if mylist.first == null then
+			node = linkednode(value,null,null)
+			mylist.first = node
+			mylist.last = node
+		else
+			node = linkednode(value,mylist.last,null)
+			mylist.last.next = node
+			mylist.last = node
+		end
+		return void
+	end
+
+	def link_disp(mylist) begin
+		current = mylist.first
+		while current != null do
+			print(current.value)
+			current = current.next
+		end
+		return void
+	end
+	mylist = linkedlist()
+	link_add(mylist,12)
+	link_add(mylist,24)
+	link_add(mylist,36)
+	link_add(mylist,48)
+	link_disp(mylist)
+
+## Built-in functions
+### Basic Functions
+	print(object): print the object
+	array(n): initialize an array
+	list(args): initialize a list
+	dict(args): initialize a dictionary
+	table(args): initialize a table
+	setparent(table,parent_table): set a table's parent table
+	length(set): return the length of a set,e.g. array,list...
+	import(dll_path,namespace_and_class): import C# functions from a dll file
+	execfile(file_path): execute code from a file
+	throw(error): throw an error
+	delete(args): delete variables
+	scan(str): print a sentence in the console, wait for the input, and return the input as string
+	range(start, stop, step): generate a sequence
+	exit(): exit from the programm
+
