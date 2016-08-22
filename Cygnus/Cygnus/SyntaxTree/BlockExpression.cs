@@ -42,7 +42,8 @@ namespace Cygnus.SyntaxTree
                 else if (Result.NodeType == ExpressionType.Return)
                     return Result;
             }
-            if (Result == null) return new ConstantExpression(null, ConstantType.Void);
+            if (Result == null)
+                return Void();
             else return Result;
         }
     }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Cygnus.SyntaxTree
 {
-    public class DictionaryExpression : Expression, ICollectionExpression, IEnumerable<Expression>, IEquatable<DictionaryExpression>
+    public class DictionaryExpression : Expression, IIndexable, IEnumerable<Expression>, IEquatable<DictionaryExpression>
     {
         public Dictionary<ConstantExpression, Expression> Dict { get; private set; }
         public DictionaryExpression(IEnumerable<KeyValuePair<ConstantExpression, Expression>> kvps)
@@ -24,7 +24,6 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.Dictionary;
             }
         }
-
         public ConstantExpression Length
         {
             get
@@ -37,11 +36,11 @@ namespace Cygnus.SyntaxTree
         {
             get
             {
-                return Dict[index.Eval(scope).GetValue<ConstantExpression>(ExpressionType.Constant, scope)];
+                return Dict[index.AsConstant(scope)];
             }
             set
             {
-                Dict[index.Eval(scope).GetValue<ConstantExpression>(ExpressionType.Constant, scope)] = value;
+                Dict[index.AsConstant(scope)] = value;
             }
         }
         public IEnumerator<Expression> GetEnumerator()
@@ -59,7 +58,6 @@ namespace Cygnus.SyntaxTree
                 yield return Array(new Expression[] { kvp.Key, kvp.Value });
             }
         }
-
         public bool Equals(DictionaryExpression other)
         {
             if (Dict.Count != other.Dict.Count) return false;

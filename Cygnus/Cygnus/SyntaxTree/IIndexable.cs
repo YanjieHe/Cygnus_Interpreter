@@ -1,7 +1,6 @@
-﻿using Cygnus.SymbolTable;
-namespace Cygnus.SyntaxTree
+﻿namespace Cygnus.SyntaxTree
 {
-    public interface ICollectionExpression
+    public interface IIndexable
     {
         Expression this[Expression index, Scope scope] { get; set; }
         ConstantExpression Length { get; }

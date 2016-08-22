@@ -19,9 +19,7 @@ namespace Cygnus.Libraries
         {
             var d = args.Single().GetValue<ConstantExpression>(ExpressionType.Constant, scope);
             if (d.constantType == ConstantType.Integer)
-            {
                 return Math.Abs((int)d.Value);
-            }
             else if (d.constantType == ConstantType.Double)
                 return Math.Abs((double)d.Value);
             else throw new ArgumentException();
@@ -45,8 +43,8 @@ namespace Cygnus.Libraries
         {
             if (args.Length == 2)
             {
-                var a = (int)args[0].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value;
-                var b = (int)args[1].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value;
+                var a = args[0].As<int>(scope);
+                var b = args[1].As<int>(scope);
                 return (a % b);
             }
             else throw new ArgumentException();

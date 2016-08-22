@@ -1,7 +1,5 @@
 ﻿using System;
-using Cygnus.SyntaxAnalyzer;
 using Cygnus.LexicalAnalyzer;
-using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {
@@ -23,7 +21,7 @@ namespace Cygnus.SyntaxTree
         }
         public override Expression Eval(Scope scope)
         {
-            var value = Value.Eval(scope) as ConstantExpression;
+            var value = Value.Eval(scope).GetValue<ConstantExpression>(ExpressionType.Constant, scope);
             return UnaryOp(value, Op);
         }
         public ConstantExpression UnaryOp(ConstantExpression expr, Operator op)
@@ -32,18 +30,18 @@ namespace Cygnus.SyntaxTree
             {
                 case ConstantType.Integer:
                     if (Op == Operator.UnaryPlus)
-                        return new ConstantExpression(+(int)expr.Value, ConstantType.Integer);
+                        return Constant(+(int)expr.Value, ConstantType.Integer);
                     else if (Op == Operator.UnaryMinus)
-                        return new ConstantExpression(-(int)expr.Value, ConstantType.Integer);
+                        return Constant(-(int)expr.Value, ConstantType.Integer);
                     else throw new NotSupportedException();
                 case ConstantType.Double:
                     if (Op == Operator.UnaryPlus)
-                        return new ConstantExpression(+(double)expr.Value, ConstantType.Integer);
+                        return Constant(+(double)expr.Value, ConstantType.Integer);
                     else if (Op == Operator.UnaryMinus)
-                        return new ConstantExpression(-(double)expr.Value, ConstantType.Integer);
+                        return Constant(-(double)expr.Value, ConstantType.Integer);
                     else throw new NotSupportedException();
                 case ConstantType.Boolean:
-                    return new ConstantExpression(!(bool)expr.Value, ConstantType.Boolean);
+                    return Constant(!(bool)expr.Value, ConstantType.Boolean);
                 default:
                     throw new NotSupportedException("Not supported unary operator '" + Op + "'");
             }

@@ -1,6 +1,4 @@
-﻿using Cygnus.SymbolTable;
-using Cygnus.Libraries;
-namespace Cygnus.SyntaxTree
+﻿namespace Cygnus.SyntaxTree
 {
     public class FunctionExpression : Expression
     {
@@ -35,7 +33,7 @@ namespace Cygnus.SyntaxTree
         {
             Scope newScope = new Scope(funcScope.Parent);
             for (int i = 0; i < Arguments.Length; i++)
-                newScope.variableTable[Arguments[i].Name] = Values[i].Eval(scope);
+                newScope[Arguments[i].Name] = Values[i].Eval(scope);
             return new FunctionExpression(Name, Body, newScope, Arguments);
         }
     }

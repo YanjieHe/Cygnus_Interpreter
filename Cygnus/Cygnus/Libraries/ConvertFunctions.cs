@@ -7,23 +7,23 @@ namespace Cygnus.Libraries
     {
         public static Expression ToInt(Expression[] args, Scope scope)
         {
-            return Expression.Constant(Convert.ToInt32(args[0].GetObjectValue(scope)), ConstantType.Integer);
+            return Convert.ToInt32(args[0].GetObjectValue(scope));
         }
         public static Expression ToDouble(Expression[] args, Scope scope)
         {
-            return Expression.Constant(Convert.ToDouble(args[0].GetObjectValue(scope)), ConstantType.Double);
+            return Convert.ToDouble(args[0].GetObjectValue(scope));
         }
         public static Expression Str(Expression[] args, Scope scope)
         {
-            return Expression.Constant(Convert.ToString(args[0].GetObjectValue(scope)), ConstantType.String);
+            return Convert.ToString(args[0].GetObjectValue(scope));
         }
         public static Expression ToArray(Expression[] args, Scope scope)
         {
-            return new ArrayExpression(args[0].GetIEnumrableList(scope).ToArray());
+            return Expression.Array(args[0].GetIEnumrableList(scope).ToArray());
         }
         public static Expression ToList(Expression[] args, Scope scope)
         {
-            return new ListExpression(args[0].GetIEnumrableList(scope).ToList());
+            return Expression.List(args[0].GetIEnumrableList(scope).ToList());
         }
     }
 }

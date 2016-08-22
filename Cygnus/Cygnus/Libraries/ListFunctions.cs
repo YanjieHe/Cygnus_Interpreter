@@ -6,24 +6,21 @@ namespace Cygnus.Libraries
     {
         public static Expression Append(Expression[] args, Scope scope)
         {
-            args[0].GetValue<ListExpression>(ExpressionType.List, scope).Values.AddRange(args.Skip(1));
-            return new ConstantExpression(null, ConstantType.Void);
+            args[0].AsList(scope).AddRange(args.Skip(1));
+            return Expression.Void();
         }
         public static Expression Remove(Expression[] args, Scope scope)
         {
-            return Expression.Constant(args[0].GetValue<ListExpression>(ExpressionType.List, scope).Values.Remove(args[1]), ConstantType.Boolean);
+            return args[0].AsList(scope).Remove(args[1]);
         }
         public static Expression Insert(Expression[] args, Scope scope)
         {
-            args[0].GetValue<ListExpression>(ExpressionType.List, scope).Values.Insert(
-                (int)args[1].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value,
-                args[2]);
+            args[0].AsList(scope).Insert(args[1].As<int>(scope), args[2]);
             return Expression.Void();
         }
         public static Expression RemoveAt(Expression[] args, Scope scope)
         {
-            args[0].GetValue<ListExpression>(ExpressionType.List, scope).Values.RemoveAt(
-                (int)args[1].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value);
+            args[0].AsList(scope).RemoveAt(args[1].As<int>(scope));
             return Expression.Void();
         }
     }

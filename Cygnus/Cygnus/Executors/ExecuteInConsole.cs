@@ -1,32 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Cygnus.LexicalAnalyzer;
 using Cygnus.SyntaxAnalyzer;
 using Cygnus.SyntaxTree;
-using Cygnus.SymbolTable;
 namespace Cygnus.Executors
 {
-    public class ExecuteInConsole
+    public class ExecuteInConsole : InterpreterExecutor
     {
-        public Scope GlobalScope;
         Stack<TokenType> stack;
         LinkedList<Token> currentList;
-        public ExecuteInConsole()
+        public ExecuteInConsole() : base()
         {
-            GlobalScope = new Scope();
             stack = new Stack<TokenType>();
             currentList = new LinkedList<Token>();
         }
-        public ExecuteInConsole(Scope GlobalScope)
+        public ExecuteInConsole(Scope GlobalScope) : base(GlobalScope)
         {
-            this.GlobalScope = GlobalScope;
             stack = new Stack<TokenType>();
             currentList = new LinkedList<Token>();
         }
-        public void Run()
+        public override Expression Run()
         {
             while (true)
             {
@@ -52,7 +45,7 @@ namespace Cygnus.Executors
 
                         var ast = new AST();
                         BlockExpression Root = ast.Parse(lex_array, GlobalScope);
-                       //   ast.Display(Root);
+                        //   ast.Display(Root);
                         Console.ForegroundColor = ConsoleColor.Green;
                         Expression Result = Root.Eval(GlobalScope).GetValue(GlobalScope);
                         //Console.WriteLine(Result);

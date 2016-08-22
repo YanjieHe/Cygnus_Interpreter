@@ -55,6 +55,7 @@ namespace Cygnus.SyntaxAnalyzer
                     case TokenType.Or:
                     case TokenType.Assign:
                     case TokenType.Dot:
+                    case TokenType.LeftBracket:
                         {
                             var current = (Operator)item.Content;
                             while (op.Count > 0)
@@ -143,23 +144,6 @@ namespace Cygnus.SyntaxAnalyzer
                                 throw new SyntaxException("There are mismatched Braces.");
                         }
                         break;
-                    case TokenType.LeftBracket:
-                        {
-                            var current = (Operator)item.Content;
-                            while (op.Count > 0)
-                            {
-                                int cmp = Priority(current) - Priority(GetOp(op.Peek()));
-                                if (cmp > 0) break;
-                                else if (cmp == 0)
-                                {
-                                    Operands.Add(op.Pop());
-                                    break;
-                                }
-                                else Operands.Add(op.Pop());
-                            }
-                            op.Push(item);
-                        }
-                        break;
                     case TokenType.RightBracket:
                         {
                             bool success = false;
@@ -188,22 +172,22 @@ namespace Cygnus.SyntaxAnalyzer
         }
         public Operator GetOp(Lexeme obj)
         {
-            if (obj.tokenType == TokenType.Function)
-                return Operator.Function;
-            else if (obj.tokenType == TokenType.LeftBrace)
-                return Operator.LeftBrace;
-            else if (obj.tokenType == TokenType.LeftBracket)
-                return Operator.LeftBracket;
-            else return (Operator)obj.Content;
+            switch (obj.tokenType)
+            {
+                case TokenType.Function:
+                    return Operator.Function;
+                case TokenType.LeftBrace:
+                    return Operator.LeftBrace;
+                case TokenType.LeftBracket:
+                    return Operator.LeftBracket;
+                default:
+                    return (Operator)obj.Content;
+            }
         }
         public void Display()
         {
             foreach (var item in Operands) Console.Write(item + "  ");
         }
-        /*
-        0:#        1:=        2:(        3:,        4:or        5:and
-        6:< <= > >=        7: == !=        8:+-        9:* /        10:unary plus,unary minus,not
-        11:!%^        12:)        */
         private static int Priority(Operator op)
         {
             switch (op)

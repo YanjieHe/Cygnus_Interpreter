@@ -1,36 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Cygnus.LexicalAnalyzer;
 using Cygnus.SyntaxAnalyzer;
 using Cygnus.SyntaxTree;
-using Cygnus.SymbolTable;
-using System.IO;
 namespace Cygnus.Executors
 {
-    public class ExecuteFromString
+    public class ExecuteFromString : InterpreterExecutor
     {
-        string Code;
-        Scope GlobalScope;
-        public ExecuteFromString(string Code)
+        public string Code { get; private set; }
+        public ExecuteFromString(string Code, Scope GlobalScope) : base(GlobalScope)
         {
             this.Code = Code;
-            GlobalScope = new Scope();
         }
-        public ExecuteFromString(string Code, Scope GlobalScope)
+        public ExecuteFromString(string Code) : base()
         {
             this.Code = Code;
-            this.GlobalScope = GlobalScope;
         }
-        public ExecuteFromString(string Code, TextWriter tr)
-        {
-            this.Code = Code;
-            Console.SetOut(tr);
-            GlobalScope = new Scope();
-        }
-        public Expression Run()
+        public override Expression Run()
         {
             try
             {

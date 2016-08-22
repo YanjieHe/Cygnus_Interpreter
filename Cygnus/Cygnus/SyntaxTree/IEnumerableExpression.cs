@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {
@@ -14,7 +10,7 @@ namespace Cygnus.SyntaxTree
         {
             get
             {
-                return ExpressionType.IEnumerableList;
+                return ExpressionType.IEnumerable;
             }
         }
         public IEnumerable<Expression> list { get; private set; }
@@ -25,9 +21,7 @@ namespace Cygnus.SyntaxTree
         public IEnumerator<Expression> GetEnumerator()
         {
             foreach (var item in list)
-            {
                 yield return item;
-            }
         }
         IEnumerator IEnumerable.GetEnumerator()
         {

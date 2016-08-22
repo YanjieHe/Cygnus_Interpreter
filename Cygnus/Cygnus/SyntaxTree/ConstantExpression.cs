@@ -45,7 +45,15 @@ namespace Cygnus.SyntaxTree
         }
         public bool Equals(ConstantExpression other)
         {
-            return constantType == other.constantType && Value.Equals(other.Value);
+            if (type == other.type)
+            {
+                if (type == ConstantType.Null || type == ConstantType.Void)
+                    return true;
+                else
+                    return Value.Equals(other.Value);
+            }
+            else
+                return false;
         }
         public override Expression Eval(Scope scope)
         {

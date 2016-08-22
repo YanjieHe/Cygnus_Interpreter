@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Cygnus.SymbolTable;
 namespace Cygnus.SyntaxTree
 {
     public abstract class Expression : IEquatable<Expression>
@@ -34,9 +31,13 @@ namespace Cygnus.SyntaxTree
         {
             return new ArrayExpression(array);
         }
-        public static ListExpression List(Expression[] list)
+        public static ListExpression List(List<Expression> list)
         {
             return new ListExpression(list);
+        }
+        public static CallExpression Call(string Name, params Expression[] Arguments)
+        {
+            return new CallExpression(Name, Arguments);
         }
         public static IEnumerableExpression IEnumerable(IEnumerable<Expression> list)
         {
@@ -50,20 +51,39 @@ namespace Cygnus.SyntaxTree
         {
             return new ConstantExpression(null, ConstantType.Null);
         }
+        public string AsString(Scope scope)
+        {
+            return GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value as string;
+        }
+        public T As<T>(Scope scope) where T : struct
+        {
+            return (T)GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value;
+        }
+        public ConstantExpression AsConstant(Scope scope)
+        {
+            return GetValue<ConstantExpression>(ExpressionType.Constant, scope);
+        }
+        public Expression[] AsArray(Scope scope)
+        {
+            return GetValue<ArrayExpression>(ExpressionType.Array, scope).Values;
+        }
+        public List<Expression> AsList(Scope scope)
+        {
+            return GetValue<ListExpression>(ExpressionType.List, scope).Values;
+        }
         public Expression GetValue(Scope scope)
         {
             switch (NodeType)
             {
-                case ExpressionType.Parameter:
-                    return (this as ParameterExpression).Eval(scope).GetValue(scope);
                 case ExpressionType.Return:
                     return (this as ReturnExpression).expression.Eval(scope).GetValue(scope);
-                case ExpressionType.Default:
+                case ExpressionType.Call:
+                case ExpressionType.Parameter:
                 case ExpressionType.Block:
                 case ExpressionType.Binary:
                 case ExpressionType.Unary:
                 case ExpressionType.Index:
-                    return this.Eval(scope).GetValue(scope);
+                    return Eval(scope).GetValue(scope);
                 default:
                     return this;
             }
@@ -73,13 +93,10 @@ namespace Cygnus.SyntaxTree
             if (NodeType == expressionType) return this as T;
             switch (NodeType)
             {
-                case ExpressionType.Call:
-                    return this.Eval(scope).GetValue<T>(expressionType, scope);
-                case ExpressionType.Parameter:
-                    return (this as ParameterExpression).Eval(scope).GetValue<T>(expressionType, scope);
                 case ExpressionType.Return:
                     return (this as ReturnExpression).expression.Eval(scope).GetValue<T>(expressionType, scope);
-                case ExpressionType.Default:
+                case ExpressionType.Parameter:
+                case ExpressionType.Call:
                 case ExpressionType.Block:
                 case ExpressionType.Binary:
                 case ExpressionType.Unary:
@@ -113,7 +130,7 @@ namespace Cygnus.SyntaxTree
                 case ExpressionType.Call:
                     return (this as CallExpression).Eval(scope).GetObjectValue(scope);
                 default:
-                    throw new NotSupportedException(this.ToString());
+                    throw new NotSupportedException(ToString());
             }
         }
         public bool IsVoid(Scope scope)
@@ -122,13 +139,13 @@ namespace Cygnus.SyntaxTree
             {
                 case ExpressionType.Constant:
                     return (this as ConstantExpression).constantType == ConstantType.Void;
-                case ExpressionType.Parameter:
-                    return (this as ParameterExpression).Eval(scope).IsVoid(scope);
                 case ExpressionType.Return:
                     return (this as ReturnExpression).expression.IsVoid(scope);
+                case ExpressionType.Parameter:
                 case ExpressionType.Block:
                 case ExpressionType.Binary:
                 case ExpressionType.Unary:
+                case ExpressionType.Call:
                     return Eval(scope).IsVoid(scope);
                 default:
                     return false;
@@ -141,19 +158,17 @@ namespace Cygnus.SyntaxTree
                 case ExpressionType.Array:
                 case ExpressionType.List:
                 case ExpressionType.Dictionary:
-                case ExpressionType.IEnumerableList:
+                case ExpressionType.IEnumerable:
                     return this as IEnumerable<Expression>;
-                case ExpressionType.Parameter:
-                    return (this as ParameterExpression).Eval(scope).GetIEnumrableList(scope);
                 case ExpressionType.Return:
                     return (this as ReturnExpression).expression.Eval(scope).GetIEnumrableList(scope);
+                case ExpressionType.Parameter:
                 case ExpressionType.Call:
                     return Eval(scope).GetIEnumrableList(scope);
                 default:
                     throw new NotSupportedException(NodeType.ToString());
             }
         }
-
         public override bool Equals(object obj)
         {
             if (obj == null || GetType() != obj.GetType())
@@ -179,21 +194,20 @@ namespace Cygnus.SyntaxTree
                         return (this as ListExpression).Equals(other as ListExpression);
                     case ExpressionType.Dictionary:
                         return (this as DictionaryExpression).Equals(other as DictionaryExpression);
-                    case ExpressionType.IEnumerableList:
+                    case ExpressionType.IEnumerable:
                         return (this as IEnumerableExpression).Equals(other as IEnumerableExpression);
                     default:
                         throw new NotSupportedException("'equals' method has not been defined between '" + this.ToString() + "' and '" + other.ToString() + "'");
                 }
             }
         }
-
     }
     public enum ExpressionType
     {
         Constant, Block, Unary, Binary,
-        IfThen, IfThenElse, Default, While, Break,
+        IfThen, IfThenElse, While, Break,
         Parameter, Function, Array, List, Dictionary,
-        Index, Return, ForEach, IEnumerableList, Call,
-        Table
+        Index, Return, ForEach, IEnumerable, Call,
+        Table, IList,
     }
 }

@@ -44,9 +44,6 @@ namespace Cygnus.SyntaxTree
         }
         public override Expression Eval(Scope scope)
         {
-            foreach (var key in Properties.Keys)
-                if (Properties[key].NodeType == ExpressionType.Call)
-                    Properties[key] = Properties[key].Eval(scope);
             return this;
         }
         public override string ToString()

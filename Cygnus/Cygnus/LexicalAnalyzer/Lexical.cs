@@ -217,8 +217,6 @@ namespace Cygnus.LexicalAnalyzer
                     tokenType = TokenType.Break; break;
                 case "begin":
                     tokenType = TokenType.Begin; break;
-                //case "func":
-                //    tokenType = TokenType.Function; break;
                 case "in":
                     tokenType = TokenType.In; break;
                 case "null":

@@ -8,7 +8,7 @@ namespace Cygnus.SyntaxTree
     public class Scope
     {
         public Scope Parent { get; private set; }
-        public VariableTable variableTable;
+        private VariableTable variableTable;
         public Scope()
         {
             Parent = null;
@@ -19,7 +19,11 @@ namespace Cygnus.SyntaxTree
             this.Parent = Parent;
             variableTable = new VariableTable();
         }
-        public void Append(string Name, Expression Value)
+        public Expression this[string Name]
+        {
+            set { variableTable[Name] = value; }
+        }
+        public void AddVariable(string Name, Expression Value)
         {
             variableTable.Add(Name, Value);
         }
@@ -33,8 +37,7 @@ namespace Cygnus.SyntaxTree
                     return Value;
                 current = current.Parent;
             }
-            if (functionTable.ContainsKey(Name)
-                || builtInMethodTable.ContainsKey(Name))
+            if (functionTable.ContainsKey(Name) || builtInMethodTable.ContainsKey(Name))
             {
                 return new CallExpression(Name, null);
             }
@@ -86,13 +89,6 @@ namespace Cygnus.SyntaxTree
             }
             return false;
         }
-        public Scope SpawnScopeWith(ParameterExpression[] parameters, Expression[] values)
-        {
-            Scope scope = new Scope(this);
-            for (int i = 0; i < values.Length; i++)
-                scope.variableTable.Add(parameters[i].Name, values[i]);
-            return scope;
-        }
         public override string ToString()
         {
             return "Scope = {\r\n" + string.Join("\r\n", variableTable.Select(i => i)) + "\r\n}";
@@ -109,12 +105,10 @@ namespace Cygnus.SyntaxTree
               ["table"] = BuiltInFunctions.InitTable,
               ["setparent"] = BuiltInFunctions.SetParent,
               ["length"] = BuiltInFunctions.Length,
-              ["dispose"] = BuiltInFunctions.Dispose,
               ["import"] = BuiltInFunctions.Import,
               ["execfile"] = BuiltInFunctions.ExecuteFile,
               ["throw"] = BuiltInFunctions.Throw,
               ["delete"] = BuiltInFunctions.Delete,
-              ["isnull"] = BuiltInFunctions.IsNull,
               ["scan"] = BuiltInFunctions.Scan,
               ["range"] = BuiltInFunctions.Range,
               ["exit"] = BuiltInFunctions.Exit,
@@ -145,10 +139,11 @@ namespace Cygnus.SyntaxTree
               ["strjoin"] = StringFunctions.StrJoin,
               ["strsplit"] = StringFunctions.StrSplit,
               ["strformat"] = StringFunctions.StrFormat,
-
+              ["strlen"] = StringFunctions.StrLen,
               /***************     Higher-order functions     ***************/
               ["map"] = HigherOrderFunctions.Map,
               ["filter"] = HigherOrderFunctions.Filter,
+              ["reduce"] = HigherOrderFunctions.Reduce,
 
           };
     }

@@ -1,24 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Cygnus.LexicalAnalyzer;
 using Cygnus.Errors;
 using Cygnus.SyntaxTree;
-using Cygnus.Extensions;
-using Cygnus.SymbolTable;
 namespace Cygnus.SyntaxAnalyzer
 {
     public class ASTParser
     {
         Lexeme[] array;
-        public Scope GlobalScope;
+        public Scope scope;
         public BlockExpression program { get; private set; }
-        public ASTParser(Lexeme[] array, Scope GlobalScope)
+        public ASTParser(Lexeme[] array, Scope scope)
         {
             this.array = array;
-            this.GlobalScope = GlobalScope;
+            this.scope = scope;
             program = new BlockExpression();
         }
         public ASTParser(Lexeme[] array, BlockExpression program)
@@ -161,10 +157,10 @@ namespace Cygnus.SyntaxAnalyzer
                         break;
                     case TokenType.LeftBrace:
                         {
-                            var tuple = (FuncTuple)item.Content;
+                            var tuple = item.Content as FuncTuple;
                             Expression[] arguments = new Expression[tuple.argsCount];
                             for (int i = tuple.argsCount - 1; i >= 0; i--)
-                                arguments[i] = stack.Pop();
+                                arguments[i] = stack.Pop().GetValue(scope);
                             stack.Push(new ArrayExpression(arguments));
                         }
                         break;
@@ -186,11 +182,11 @@ namespace Cygnus.SyntaxAnalyzer
                         break;
                     case TokenType.Function:
                         {
-                            var tuple = (FuncTuple)item.Content;
+                            var tuple = item.Content as FuncTuple;
                             Expression[] arguments = new Expression[tuple.argsCount];
                             for (int i = tuple.argsCount - 1; i >= 0; i--)
                                 arguments[i] = stack.Pop();
-                            var Name = (item.Content as FuncTuple).Name;
+                            var Name = tuple.Name;
                             stack.Push(new CallExpression(Name, arguments));
                         }
                         break;
@@ -340,29 +336,7 @@ namespace Cygnus.SyntaxAnalyzer
                 }
                 if (Do_Position < 0)
                     throw new SyntaxException("Missing 'do'");
-                bool success = false;
-                for (int i = Do_Position; i <= end; i++)
-                {
-                    switch (array[i].tokenType)
-                    {
-                        case TokenType.Then:
-                        case TokenType.Do:
-                        case TokenType.Begin:
-                            stack.Push(array[i].tokenType);
-                            break;
-                        case TokenType.End:
-                            var token = stack.Pop();
-                            if (stack.Count == 0)
-                            {
-                                End_Position = i;
-                                success = true;
-                                break;
-                            }
-                            break;
-                    }
-                    if (success) break;
-                }
-                if (!success) throw new SyntaxException("Missing 'end'");
+                FindEnd(Do_Position, ref End_Position, end, ref stack);
                 endIndex = End_Position;
                 var condition = ParseExpr(Block, While_Position + 1, Do_Position - 1);
                 var body = new BlockExpression(Block);
@@ -394,29 +368,7 @@ namespace Cygnus.SyntaxAnalyzer
                 }
                 if (Do_Position < 0)
                     throw new SyntaxException("Missing 'do'");
-                bool success = false;
-                for (int i = Do_Position; i <= end; i++)
-                {
-                    switch (array[i].tokenType)
-                    {
-                        case TokenType.Then:
-                        case TokenType.Do:
-                        case TokenType.Begin:
-                            stack.Push(array[i].tokenType);
-                            break;
-                        case TokenType.End:
-                            var token = stack.Pop();
-                            if (stack.Count == 0)
-                            {
-                                End_Position = i;
-                                success = true;
-                                break;
-                            }
-                            break;
-                    }
-                    if (success) break;
-                }
-                if (!success) throw new SyntaxException("Missing 'end'");
+                FindEnd(Do_Position, ref End_Position, end, ref stack);
                 endIndex = End_Position;
                 var Iter_List = ParseExpr(Block, In_Position + 1, Do_Position - 1);
                 var body = new BlockExpression(Block);
@@ -443,29 +395,7 @@ namespace Cygnus.SyntaxAnalyzer
                 }
                 if (Begin_Position < 0)
                     throw new SyntaxException("Missing 'begin'");
-                bool success = false;
-                for (int i = Begin_Position; i <= end; i++)
-                {
-                    switch (array[i].tokenType)
-                    {
-                        case TokenType.Then:
-                        case TokenType.Do:
-                        case TokenType.Begin:
-                            stack.Push(array[i].tokenType);
-                            break;
-                        case TokenType.End:
-                            var token = stack.Pop();
-                            if (stack.Count == 0)
-                            {
-                                End_Position = i;
-                                success = true;
-                                break;
-                            }
-                            break;
-                    }
-                    if (success) break;
-                }
-                if (!success) throw new SyntaxException("Missing 'end'");
+                FindEnd(Begin_Position, ref End_Position, end, ref stack);
                 endIndex = End_Position;
                 var body = new BlockExpression(Block);
                 var parameters = Subset(Def_Position + 1, Begin_Position - 1);
@@ -478,7 +408,7 @@ namespace Cygnus.SyntaxAnalyzer
                     arguments[k] = new ParameterExpression(item.Content as string);
                     k++;
                 }
-                var funcScope = new Scope(GlobalScope);
+                var funcScope = new Scope(scope);
                 var FUNCTION = new FunctionExpression(funcTuple.Name, body, funcScope, arguments);
                 Scope.functionTable[FUNCTION.Name] = FUNCTION;
                 ParseBlock(body, Begin_Position + 1, End_Position - 1);
@@ -494,6 +424,32 @@ namespace Cygnus.SyntaxAnalyzer
         {
             for (int i = start; i <= end; i++)
                 yield return array[i];
+        }
+        public void FindEnd(int StartPosition, ref int EndPosition, int end, ref Stack<TokenType> stack)
+        {
+            bool success = false;
+            for (int i = StartPosition; i <= end; i++)
+            {
+                switch (array[i].tokenType)
+                {
+                    case TokenType.Then:
+                    case TokenType.Do:
+                    case TokenType.Begin:
+                        stack.Push(array[i].tokenType);
+                        break;
+                    case TokenType.End:
+                        var token = stack.Pop();
+                        if (stack.Count == 0)
+                        {
+                            EndPosition = i;
+                            success = true;
+                            break;
+                        }
+                        break;
+                }
+                if (success) break;
+            }
+            if (!success) throw new SyntaxException("Missing 'end'");
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using Cygnus.SymbolTable;
-
-namespace Cygnus.SyntaxTree
+﻿namespace Cygnus.SyntaxTree
 {
     public class IfThenExpression : Expression
     {
@@ -23,18 +20,13 @@ namespace Cygnus.SyntaxTree
         {
             return "(IfThen)";
         }
-
         public override Expression Eval(Scope scope)
         {
-            var test = (ConstantExpression)Test.Eval(scope);
-            if (test.constantType != ConstantType.Boolean) throw new ArgumentException();
+            var test = Test.Eval(scope).As<bool>(scope);
+            if (test)
+                return IfTrue.Eval(scope);
             else
-            {
-                if ((bool)test.Value)
-                    return IfTrue.Eval(scope);
-                else
-                    return new ConstantExpression(null, ConstantType.Void);
-            }
+                return Void();
         }
     }
 }

@@ -50,29 +50,26 @@ namespace Cygnus.Libraries
         }
         public static Expression InitList(Expression[] args, Scope scope)
         {
-            var arr = args.Single();
-            if (arr.IsVoid(scope))
-                return new ListExpression(new Expression[0]);
+            if (args.Length == 1 && args.Single().IsVoid(scope))
+                return Expression.List(new List<Expression>());
             else
-                return new ListExpression(arr.GetValue<ArrayExpression>(ExpressionType.Array, scope).Values);
+                return Expression.List(args.Select(i => i.GetValue(scope)).ToList());
         }
         public static Expression InitDictionary(Expression[] args, Scope scope)
         {
-            var arr = args.Single();
-            if (arr.IsVoid(scope))
+            if (args.Length == 1 && args.Single().IsVoid(scope))
                 return new DictionaryExpression(new Dictionary<ConstantExpression, Expression>());
             else
-                return new DictionaryExpression(
-                        arr.GetValue<ArrayExpression>(ExpressionType.Array, scope).Values
-                        .Map(i =>
-                        {
-                            var kvparr = i.GetValue<ArrayExpression>(ExpressionType.Array, scope).Values;
-                            if (kvparr.Length != 2)
-                                throw new ArgumentException("The length of key-value pair must be 2");
-                            else
-                                return new KeyValuePair<ConstantExpression, Expression>(kvparr[0].GetValue<ConstantExpression>(ExpressionType.Constant, scope), kvparr[1].GetValue(scope));
-                        }
-                        ));
+                return new DictionaryExpression(args.Map(i =>
+                {
+                    var kvparr = i.AsArray(scope);
+                    if (kvparr.Length != 2)
+                        throw new ArgumentException("The length of key-value pair must be 2");
+                    else
+                        return new KeyValuePair<ConstantExpression, Expression>
+                        (kvparr[0].AsConstant(scope), kvparr[1].GetValue(scope));
+                }
+                ));
         }
         public static Expression InitTable(Expression[] args, Scope scope)
         {
@@ -81,19 +78,12 @@ namespace Cygnus.Libraries
         }
         public static Expression Length(Expression[] args, Scope scope)
         {
-            return (args.Single().GetValue(scope) as ICollectionExpression).Length;
-        }
-        public static Expression Dispose(Expression[] args, Scope scope)
-        {
-            var resource = args.Single().GetValue(scope);
-            (resource as IDisposable).Dispose();
-            return Expression.Void();
+            return (args.Single().GetValue(scope) as IIndexable).Length;
         }
         public static Expression Import(Expression[] args, Scope scope)
         {
-            new CSharpAssembly(args[0].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value.ToString(),
-                args[1].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value.ToString()).Import();
-            return new ConstantExpression(null, ConstantType.Void);
+            new CSharpAssembly(args[0].AsString(scope), args[1].AsString(scope)).Import();
+            return Expression.Void();
         }
         public static Expression SetParent(Expression[] args, Scope scope)
         {
@@ -108,14 +98,13 @@ namespace Cygnus.Libraries
             {
                 return
                     Expression.IEnumerable(
-                    Enumerable.Range(0,
-                    (int)args[0].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value)
+                    Enumerable.Range(0, args[0].As<int>(scope))
                     .Select(i => Expression.Constant(i, ConstantType.Integer)));
             }
             else if (args.Length == 2 || args.Length == 3)
             {
-                int start = (int)args[0].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value;
-                int end = (int)args[1].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value;
+                int start = args[0].As<int>(scope);
+                int end = args[1].As<int>(scope);
                 if (args.Length == 2)
                     return
                          Expression.IEnumerable(
@@ -123,7 +112,7 @@ namespace Cygnus.Libraries
                              .Select(i => Expression.Constant(i, ConstantType.Integer)));
                 else if (args.Length == 3)
                 {
-                    int step = (int)args[2].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value;
+                    int step = args[2].As<int>(scope);
                     return
                         Expression.IEnumerable(
                             GetRange(start, end, step)
@@ -145,11 +134,8 @@ namespace Cygnus.Libraries
         }
         public static Expression ExecuteFile(Expression[] args, Scope scope)
         {
-            var FilePath = args[0].GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value as string;
+            var FilePath = args[0].AsString(scope);
             var encoding = Encoding.Default;
-            //var current = scope;
-            //while (current.Parent != null)
-            //    current = current.Parent;
             using (var lex = new Lexical(FilePath, encoding, TokenDefinition.tokenDefinitions))
             {
                 lex.Tokenize();
@@ -170,7 +156,7 @@ namespace Cygnus.Libraries
         }
         public static Expression Throw(Expression[] args, Scope scope)
         {
-            throw new Exception(args.Single().GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value as string);
+            throw new Exception(args.Single().AsString(scope));
         }
         public static Expression Delete(Expression[] args, Scope scope)
         {
@@ -184,16 +170,6 @@ namespace Cygnus.Libraries
                 }
             }
             return new ConstantExpression(null, ConstantType.Void);
-        }
-        public static Expression IsNull(Expression[] args, Scope scope)
-        {
-            var value = args.Single().GetValue(scope);
-            if (value.NodeType != ExpressionType.Constant)
-            {
-                return (ConstantExpression)false;
-            }
-            else
-                return ((value as ConstantExpression).constantType == ConstantType.Null);
         }
         public static Expression Exit(Expression[] args, Scope scope)
         {

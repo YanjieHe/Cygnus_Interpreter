@@ -51,7 +51,7 @@ namespace Cygnus.SyntaxTree
                     break;
                 case ExpressionType.Index:
                     {
-                        PrintTree(((IndexExpression)Node).Collection, depth + 1);
+                        PrintTree(((IndexExpression)Node).ListExpr, depth + 1);
                         PrintTree(((IndexExpression)Node).Index, depth + 1);
                     }
                     break;

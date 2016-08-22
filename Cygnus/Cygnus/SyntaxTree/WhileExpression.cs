@@ -30,7 +30,7 @@ namespace Cygnus.SyntaxTree
         public override Expression Eval(Scope scope)
         {
             Expression Result = null;
-            while ((bool)((ConstantExpression)Condition.Eval(scope)).Value)
+            while (Condition.Eval(scope).As<bool>(scope))
             {
                 Result = Body.Eval(scope);
                 if (Result.NodeType == ExpressionType.Break)
@@ -38,7 +38,7 @@ namespace Cygnus.SyntaxTree
                 else if (Result.NodeType == ExpressionType.Return)
                     return Result;
             }
-            return new ConstantExpression(null, ConstantType.Void);
+            return Void();
         }
     }
 }

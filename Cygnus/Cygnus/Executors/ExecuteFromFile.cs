@@ -10,21 +10,32 @@ using Cygnus.SymbolTable;
 
 namespace Cygnus.Executors
 {
-    public class ExecuteFromFile
+    public class ExecuteFromFile : InterpreterExecutor
     {
         string FilePath;
         Encoding encoding;
-        public ExecuteFromFile(string FilePath)
+        public ExecuteFromFile(string FilePath) : base()
         {
-            this.FilePath = FilePath;
-            this.encoding = Encoding.Default;
+            Initialize(FilePath, Encoding.Default);
         }
-        public ExecuteFromFile(string FilePath, Encoding encoding)
+        public ExecuteFromFile(string FilePath, Scope GlobalScope) : base(GlobalScope)
+        {
+            Initialize(FilePath, Encoding.Default);
+        }
+        public ExecuteFromFile(string FilePath, Encoding encoding) : base()
+        {
+            Initialize(FilePath, encoding);
+        }
+        public ExecuteFromFile(string FilePath, Encoding encoding, Scope GlobalScope) : base(GlobalScope)
+        {
+            Initialize(FilePath, encoding);
+        }
+        private void Initialize(string FilePath, Encoding encoding)
         {
             this.FilePath = FilePath;
             this.encoding = encoding;
         }
-        public void Run()
+        public override Expression Run()
         {
             try
             {
@@ -33,18 +44,19 @@ namespace Cygnus.Executors
                     lex.Tokenize();
                     var lex_array = Lexeme.Generate(lex.tokenList);
                     var ast = new AST();
-                    Scope GlobalScope = new Scope();
                     BlockExpression Root = ast.Parse(lex_array, GlobalScope);
                     //                     ast.Display(Root);
                     Console.ForegroundColor = ConsoleColor.Green;
                     Expression Result = Root.Eval(GlobalScope).GetValue(GlobalScope);
                     //Console.WriteLine(Result);
+                    return Result;
                 }
             }
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(ex.ToString());
+                return Expression.Void();
             }
         }
     }

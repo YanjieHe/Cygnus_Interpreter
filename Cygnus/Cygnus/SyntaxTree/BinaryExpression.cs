@@ -1,6 +1,5 @@
 ﻿using System;
 using Cygnus.LexicalAnalyzer;
-using Cygnus.SymbolTable;
 
 namespace Cygnus.SyntaxTree
 {
@@ -24,14 +23,6 @@ namespace Cygnus.SyntaxTree
         }
         public override Expression Eval(Scope scope)
         {
-            if (Op == Operator.Assgin)
-                return AssginOp(Left, Right, scope);
-            var lvalue = Left.Eval(scope);
-            var rvalue = Right.Eval(scope);
-
-            var left = lvalue.GetValue<ConstantExpression>(ExpressionType.Constant, scope);
-            var right = rvalue.GetValue<ConstantExpression>(ExpressionType.Constant, scope);
-
             switch (Op)
             {
                 case Operator.Add:
@@ -39,21 +30,22 @@ namespace Cygnus.SyntaxTree
                 case Operator.Multiply:
                 case Operator.Divide:
                 case Operator.Power:
-                    return ArithemeticOp(left, right, Op);
+                    return ArithemeticOp(Left, Right, Op, scope);
                 case Operator.And:
-                    return (bool)left.Value && (bool)right.Value;
+                    return Left.Eval(scope).As<bool>(scope) && Right.Eval(scope).As<bool>(scope);
                 case Operator.Or:
-                    return (bool)left.Value || (bool)right.Value;
+                    return Left.Eval(scope).As<bool>(scope) || Right.Eval(scope).As<bool>(scope);
                 case Operator.Less:
                 case Operator.Greater:
                 case Operator.LessOrEquals:
                 case Operator.GreaterOrEquals:
-                    return CompareOp(left, right, Op);
+                    return CompareOp(Left, Right, Op, scope);
                 case Operator.Equals:
+                    return Left.Eval(scope).Equals(Right.Eval(scope));
                 case Operator.NotEqualTo:
-                    return EqualsOp(left, right, Op);
+                    return !Left.Eval(scope).Equals(Right.Eval(scope));
                 case Operator.Assgin:
-                    break;
+                        return AssginOp(Left, Right, scope);
                 default:
                     throw new NotSupportedException();
             }
@@ -81,8 +73,10 @@ namespace Cygnus.SyntaxTree
                     throw new ArgumentException("The left side of the equal-sign cannot be assigned");
             }
         }
-        public static ConstantExpression ArithemeticOp(ConstantExpression left, ConstantExpression right, Operator op)
+        public static ConstantExpression ArithemeticOp(Expression LeftOperand, Expression RightOperand, Operator op, Scope scope)
         {
+            var left = LeftOperand.AsConstant(scope);
+            var right = RightOperand.AsConstant(scope);
             if (left.constantType == ConstantType.Integer && right.constantType == ConstantType.Integer)
             {
                 switch (op)
@@ -128,8 +122,10 @@ namespace Cygnus.SyntaxTree
             }
             else throw new NotSupportedException();
         }
-        public static ConstantExpression CompareOp(ConstantExpression left, ConstantExpression right, Operator op)
+        public static ConstantExpression CompareOp(Expression LeftOperand, Expression RightOperand, Operator op, Scope scope)
         {
+            var left = LeftOperand.AsConstant(scope);
+            var right = RightOperand.AsConstant(scope);
             var cmpLeft = left.Value as IComparable;
             var cmpRight = right.Value as IComparable;
             if (cmpLeft == null || cmpRight == null) throw new NotSupportedException();
@@ -143,17 +139,6 @@ namespace Cygnus.SyntaxTree
                     return Constant(cmpLeft.CompareTo(cmpRight) <= 0, ConstantType.Boolean);
                 case Operator.GreaterOrEquals:
                     return Constant(cmpLeft.CompareTo(cmpRight) >= 0, ConstantType.Boolean);
-            }
-            throw new NotSupportedException();
-        }
-        public static ConstantExpression EqualsOp(ConstantExpression left, ConstantExpression right, Operator op)
-        {
-            switch (op)
-            {
-                case Operator.Equals:
-                    return Expression.Constant(left.Equals(right), ConstantType.Boolean);
-                case Operator.NotEqualTo:
-                    return Expression.Constant(!left.Equals(right), ConstantType.Boolean);
             }
             throw new NotSupportedException();
         }
@@ -171,6 +156,5 @@ namespace Cygnus.SyntaxTree
         {
             return string.Format("(Binary: {0})", Op);
         }
-
     }
 }
