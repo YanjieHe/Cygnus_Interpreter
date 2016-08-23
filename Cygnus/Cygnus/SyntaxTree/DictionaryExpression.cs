@@ -46,17 +46,12 @@ namespace Cygnus.SyntaxTree
         public IEnumerator<Expression> GetEnumerator()
         {
             foreach (var kvp in Dict)
-            {
-                yield return Array(new Expression[] { kvp.Key, kvp.Value });
-            }
+                yield return new KeyValuePairExpression(kvp);
         }
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             foreach (var kvp in Dict)
-            {
-                yield return Array(new Expression[] { kvp.Key, kvp.Value });
-            }
+                yield return new KeyValuePairExpression(kvp);
         }
         public bool Equals(DictionaryExpression other)
         {

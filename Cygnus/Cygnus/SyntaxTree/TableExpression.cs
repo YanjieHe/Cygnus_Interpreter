@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Cygnus.Errors;
 namespace Cygnus.SyntaxTree
 {
-    public class TableExpression : Expression
+    public class TableExpression : Expression, ITable
     {
         public TableExpression Parent { get; set; }
         public Dictionary<string, Expression> Properties { get; private set; }
@@ -13,6 +14,20 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.Table;
             }
         }
+
+        public Expression this[string Name]
+        {
+            get
+            {
+                return Find(Name);
+            }
+
+            set
+            {
+                Assign(Name, value);
+            }
+        }
+
         public Expression Find(string key)
         {
             TableExpression current = this;

@@ -39,7 +39,7 @@ namespace Cygnus.SyntaxTree
                 Result = line.Eval(scope);
                 if (Result.NodeType == ExpressionType.Break)
                     break;
-                else if (Result.NodeType == ExpressionType.Return)
+                else if (Result.NodeType == ExpressionType.Continue || Result.NodeType == ExpressionType.Return)
                     return Result;
             }
             if (Result == null)

@@ -80,7 +80,9 @@ namespace Cygnus.LexicalAnalyzer
                 case TokenType.Until:
                     break;
                 case TokenType.Return:
-                    return Operator.Return;
+                    return ControlStmt.Return;
+                case TokenType.Continue:
+                    return ControlStmt.Continue;
                 case TokenType.Do:
                     return ControlStmt.Do;
                 case TokenType.End:
@@ -181,5 +183,6 @@ namespace Cygnus.LexicalAnalyzer
         Terminator,
         Define, Begin,
         For, In,
+        Return,Continue
     }
 }

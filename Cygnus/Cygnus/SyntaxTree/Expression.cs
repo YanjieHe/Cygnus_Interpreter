@@ -208,6 +208,6 @@ namespace Cygnus.SyntaxTree
         IfThen, IfThenElse, While, Break,
         Parameter, Function, Array, List, Dictionary,
         Index, Return, ForEach, IEnumerable, Call,
-        Table, IList,
+        Table, IList, KeyValuePair, Continue,
     }
 }

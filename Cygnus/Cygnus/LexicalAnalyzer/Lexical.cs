@@ -215,6 +215,8 @@ namespace Cygnus.LexicalAnalyzer
                     tokenType = TokenType.While; break;
                 case "break":
                     tokenType = TokenType.Break; break;
+                case "continue":
+                    tokenType = TokenType.Continue; break;
                 case "begin":
                     tokenType = TokenType.Begin; break;
                 case "in":

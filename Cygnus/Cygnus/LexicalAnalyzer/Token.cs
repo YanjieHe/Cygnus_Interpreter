@@ -48,5 +48,6 @@
         EndOfLine,
         Comments,
         No_Arg,
+        Continue,
     };
 }

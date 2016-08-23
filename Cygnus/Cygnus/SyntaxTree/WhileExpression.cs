@@ -35,6 +35,8 @@ namespace Cygnus.SyntaxTree
                 Result = Body.Eval(scope);
                 if (Result.NodeType == ExpressionType.Break)
                     break;
+                else if (Result.NodeType == ExpressionType.Continue)
+                    continue;
                 else if (Result.NodeType == ExpressionType.Return)
                     return Result;
             }

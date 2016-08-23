@@ -55,6 +55,26 @@ namespace Cygnus.SyntaxTree
                     throw new ArgumentException(Expr.ToString() + " Cannot get element by index");
             }
         }
+        public ITable GetByDot(Expression obj, Scope scope)
+        {
+            var Expr = obj.Eval(scope);
+            switch (Expr.NodeType)
+            {
+                case ExpressionType.Table:
+                case ExpressionType.KeyValuePair:
+                    return Expr as ITable;
+                case ExpressionType.Parameter:
+                case ExpressionType.Call:
+                case ExpressionType.Binary:
+                case ExpressionType.Unary:
+                case ExpressionType.Index:
+                    return GetByDot(Expr.Eval(scope), scope);
+                case ExpressionType.Return:
+                    return GetByDot((Expr as ReturnExpression).expression.Eval(scope), scope);
+                default:
+                    throw new ArgumentException(Expr.ToString() + " Cannot get element by index");
+            }
+        }
         public override Expression Eval(Scope scope)
         {
             switch (indexType)
@@ -62,7 +82,7 @@ namespace Cygnus.SyntaxTree
                 case IndexType.Bracket:
                     return GetByIndex(ListExpr, scope)[Index.Eval(scope), scope];
                 case IndexType.Dot:
-                    return ListExpr.GetValue<TableExpression>(ExpressionType.Table, scope).Find((Index as ParameterExpression).Name);
+                    return GetByDot(ListExpr, scope)[(Index as ParameterExpression).Name];
                 default:
                     throw new NotSupportedException();
             }
