@@ -4,6 +4,7 @@ using System.Linq;
 using Cygnus.LexicalAnalyzer;
 using Cygnus.Errors;
 using Cygnus.SyntaxTree;
+using Cygnus.Extensions;
 namespace Cygnus.SyntaxAnalyzer
 {
     public class ASTParser
@@ -36,6 +37,7 @@ namespace Cygnus.SyntaxAnalyzer
                 switch (array[i].tokenType)
                 {
                     case TokenType.If:
+                    case TokenType.ElseIf:
                         ParseLine(Block, ref ExprStart, ExprEnd);
                         ParseIf(Block, i, end, ref i);
                         ExprStart = i; ExprEnd = i;
@@ -72,6 +74,10 @@ namespace Cygnus.SyntaxAnalyzer
                         ParseReturn(Block, i, end, ref i);
                         ExprStart = i; ExprEnd = i;
                         break;
+                    case TokenType.Pass:
+                        ParseLine(Block, ref ExprStart, ExprEnd);
+                        Block.Append(Expression.Void());
+                        break;
                     default:
                         ExprEnd++;
                         break;
@@ -87,9 +93,10 @@ namespace Cygnus.SyntaxAnalyzer
             int IF_Position = -1, Then_Position = -1, Else_Position = -1, End_Position = -1;
             var stack = new Stack<TokenType>();
             var Else_Stack = new Stack<int>();
-            if (array[start].tokenType == TokenType.If)
+            if (array[start].tokenType == TokenType.If || array[start].tokenType == TokenType.ElseIf)
             {
                 IF_Position = start;
+                stack.Push(TokenType.If);
                 for (int i = start + 1; i <= end; i++)
                 {
                     if (array[i].tokenType == TokenType.Then)
@@ -105,12 +112,12 @@ namespace Cygnus.SyntaxAnalyzer
                 {
                     switch (array[i].tokenType)
                     {
-                        case TokenType.Then:
                         case TokenType.Do:
                         case TokenType.Begin:
                             stack.Push(array[i].tokenType);
                             break;
                         case TokenType.Else:
+                        case TokenType.ElseIf:
                             Else_Stack.Push(i);
                             stack.Push(array[i].tokenType); break;
                         case TokenType.End:
@@ -121,13 +128,13 @@ namespace Cygnus.SyntaxAnalyzer
                                 success = true;
                                 break;
                             }
-                            else if (stack.Count == 1 && token == TokenType.Else)
+                            else if (stack.Count == 1 && token == TokenType.Else || token == TokenType.ElseIf)
                             {
                                 End_Position = i;
                                 success = true;
                                 break;
                             }
-                            if (token == TokenType.Else)
+                            if (token == TokenType.Else || token == TokenType.ElseIf)
                             {
                                 Else_Stack.Pop();
                                 stack.Pop();
@@ -151,7 +158,10 @@ namespace Cygnus.SyntaxAnalyzer
                     var IfTrue = new BlockExpression(Block);
                     var IfFalse = new BlockExpression(Block);
                     ParseBlock(IfTrue, Then_Position + 1, Else_Position - 1);
-                    ParseBlock(IfFalse, Else_Position + 1, End_Position - 1);
+                    if (array[Else_Position].tokenType == TokenType.ElseIf)
+                        ParseBlock(IfFalse, Else_Position, End_Position);
+                    else
+                        ParseBlock(IfFalse, Else_Position + 1, End_Position - 1);
                     Block.Append(new IfThenElseExpression(test, IfTrue, IfFalse));
                 }
                 else throw new Exception();
@@ -246,7 +256,7 @@ namespace Cygnus.SyntaxAnalyzer
                     throw new SyntaxException("Missing 'begin'");
                 FindEnd(Begin_Position, ref End_Position, end, ref stack);
                 var body = new BlockExpression(Block);
-                var parameters = Subset(Def_Position + 1, Begin_Position - 1);
+                var parameters = array.Slice(Def_Position + 1, Begin_Position - 1);
                 var funcTuple = (array[Def_Position + 1].Content as FuncTuple);
                 int argsCount = parameters.Count(j => j.tokenType == TokenType.Variable);
                 var arguments = new ParameterExpression[argsCount];
@@ -260,7 +270,7 @@ namespace Cygnus.SyntaxAnalyzer
                 var FUNCTION = new FunctionExpression(funcTuple.Name, body, funcScope, arguments);
                 Scope.functionTable[FUNCTION.Name] = FUNCTION;
                 ParseBlock(body, Begin_Position + 1, End_Position - 1);
-                Block.Append(new ConstantExpression(null, ConstantType.Void));
+                Block.Append(Expression.Void());
                 EndIndex = End_Position;
             }
             else throw new ArgumentException();
@@ -279,7 +289,7 @@ namespace Cygnus.SyntaxAnalyzer
         public Expression ParseExpression(BlockExpression Block, int start, int end)
         {
             CountArguments(start, end);
-            return ParseReversePolishNotation(ConvertToRPN(Subset(start, end)));
+            return ParseReversePolishNotation(ConvertToRPN(array.Slice(start, end)));
         }
         private IEnumerable<Lexeme> ConvertToRPN(IEnumerable<Lexeme> sequence)
         {
@@ -472,7 +482,7 @@ namespace Cygnus.SyntaxAnalyzer
             {
                 switch (array[i].tokenType)
                 {
-                    case TokenType.Then:
+                    case TokenType.If:
                     case TokenType.Do:
                     case TokenType.Begin:
                         stack.Push(array[i].tokenType);
@@ -490,11 +500,6 @@ namespace Cygnus.SyntaxAnalyzer
                 if (success) break;
             }
             if (!success) throw new SyntaxException("Missing 'end'");
-        }
-        public IEnumerable<Lexeme> Subset(int start, int end)
-        {
-            for (int i = start; i <= end; i++)
-                yield return array[i];
         }
         public static bool IsTerminator(TokenType tokenType)
         {

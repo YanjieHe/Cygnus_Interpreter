@@ -16,5 +16,10 @@ namespace Cygnus.Extensions
                 array[i] = selector(source[i]);
             return array;
         }
+        public static IEnumerable<T> Slice<T>(this T[] array, int start, int end)
+        {
+            for (int i = start; i <= end; i++)
+                yield return array[i];
+        }
     }
 }

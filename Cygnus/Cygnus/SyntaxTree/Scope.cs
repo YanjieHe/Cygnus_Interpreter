@@ -140,6 +140,8 @@ namespace Cygnus.SyntaxTree
               ["strsplit"] = StringFunctions.StrSplit,
               ["strformat"] = StringFunctions.StrFormat,
               ["strlen"] = StringFunctions.StrLen,
+              ["strfind"] = StringFunctions.StrFind,
+              ["strreplace"] = StringFunctions.StrReplace,
               /***************     Higher-order functions     ***************/
               ["map"] = HigherOrderFunctions.Map,
               ["filter"] = HigherOrderFunctions.Filter,

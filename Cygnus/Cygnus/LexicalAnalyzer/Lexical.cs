@@ -229,6 +229,12 @@ namespace Cygnus.LexicalAnalyzer
                     tokenType = TokenType.Do; break;
                 case "then":
                     tokenType = TokenType.Then; break;
+                case "pass":
+                    tokenType = TokenType.Pass; break;
+                case "try":
+                    tokenType = TokenType.Try; break;
+                case "catch":
+                    tokenType = TokenType.Catch; break;
                 default:
                     tokenType = TokenType.Variable; break;
             }

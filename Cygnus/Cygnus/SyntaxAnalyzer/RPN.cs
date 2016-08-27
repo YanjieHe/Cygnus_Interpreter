@@ -64,7 +64,8 @@ namespace Cygnus.SyntaxAnalyzer
                                 if (cmp > 0) break;
                                 else if (cmp == 0)
                                 {
-                                    Operands.Add(op.Pop());
+                                    if (op.Peek().tokenType != TokenType.Assign)
+                                        Operands.Add(op.Pop());
                                     break;
                                 }
                                 else Operands.Add(op.Pop());

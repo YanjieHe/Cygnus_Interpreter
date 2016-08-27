@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Cygnus.Errors;
 namespace Cygnus.SyntaxTree
 {
@@ -14,7 +13,6 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.Table;
             }
         }
-
         public Expression this[string Name]
         {
             get
@@ -51,11 +49,16 @@ namespace Cygnus.SyntaxTree
             }
             throw new NotDefinedException(key);
         }
-        public TableExpression(KeyValuePair<string, Expression>[] properties)
+        public TableExpression(params KeyValuePair<string, Expression>[] properties)
         {
             Properties = new Dictionary<string, Expression>(properties.Length);
             foreach (var kvp in properties)
                 Properties.Add(kvp.Key, kvp.Value);
+        }
+        public TableExpression Append(string Name,Expression property)
+        {
+            Properties.Add(Name, property);
+            return this;
         }
         public override Expression Eval(Scope scope)
         {

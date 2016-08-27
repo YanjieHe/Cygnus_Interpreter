@@ -8,6 +8,7 @@ namespace Cygnus.Executors
     public class ExecuteInConsole : InterpreterExecutor
     {
         Stack<TokenType> stack;
+        Stack<TokenType> BracketStack = new Stack<TokenType>();
         LinkedList<Token> currentList;
         public ExecuteInConsole() : base()
         {
@@ -29,7 +30,7 @@ namespace Cygnus.Executors
                     Console.Write(">>> ");
                     string line = Console.ReadLine();
                 Start:
-                    using (var lex = new Lexical(line, TokenDefinition.tokenDefinitions))
+                    using (var lex = new Lexical(line, TokenDefinition.tokenDefinitions, BracketStack))
                     {
                         lex.Tokenize();
                         foreach (var item in lex.tokenList)
@@ -62,8 +63,10 @@ namespace Cygnus.Executors
         }
         public bool Check(LinkedList<Token> list)
         {
-            foreach (var item in list)
+            var current = list.First;
+            while (current != null)
             {
+                var item = current.Value;
                 switch (item.tokenType)
                 {
                     case TokenType.LeftBrace:
@@ -72,8 +75,10 @@ namespace Cygnus.Executors
                     case TokenType.Call:
                     case TokenType.Do:
                     case TokenType.Begin:
-                    case TokenType.Then:
                         stack.Push(item.tokenType); break;
+                    case TokenType.If:
+                        stack.Push(item.tokenType);
+                        break;
                     case TokenType.RightBrace:
                         if (stack.Peek() != TokenType.LeftBrace) throw new ArgumentException();
                         else stack.Pop(); break;
@@ -89,11 +94,12 @@ namespace Cygnus.Executors
                     case TokenType.End:
                         if (stack.Peek() != TokenType.Do
                             && stack.Peek() != TokenType.Begin
-                            && stack.Peek() != TokenType.Then
+                            && stack.Peek() != TokenType.If
                             && stack.Peek() != TokenType.Else)
                             throw new ArgumentException();
                         else stack.Pop(); break;
                 }
+                current = current.Next;
             }
             return stack.Count == 0;
         }

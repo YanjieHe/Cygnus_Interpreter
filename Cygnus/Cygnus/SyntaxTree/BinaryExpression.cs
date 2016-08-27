@@ -45,7 +45,7 @@ namespace Cygnus.SyntaxTree
                 case Operator.NotEqualTo:
                     return !Left.Eval(scope).Equals(Right.Eval(scope));
                 case Operator.Assgin:
-                        return AssginOp(Left, Right, scope);
+                    return AssginOp(Left, Right, scope);
                 default:
                     throw new NotSupportedException();
             }
@@ -73,54 +73,25 @@ namespace Cygnus.SyntaxTree
                     throw new ArgumentException("The left side of the equal-sign cannot be assigned");
             }
         }
-        public static ConstantExpression ArithemeticOp(Expression LeftOperand, Expression RightOperand, Operator op, Scope scope)
+        public static Expression ArithemeticOp(Expression LeftOperand, Expression RightOperand, Operator op, Scope scope)
         {
-            var left = LeftOperand.AsConstant(scope);
-            var right = RightOperand.AsConstant(scope);
-            if (left.constantType == ConstantType.Integer && right.constantType == ConstantType.Integer)
+            var left = LeftOperand.GetValue(scope) as IComputable;
+            var right = RightOperand.GetValue(scope);
+            switch (op)
             {
-                switch (op)
-                {
-                    case Operator.Add:
-                        return Constant((int)left.Value + (int)right.Value, ConstantType.Integer);
-                    case Operator.Subtract:
-                        return Constant((int)left.Value - (int)right.Value, ConstantType.Integer);
-                    case Operator.Multiply:
-                        return Constant((int)left.Value * (int)right.Value, ConstantType.Integer);
-                    case Operator.Divide:
-                        return Constant((int)left.Value / (int)right.Value, ConstantType.Integer);
-                    case Operator.Power:
-                        return Constant((int)Math.Pow((int)left.Value, (int)right.Value), ConstantType.Integer);
-                    default: throw new NotSupportedException();
-                }
-
+                case Operator.Add:
+                    return left.Add(right);
+                case Operator.Subtract:
+                    return left.Subtract(right);
+                case Operator.Multiply:
+                    return left.Multiply(right);
+                case Operator.Divide:
+                    return left.Divide(right);
+                case Operator.Power:
+                    return left.Power(right);
+                default:
+                    throw new NotSupportedException();
             }
-            else if ((left.constantType == ConstantType.Integer && right.constantType == ConstantType.Double)
-                   || (left.constantType == ConstantType.Double && right.constantType == ConstantType.Integer)
-                   || (left.constantType == ConstantType.Double && right.constantType == ConstantType.Double))
-            {
-                switch (op)
-                {
-                    case Operator.Add:
-                        return Constant(GetDouble(left) + GetDouble(right), ConstantType.Double);
-                    case Operator.Subtract:
-                        return Constant(GetDouble(left) - GetDouble(right), ConstantType.Double);
-                    case Operator.Multiply:
-                        return Constant(GetDouble(left) * GetDouble(right), ConstantType.Double);
-                    case Operator.Divide:
-                        return Constant(GetDouble(left) / GetDouble(right), ConstantType.Double);
-                    case Operator.Power:
-                        return Constant(Math.Pow(GetDouble(left), GetDouble(right)), ConstantType.Double);
-                    default: throw new NotSupportedException();
-                }
-            }
-            else if (op == Operator.Add
-                && (left.constantType == ConstantType.String
-                || right.constantType == ConstantType.String))
-            {
-                return Constant(left.Value.ToString() + right.Value.ToString(), ConstantType.String);
-            }
-            else throw new NotSupportedException();
         }
         public static ConstantExpression CompareOp(Expression LeftOperand, Expression RightOperand, Operator op, Scope scope)
         {

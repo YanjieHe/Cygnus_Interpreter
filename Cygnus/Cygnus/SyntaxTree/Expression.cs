@@ -27,6 +27,10 @@ namespace Cygnus.SyntaxTree
         {
             return new ConstantExpression(obj, constantType);
         }
+        public static ConstantExpression Constant(object obj)
+        {
+            return new ConstantExpression(obj);
+        }
         public static ArrayExpression Array(Expression[] array)
         {
             return new ArrayExpression(array);
@@ -34,6 +38,10 @@ namespace Cygnus.SyntaxTree
         public static ListExpression List(List<Expression> list)
         {
             return new ListExpression(list);
+        }
+        public static DictionaryExpression Dictionary(Dictionary<ConstantExpression, Expression> dict)
+        {
+            return new DictionaryExpression(dict);
         }
         public static CallExpression Call(string Name, params Expression[] Arguments)
         {
@@ -43,6 +51,14 @@ namespace Cygnus.SyntaxTree
         {
             return new IEnumerableExpression(list);
         }
+        public static CSharpObjectExpression CSharpObject(object obj, Type type)
+        {
+            return new CSharpObjectExpression(obj, type);
+        }
+        public static CSharpObjectExpression CSharpObject(object obj)
+        {
+            return new CSharpObjectExpression(obj);
+        }
         public static ConstantExpression Void()
         {
             return new ConstantExpression(null, ConstantType.Void);
@@ -51,13 +67,13 @@ namespace Cygnus.SyntaxTree
         {
             return new ConstantExpression(null, ConstantType.Null);
         }
-        public string AsString(Scope scope)
-        {
-            return GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value as string;
-        }
         public T As<T>(Scope scope) where T : struct
         {
             return (T)GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value;
+        }
+        public string AsString(Scope scope)
+        {
+            return GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value as string;
         }
         public ConstantExpression AsConstant(Scope scope)
         {
@@ -70,6 +86,34 @@ namespace Cygnus.SyntaxTree
         public List<Expression> AsList(Scope scope)
         {
             return GetValue<ListExpression>(ExpressionType.List, scope).Values;
+        }
+        public Dictionary<ConstantExpression, Expression> AsDictionary(Scope scope)
+        {
+            return GetValue<DictionaryExpression>(ExpressionType.Dictionary, scope).Dict;
+        }
+        public Expression From(object obj)
+        {
+            return new ConstantExpression(obj);
+        }
+        public ArrayExpression From(object[] objs)
+        {
+            int n = objs.Length;
+            var arr = new Expression[n];
+            for (int i = 0; i < n; i++)
+            {
+                arr[i] = From(objs[i]);
+            }
+            return new ArrayExpression(arr);
+        }
+        public ListExpression From(List<object> objs)
+        {
+            int n = objs.Count;
+            var list = new List<Expression>(n);
+            foreach (var item in objs)
+            {
+                list.Add(From(item));
+            }
+            return new ListExpression(list);
         }
         public Expression GetValue(Scope scope)
         {
@@ -208,6 +252,6 @@ namespace Cygnus.SyntaxTree
         IfThen, IfThenElse, While, Break,
         Parameter, Function, Array, List, Dictionary,
         Index, Return, ForEach, IEnumerable, Call,
-        Table, IList, KeyValuePair, Continue,
+        Table, IList, KeyValuePair, Continue, CSharpObject,
     }
 }

@@ -107,6 +107,8 @@ namespace Cygnus.LexicalAnalyzer
                     return new FuncTuple(token.Content, 0);
                 case TokenType.In:
                     return ControlStmt.In;
+                case TokenType.Pass:
+                    return ControlStmt.Pass;
                 case TokenType.Null:
                     return null;
                 case TokenType.Void:
@@ -183,6 +185,6 @@ namespace Cygnus.LexicalAnalyzer
         Terminator,
         Define, Begin,
         For, In,
-        Return,Continue
+        Return,Continue,Pass
     }
 }
