@@ -7,15 +7,15 @@ namespace Cygnus.Libraries
     {
         public static Expression ToInt(Expression[] args, Scope scope)
         {
-            return Convert.ToInt32(args[0].GetObjectValue(scope));
+            return Convert.ToInt32(args.Single().AsConstant(scope).Value);
         }
         public static Expression ToDouble(Expression[] args, Scope scope)
         {
-            return Convert.ToDouble(args[0].GetObjectValue(scope));
+            return Convert.ToDouble(args.Single().AsConstant(scope).Value);
         }
         public static Expression Str(Expression[] args, Scope scope)
         {
-            return Convert.ToString(args[0].GetObjectValue(scope));
+            return Convert.ToString(args.Single().AsConstant(scope).Value);
         }
         public static Expression ToArray(Expression[] args, Scope scope)
         {

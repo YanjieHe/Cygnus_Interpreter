@@ -7,17 +7,17 @@ namespace Cygnus.Libraries
     {
         public static Expression Exp(Expression[] args, Scope scope)
         {
-            var d = GetDouble(args.Single().GetValue<ConstantExpression>(ExpressionType.Constant, scope));
+            var d = GetDouble(args.Single().AsConstant(scope));
             return Math.Exp(d);
         }
         public static Expression Sqrt(Expression[] args, Scope scope)
         {
-            var d = GetDouble(args.Single().GetValue<ConstantExpression>(ExpressionType.Constant, scope));
+            var d = GetDouble(args.Single().AsConstant(scope));
             return Math.Sqrt(d);
         }
         public static Expression Abs(Expression[] args, Scope scope)
         {
-            var d = args.Single().GetValue<ConstantExpression>(ExpressionType.Constant, scope);
+            var d = args.Single().AsConstant(scope);
             if (d.constantType == ConstantType.Integer)
                 return Math.Abs((int)d.Value);
             else if (d.constantType == ConstantType.Double)
@@ -33,8 +33,8 @@ namespace Cygnus.Libraries
             }
             else if (args.Length == 2)
             {
-                var a = GetDouble(args[0].GetValue<ConstantExpression>(ExpressionType.Constant, scope));
-                var newBase = GetDouble(args[1].GetValue<ConstantExpression>(ExpressionType.Constant, scope));
+                var a = GetDouble(args[0].AsConstant(scope));
+                var newBase = GetDouble(args[1].AsConstant(scope));
                 return Math.Log(a, newBase);
             }
             else throw new ArgumentException();

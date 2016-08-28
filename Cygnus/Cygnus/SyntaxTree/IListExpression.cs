@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Cygnus.Extensions;
 namespace Cygnus.SyntaxTree
 {
     public class IListExpression<T> : Expression, IEnumerable<Expression>, IEquatable<IListExpression<T>>, IIndexable where T : IList<Expression>
@@ -53,6 +53,10 @@ namespace Cygnus.SyntaxTree
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+        public override void Display()
+        {
+            Values.DisplayList();
         }
         public bool Equals(IListExpression<T> other)
         {

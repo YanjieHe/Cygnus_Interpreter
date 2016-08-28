@@ -30,27 +30,25 @@ namespace Cygnus.Executors
                     Console.Write(">>> ");
                     string line = Console.ReadLine();
                 Start:
-                    using (var lex = new Lexical(line, TokenDefinition.tokenDefinitions, BracketStack))
+                    var lex = new Lexical(line, BracketStack);
+                    lex.Tokenize();
+                    foreach (var item in lex.tokenList)
+                        currentList.AddLast(item);
+                    if (!Check(lex.tokenList))
                     {
-                        lex.Tokenize();
-                        foreach (var item in lex.tokenList)
-                            currentList.AddLast(item);
-                        if (!Check(lex.tokenList))
-                        {
-                            Console.Write("... ");
-                            line = Console.ReadLine();
-                            goto Start;
-                        }
-                        var lex_array = Lexeme.Generate(currentList);
-                        currentList.Clear();
-
-                        var ast = new AST();
-                        BlockExpression Root = ast.Parse(lex_array, GlobalScope);
-                        //   ast.Display(Root);
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Expression Result = Root.Eval(GlobalScope).GetValue(GlobalScope);
-                        //Console.WriteLine(Result);
+                        Console.Write("... ");
+                        line = Console.ReadLine();
+                        goto Start;
                     }
+                    var lex_array = Lexeme.Generate(currentList);
+                    currentList.Clear();
+
+                    var ast = new AST();
+                    BlockExpression Root = ast.Parse(lex_array, GlobalScope);
+                    //   ast.Display(Root);
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Expression Result = Root.Eval(GlobalScope).GetValue(GlobalScope);
+                    //Console.WriteLine(Result);
                 }
                 catch (Exception ex)
                 {
@@ -58,6 +56,7 @@ namespace Cygnus.Executors
                     Console.WriteLine(ex.ToString());
                     currentList.Clear();
                     stack.Clear();
+                    BracketStack.Clear();
                 }
             }
         }

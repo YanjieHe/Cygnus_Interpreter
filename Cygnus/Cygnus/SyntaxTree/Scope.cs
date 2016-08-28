@@ -103,6 +103,7 @@ namespace Cygnus.SyntaxTree
               ["list"] = BuiltInFunctions.InitList,
               ["dict"] = BuiltInFunctions.InitDictionary,
               ["table"] = BuiltInFunctions.InitTable,
+              ["matrix"] = BuiltInFunctions.InitMatrix,
               ["setparent"] = BuiltInFunctions.SetParent,
               ["length"] = BuiltInFunctions.Length,
               ["import"] = BuiltInFunctions.Import,
@@ -146,6 +147,13 @@ namespace Cygnus.SyntaxTree
               ["map"] = HigherOrderFunctions.Map,
               ["filter"] = HigherOrderFunctions.Filter,
               ["reduce"] = HigherOrderFunctions.Reduce,
+
+              /***************     Matrix functions     ***************/
+              ["zeros"] = MatrixFunctions.Mat_Zeros,
+              ["ones"] = MatrixFunctions.Mat_Ones,
+              ["inv"] = MatrixFunctions.Mat_Inverse,
+              ["dot"] = MatrixFunctions.Mat_Dot,
+              ["trans"] = MatrixFunctions.Mat_Transpose,
 
           };
     }

@@ -14,12 +14,12 @@ namespace Cygnus.AssemblyImporter
             this.FilePath = FilePath;
             this.Name = Name;
         }
-        //import('D:\myCode\CSharpCode\DllForTest\DllForTest\bin\Debug\DllForTest.dll','DllForTest.addclass')
+        //import('DllForTest.dll','DllForTest.addclass')
         public void Import()
         {
             Assembly assembly = Assembly.LoadFile(FilePath);  //load dll file
             Type type = assembly.GetType(Name);  //Namespace + class name
-            foreach (var method in type.GetMethods())
+            foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Static))
             {
                 if (!ExceptMethods.Contains(method.Name))
                 {
@@ -30,7 +30,8 @@ namespace Cygnus.AssemblyImporter
         }
         public static Func<Expression[], Scope, Expression> GetFunc(MethodInfo method)
         {
-            return (args, scope) => (Expression)method.Invoke(null, new object[] { args, scope });
+            return Delegate.CreateDelegate(typeof(Func<Expression[], Scope, Expression>), method)
+                as Func<Expression[], Scope, Expression>;
         }
         private static readonly string[] ExceptMethods = new string[]
         {

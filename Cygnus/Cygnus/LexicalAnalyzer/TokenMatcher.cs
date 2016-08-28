@@ -6,7 +6,11 @@ namespace Cygnus.LexicalAnalyzer
         public readonly Regex Matcher;
         public TokenMatcher(string regex)
         {
-            Matcher = new Regex("^" + regex);
+            Matcher = new Regex(@"\G" + regex);
+        }
+        public TokenMatcher(string regex, RegexOptions option)
+        {
+            Matcher = new Regex(@"\G" + regex, option);
         }
         public static implicit operator TokenMatcher(string s)
         {

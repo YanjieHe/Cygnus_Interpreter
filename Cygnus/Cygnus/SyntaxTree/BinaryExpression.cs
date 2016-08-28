@@ -93,7 +93,7 @@ namespace Cygnus.SyntaxTree
                     throw new NotSupportedException();
             }
         }
-        public static ConstantExpression CompareOp(Expression LeftOperand, Expression RightOperand, Operator op, Scope scope)
+        public static Expression CompareOp(Expression LeftOperand, Expression RightOperand, Operator op, Scope scope)
         {
             var left = LeftOperand.AsConstant(scope);
             var right = RightOperand.AsConstant(scope);
@@ -103,15 +103,16 @@ namespace Cygnus.SyntaxTree
             switch (op)
             {
                 case Operator.Less:
-                    return Constant(cmpLeft.CompareTo(cmpRight) < 0, ConstantType.Boolean);
+                    return cmpLeft.CompareTo(cmpRight) < 0;
                 case Operator.Greater:
-                    return Constant(cmpLeft.CompareTo(cmpRight) > 0, ConstantType.Boolean);
+                    return cmpLeft.CompareTo(cmpRight) > 0;
                 case Operator.LessOrEquals:
-                    return Constant(cmpLeft.CompareTo(cmpRight) <= 0, ConstantType.Boolean);
+                    return cmpLeft.CompareTo(cmpRight) <= 0;
                 case Operator.GreaterOrEquals:
-                    return Constant(cmpLeft.CompareTo(cmpRight) >= 0, ConstantType.Boolean);
+                    return cmpLeft.CompareTo(cmpRight) >= 0;
+                default:
+                    throw new NotSupportedException();
             }
-            throw new NotSupportedException();
         }
         public static double GetDouble(ConstantExpression Expr)
         {

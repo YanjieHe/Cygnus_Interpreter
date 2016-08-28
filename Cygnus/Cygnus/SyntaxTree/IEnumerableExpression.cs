@@ -46,5 +46,9 @@ namespace Cygnus.SyntaxTree
         {
             return this;
         }
+        public override string ToString()
+        {
+            return "(IEnumerable)";
+        }
     }
 }

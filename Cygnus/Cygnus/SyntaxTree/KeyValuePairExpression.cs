@@ -21,16 +21,27 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.KeyValuePair;
             }
         }
-
+        public override void Display()
+        {
+            Console.Write('[');
+            keyValuePair.Key.Display();
+            Console.Write(", ");
+            keyValuePair.Value.Display();
+            Console.Write(']');
+        }
         public Expression this[string Name]
         {
             get
             {
-                if (Name == "key")
-                    return keyValuePair.Key;
-                else if (Name == "value")
-                    return keyValuePair.Value;
-                else throw new ArgumentException();
+                switch (Name)
+                {
+                    case "key":
+                        return keyValuePair.Key;
+                    case "value":
+                        return keyValuePair.Value;
+                    default:
+                        throw new ArgumentException();
+                }
             }
 
             set

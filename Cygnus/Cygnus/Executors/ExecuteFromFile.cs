@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Cygnus.LexicalAnalyzer;
-using Cygnus.SyntaxAnalyzer;
 using Cygnus.SyntaxTree;
-using Cygnus.SymbolTable;
 
 namespace Cygnus.Executors
 {
@@ -39,18 +34,7 @@ namespace Cygnus.Executors
         {
             try
             {
-                using (var lex = new Lexical(FilePath, encoding, TokenDefinition.tokenDefinitions))
-                {
-                    lex.Tokenize();
-                    var lex_array = Lexeme.Generate(lex.tokenList);
-                    var ast = new AST();
-                    BlockExpression Root = ast.Parse(lex_array, GlobalScope);
-                    //                     ast.Display(Root);
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Expression Result = Root.Eval(GlobalScope).GetValue(GlobalScope);
-                    //Console.WriteLine(Result);
-                    return Result;
-                }
+                return Execute(new Lexical(FilePath, encoding));
             }
             catch (Exception ex)
             {

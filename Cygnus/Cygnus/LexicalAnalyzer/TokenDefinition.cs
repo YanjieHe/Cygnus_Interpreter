@@ -1,4 +1,5 @@
-﻿namespace Cygnus.LexicalAnalyzer
+﻿using System.Text.RegularExpressions;
+namespace Cygnus.LexicalAnalyzer
 {
     public sealed class TokenDefinition
     {
@@ -10,21 +11,16 @@
             tokenMatcher = _tokenMatcher;
             tokenType = TokenType;
         }
-        public int Match(string s, out string result)
+        public Match Match(string s, int startat)
         {
-            result = string.Empty;
-            if (s.Length == 0) return (-1);
-            var m = tokenMatcher.Matcher.Match(s);
-            if (m.Success)
-            {
-                result = m.Value;
-                return m.Length;
-            }
-            else return (-1);
+            return tokenMatcher.Matcher.Match(s, startat);
         }
-        public static readonly TokenDefinition[] tokenDefinitions = new TokenDefinition[]
+        public static readonly
+            TokenDefinition[] tokenDefinitions
+            = new TokenDefinition[]
                {
                 new TokenDefinition(@"([""'])(?:\\\1|.)*?\1", TokenType.String),
+                new TokenDefinition(@"([\r\n]|[\n])+", TokenType.EndOfLine),
 
                 new TokenDefinition(@"==", TokenType.Equals),
                 new TokenDefinition(@">=", TokenType.Greater_Than_Or_Equals),
@@ -37,27 +33,27 @@
                 new TokenDefinition(@"[0-9]+\.[0-9]+", TokenType.Double),
                 new TokenDefinition(@"[0-9]+", TokenType.Integer),
 
-                new TokenDefinition(@"^\+", TokenType.Add),
-                new TokenDefinition(@"^\-", TokenType.Subtract),
-                new TokenDefinition(@"^\*", TokenType.Multiply),
-                new TokenDefinition(@"^\/", TokenType.Divide),
-                new TokenDefinition(@"^\^", TokenType.Power),
-                new TokenDefinition(@"^\,", TokenType.Comma),
-                new TokenDefinition(@"^\.", TokenType.Dot),
+                new TokenDefinition(@"\+", TokenType.Add),
+                new TokenDefinition(@"\-", TokenType.Subtract),
+                new TokenDefinition(@"\*", TokenType.Multiply),
+                new TokenDefinition(@"\/", TokenType.Divide),
+                new TokenDefinition(@"\^", TokenType.Power),
+                new TokenDefinition(@"\,", TokenType.Comma),
+                new TokenDefinition(@"\.", TokenType.Dot),
 
-                new TokenDefinition(@"^\(", TokenType.LeftParenthesis),
-                new TokenDefinition(@"^\)", TokenType.RightParenthesis),
-                new TokenDefinition(@"^\[", TokenType.LeftBracket),
-                new TokenDefinition(@"^\]", TokenType.RightBracket),
-                new TokenDefinition(@"^\{", TokenType.LeftBrace),
-                new TokenDefinition(@"^\}", TokenType.RightBrace),
+                new TokenDefinition(@"\(", TokenType.LeftParenthesis),
+                new TokenDefinition(@"\)", TokenType.RightParenthesis),
+                new TokenDefinition(@"\[", TokenType.LeftBracket),
+                new TokenDefinition(@"\]", TokenType.RightBracket),
+                new TokenDefinition(@"\{", TokenType.LeftBrace),
+                new TokenDefinition(@"\}", TokenType.RightBrace),
 
-                new TokenDefinition(@"^\;", TokenType.EndOfLine),
+                new TokenDefinition(@"\;", TokenType.EndOfLine),
 
                 new TokenDefinition(@"[_A-Za-z]+[_A-Za-z0-9]*[\s]*\(", TokenType.Call),
                 new TokenDefinition(@"[_A-Za-z]+[_A-Za-z0-9]*", TokenType.Symbol),
-                new TokenDefinition(@"^[\s]+", TokenType.Space),
-                new TokenDefinition(@"^%(.*)", TokenType.Comments),
+                new TokenDefinition(@"[\s]+", TokenType.Space),
+                new TokenDefinition(@"%(.*)", TokenType.Comments),
                };
 
     }

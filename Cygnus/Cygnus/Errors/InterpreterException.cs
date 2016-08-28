@@ -1,9 +1,9 @@
 ﻿using System;
-
 namespace Cygnus.Errors
 {
     public class InterpreterException : Exception
     {
+        public InterpreterException() : base("[Interpreter Exception]") { }
         public InterpreterException(Exception ex, string message)
             : base(message, ex)
         {

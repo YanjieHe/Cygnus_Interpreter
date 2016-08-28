@@ -33,13 +33,17 @@ namespace Cygnus.SyntaxTree
             while (Condition.As<bool>(scope))
             {
                 Result = Body.Eval(scope);
-                if (Result.NodeType == ExpressionType.Break)
-                    break;
-                else if (Result.NodeType == ExpressionType.Continue)
-                    continue;
-                else if (Result.NodeType == ExpressionType.Return)
-                    return Result;
+                switch (Result.NodeType)
+                {
+                    case ExpressionType.Break:
+                        goto EndWhile;
+                    case ExpressionType.Continue:
+                        continue;
+                    case ExpressionType.Return:
+                        return Result;
+                }
             }
+        EndWhile:
             return Void();
         }
     }

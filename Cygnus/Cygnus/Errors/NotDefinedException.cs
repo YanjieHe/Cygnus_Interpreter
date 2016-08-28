@@ -8,10 +8,10 @@ namespace Cygnus.Errors
 {
     public class NotDefinedException : SyntaxException
     {
-        public NotDefinedException(params object[] args) 
+        public NotDefinedException() : base("[Not Defined Exception]") { }
+        public NotDefinedException(params object[] args)
             : base("[Not Defined Exception]: " + string.Join(", ", args) + (args.Length == 1 ? " is " : "are ") + "not defined")
         {
-
         }
     }
 }

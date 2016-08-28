@@ -8,41 +8,22 @@ using Cygnus.AssemblyImporter;
 using Cygnus.LexicalAnalyzer;
 using Cygnus.SyntaxAnalyzer;
 using Cygnus.Errors;
+using Cygnus.Executors;
+using System.IO;
 namespace Cygnus.Libraries
 {
     public static class BuiltInFunctions
     {
         public static Expression Print(Expression[] args, Scope scope)
         {
-            var obj = args.Single().GetObjectValue(scope);
-            if (obj is Expression[])
-                PrintList(((Expression[])obj).Select(j => j.GetObjectValue(scope)));
-            else if (obj is List<Expression>)
-                PrintList(((List<Expression>)obj).Select(j => j.GetObjectValue(scope)));
-            else if (obj is Dictionary<ConstantExpression, Expression>)
-                PrintList(((Dictionary<ConstantExpression, Expression>)obj)
-                    .Select(j => (object)new KeyValuePair<object, object>(j.Key.GetObjectValue(scope), j.Value.GetObjectValue(scope))));
-            else if (obj != null)
-                Console.WriteLine(obj);
+            var obj = args.Single().GetValue(scope);
+            obj.Display();
+            Console.WriteLine();
             return Expression.Void();
-        }
-        private static void PrintList(IEnumerable<object> objs)
-        {
-            Console.Write("{ ");
-            using (var obj = objs.GetEnumerator())
-                if (obj.MoveNext())
-                    while (true)
-                    {
-                        Console.Write(obj.Current);
-                        if (obj.MoveNext())
-                            Console.Write(", ");
-                        else break;
-                    }
-            Console.WriteLine(" }");
         }
         public static Expression InitArray(Expression[] args, Scope scope)
         {
-            int n = (int)args.Single().GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value;
+            int n = args.Single().As<int>(scope);
             var arr = new Expression[n];
             for (int i = 0; i < n; i++)
                 arr[i] = Expression.Null();
@@ -62,7 +43,7 @@ namespace Cygnus.Libraries
             else
                 return new DictionaryExpression(args.Map(i =>
                 {
-                    var kvparr = i.AsArray(scope);
+                    var kvparr = i.AsArray(scope).Values;
                     if (kvparr.Length != 2)
                         throw new ArgumentException("The length of key-value pair must be 2");
                     else
@@ -76,55 +57,93 @@ namespace Cygnus.Libraries
             return new TableExpression(args.Cast<ParameterExpression>()
                 .Select(i => new KeyValuePair<string, Expression>(i.Name, Expression.Null())).ToArray());
         }
+        public static Expression InitMatrix(Expression[] args, Scope scope)
+        {
+            var rows = new double[args.Length][];
+            for (int i = 0; i < args.Length; i++)
+            {
+                rows[i] = args[i].AsArray(scope).Values.Map(j => j.AsConstant(scope).GetDouble());
+            }
+            return new MatrixExpression(rows);
+        }
         public static Expression Length(Expression[] args, Scope scope)
         {
             return (args.Single().GetValue(scope) as IIndexable).Length;
         }
         public static Expression Import(Expression[] args, Scope scope)
         {
-            new CSharpAssembly(args[0].AsString(scope), args[1].AsString(scope)).Import();
+            (args.Length == 2).OrThrows<ParameterException>();
+            var path = GetFilePath(args[0].AsString(scope));
+            var info = args[1].AsString(scope);//Namespace.Class
+            new CSharpAssembly(path, info).Import();
             return Expression.Void();
+        }
+        private static string GetFilePath(string path)
+        {
+            if (!Path.IsPathRooted(path))
+            {
+                var file = path;
+                path = SearchFile(Directory.GetCurrentDirectory(), file);
+                if (path == null)
+                    throw new DirectoryNotFoundException(file);
+            }
+            return path;
+        }
+        private static string SearchFile(string path, string file)
+        {
+            foreach (var f in Directory.EnumerateFiles(path))
+                if (Path.GetFileName(f) == file)
+                    return f;
+            foreach (var folder in Directory.EnumerateDirectories(path))
+            {
+                var result = SearchFile(folder, file);
+                if (result != null) return result;
+            }
+            return null;
         }
         public static Expression SetParent(Expression[] args, Scope scope)
         {
-            var table = args[0].GetValue<TableExpression>(ExpressionType.Table, scope);
+            (args.Length == 2).OrThrows<ParameterException>();
+            var table = args[0].AsTable(scope);
             var parent_table = args[1].GetValue<TableExpression>(ExpressionType.Table, scope);
             table.Parent = parent_table;
             return Expression.Void();
         }
         public static Expression Range(Expression[] args, Scope scope)
         {
-            if (args.Length == 1)
+            switch (args.Length)
             {
-                return
-                    Expression.IEnumerable(
-                    Enumerable.Range(0, args[0].As<int>(scope))
-                    .Select(i => Expression.Constant(i, ConstantType.Integer)));
-            }
-            else if (args.Length == 2 || args.Length == 3)
-            {
-                int start = args[0].As<int>(scope);
-                int end = args[1].As<int>(scope);
-                if (args.Length == 2)
+                case 1:
                     return
-                         Expression.IEnumerable(
-                             Enumerable.Range(start, end - start)
-                             .Select(i => Expression.Constant(i, ConstantType.Integer)));
-                else if (args.Length == 3)
-                {
-                    int step = args[2].As<int>(scope);
-                    return
-                        Expression.IEnumerable(
-                            GetRange(start, end, step)
-                            .Select(i => Expression.Constant(i, ConstantType.Integer)));
-                }
-                else throw new ArgumentException();
+               Expression.IEnumerable(
+               Enumerable.Range(0, args[0].As<int>(scope))
+               .Select(i => Expression.Constant(i, ConstantType.Integer)));
+                case 2:
+                    {
+                        int start = args[0].As<int>(scope);
+                        int end = args[1].As<int>(scope);
+                        return
+                       Expression.IEnumerable(
+                           Enumerable.Range(start, end - start)
+                           .Select(i => Expression.Constant(i, ConstantType.Integer)));
+                    }
+                case 3:
+                    {
+                        int start = args[0].As<int>(scope);
+                        int end = args[1].As<int>(scope);
+                        int step = args[2].As<int>(scope);
+                        return
+                            Expression.IEnumerable(
+                                GetRange(start, end, step)
+                                .Select(i => Expression.Constant(i, ConstantType.Integer)));
+                    }
+                default:
+                    throw new ParameterException();
             }
-            else throw new ArgumentException();
         }
         private static IEnumerable<int> GetRange(int start, int end, int step)
         {
-            if (step == 0) throw new ArgumentException();
+            if (step == 0) throw new ParameterException("The step cannot be zero");
             if (step > 0)
                 for (int i = start; i < end; i += step)
                     yield return i;
@@ -134,24 +153,33 @@ namespace Cygnus.Libraries
         }
         public static Expression ExecuteFile(Expression[] args, Scope scope)
         {
-            var FilePath = args[0].AsString(scope);
-            var encoding = Encoding.Default;
-            using (var lex = new Lexical(FilePath, encoding, TokenDefinition.tokenDefinitions))
+            (args.Length == 1 || args.Length == 2).OrThrows<ParameterException>();
+            var FilePath = GetFilePath(args[0].AsString(scope));
+            var encoding = args.Length == 2 ? GetEncoding(args[1].AsString(scope)) : Encoding.Default;
+            return new ExecuteFromFile(FilePath, encoding, scope).Run();
+        }
+        private static Encoding GetEncoding(string encoding)
+        {
+            switch (encoding)
             {
-                lex.Tokenize();
-                var lex_array = Lexeme.Generate(lex.tokenList);
-                var ast = new AST();
-                BlockExpression Root = ast.Parse(lex_array, scope);
-                //    ast.Display(Root);
-                Expression Result = Root.Eval(scope).GetValue(scope);
-                return Result;
+                case "default":
+                    return Encoding.Default;
+                case "utf-8":
+                case "utf8":
+                    return Encoding.UTF8;
+                case "unicode":
+                    return Encoding.Unicode;
+                case "ascii":
+                    return Encoding.ASCII;
+                default:
+                    return Encoding.GetEncoding(encoding);
             }
         }
         public static Expression Scan(Expression[] args, Scope scope)
         {
-            if (args.Length != 0 && args.Length != 1) throw new ArgumentException();
+            (args.Length == 0 || args.Length == 1).OrThrows<ParameterException>();
             if (args.Length == 1)
-                Console.Write(args.Single().GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value);
+                Console.Write(args.Single().AsString(scope));
             return Console.ReadLine();
         }
         public static Expression Throw(Expression[] args, Scope scope)
@@ -169,7 +197,7 @@ namespace Cygnus.Libraries
                     else throw new NotDefinedException(item);
                 }
             }
-            return new ConstantExpression(null, ConstantType.Void);
+            return Expression.Void();
         }
         public static Expression Exit(Expression[] args, Scope scope)
         {

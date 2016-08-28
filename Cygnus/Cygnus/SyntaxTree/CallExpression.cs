@@ -36,7 +36,7 @@ namespace Cygnus.SyntaxTree
             if (scope.TryGetValue(Name, out funcExpr))
             {
                 if (funcExpr.NodeType == ExpressionType.Call)
-                    return new CallExpression((funcExpr as CallExpression).Name, Arguments).Eval(scope);
+                    return new CallExpression(funcExpr.AsCall(scope).Name, Arguments).Eval(scope);
             }
             throw new NotDefinedException(Name);
         }

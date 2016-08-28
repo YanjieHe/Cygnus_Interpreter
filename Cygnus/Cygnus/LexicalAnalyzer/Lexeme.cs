@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Cygnus.Extensions;
 namespace Cygnus.LexicalAnalyzer
 {
     public sealed class Lexeme
@@ -14,15 +15,7 @@ namespace Cygnus.LexicalAnalyzer
         }
         public static Lexeme[] Generate(LinkedList<Token> list)
         {
-            int n = list.Count;
-            var array = new Lexeme[n];
-            int i = 0;
-            foreach (var item in list)
-            {
-                array[i] = new Lexeme(item.tokenType, GetContent(item));
-                i++;
-            }
-            return array;
+            return list.Map(i => new Lexeme(i.tokenType, GetContent(i)));
         }
         private static object GetContent(Token token)
         {
@@ -80,35 +73,35 @@ namespace Cygnus.LexicalAnalyzer
                 case TokenType.Until:
                     break;
                 case TokenType.Return:
-                    return ControlStmt.Return;
+                    return ControlStatement.Return;
                 case TokenType.Continue:
-                    return ControlStmt.Continue;
+                    return ControlStatement.Continue;
                 case TokenType.Do:
-                    return ControlStmt.Do;
+                    return ControlStatement.Do;
                 case TokenType.End:
-                    return ControlStmt.End;
+                    return ControlStatement.End;
                 case TokenType.If:
-                    return ControlStmt.If;
+                    return ControlStatement.If;
                 case TokenType.Then:
-                    return ControlStmt.Then;
+                    return ControlStatement.Then;
                 case TokenType.Else:
-                    return ControlStmt.Else;
+                    return ControlStatement.Else;
                 case TokenType.ElseIf:
-                    return ControlStmt.ElseIf;
+                    return ControlStatement.ElseIf;
                 case TokenType.For:
-                    return ControlStmt.For;
+                    return ControlStatement.For;
                 case TokenType.While:
-                    return ControlStmt.While;
+                    return ControlStatement.While;
                 case TokenType.Break:
-                    return ControlStmt.Break;
+                    return ControlStatement.Break;
                 case TokenType.EndOfLine:
-                    return ControlStmt.Terminator;
+                    return ControlStatement.Terminator;
                 case TokenType.Call:
                     return new FuncTuple(token.Content, 0);
                 case TokenType.In:
-                    return ControlStmt.In;
+                    return ControlStatement.In;
                 case TokenType.Pass:
-                    return ControlStmt.Pass;
+                    return ControlStatement.Pass;
                 case TokenType.Null:
                     return null;
                 case TokenType.Void:
@@ -116,9 +109,9 @@ namespace Cygnus.LexicalAnalyzer
                 case TokenType.No_Arg:
                     return "No_Arg";
                 case TokenType.Define:
-                    return ControlStmt.Define;
+                    return ControlStatement.Define;
                 case TokenType.Begin:
-                    return ControlStmt.Begin;
+                    return ControlStatement.Begin;
                 case TokenType.Variable:
                     return token.Content;
                 default:
@@ -164,27 +157,5 @@ namespace Cygnus.LexicalAnalyzer
         {
             return string.Concat("(", Content, ", ", tokenType, ")");
         }
-    }
-    public enum Operator
-    {
-        UnaryPlus, UnaryMinus,
-        Add, Subtract, Multiply, Divide, Power,
-        And, Or, Not,
-        Less, Greater, LessOrEquals, GreaterOrEquals,
-        Equals, NotEqualTo,
-        LeftParenthesis, RightParenthesis,
-        LeftBrace, RightBrace,
-        Call, Comma, Assgin,
-        LeftBracket, RightBracket,
-        Return, Dot,
-    }
-    public enum ControlStmt
-    {
-        If, Then, Else, ElseIf, End, Break,
-        While, Do,
-        Terminator,
-        Define, Begin,
-        For, In,
-        Return,Continue,Pass
     }
 }

@@ -21,30 +21,47 @@ namespace Cygnus.SyntaxTree
         }
         public override Expression Eval(Scope scope)
         {
-            var value = Value.Eval(scope).GetValue<ConstantExpression>(ExpressionType.Constant, scope);
+            var value = Value.GetValue(scope);
             return UnaryOp(value, Op);
         }
-        public ConstantExpression UnaryOp(ConstantExpression expr, Operator op)
+        public Expression UnaryOp(Expression expression, Operator op)
         {
-            switch (expr.constantType)
+            if (expression.NodeType == ExpressionType.Constant)
             {
-                case ConstantType.Integer:
-                    if (Op == Operator.UnaryPlus)
-                        return Constant(+(int)expr.Value, ConstantType.Integer);
-                    else if (Op == Operator.UnaryMinus)
-                        return Constant(-(int)expr.Value, ConstantType.Integer);
-                    else throw new NotSupportedException();
-                case ConstantType.Double:
-                    if (Op == Operator.UnaryPlus)
-                        return Constant(+(double)expr.Value, ConstantType.Integer);
-                    else if (Op == Operator.UnaryMinus)
-                        return Constant(-(double)expr.Value, ConstantType.Integer);
-                    else throw new NotSupportedException();
-                case ConstantType.Boolean:
-                    return Constant(!(bool)expr.Value, ConstantType.Boolean);
-                default:
-                    throw new NotSupportedException("Not supported unary operator '" + Op + "'");
+                var expr = expression as ConstantExpression;
+                switch (expr.constantType)
+                {
+                    case ConstantType.Integer:
+                        if (Op == Operator.UnaryPlus)
+                            return +(int)expr.Value;
+                        else if (Op == Operator.UnaryMinus)
+                            return -(int)expr.Value;
+                        else goto default;
+                    case ConstantType.Double:
+                        if (Op == Operator.UnaryPlus)
+                            return +(double)expr.Value;
+                        else if (Op == Operator.UnaryMinus)
+                            return -(double)expr.Value;
+                        else goto default;
+                    case ConstantType.Boolean:
+                        if (Op == Operator.Not)
+                            return !(bool)expr.Value;
+                        else goto default;
+                    default:
+                        throw new NotSupportedException("Not supported unary operator '" + Op + "'");
+                }
             }
+            else if (expression.NodeType == ExpressionType.Matrix)
+            {
+                var expr = expression as MatrixExpression;
+                if (Op == Operator.UnaryPlus)
+                    return new MatrixExpression(+expr.Data);
+                else if (Op == Operator.UnaryMinus)
+                    return new MatrixExpression(-expr.Data);
+                else throw new NotSupportedException();
+            }
+            else
+                throw new NotSupportedException();
         }
         public override string ToString()
         {

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-
+using Cygnus.Extensions;
+using System.Linq;
 namespace Cygnus.SyntaxTree
 {
     public class DictionaryExpression : Expression, IIndexable, IEnumerable<Expression>, IEquatable<DictionaryExpression>
@@ -52,6 +53,10 @@ namespace Cygnus.SyntaxTree
         {
             foreach (var kvp in Dict)
                 yield return new KeyValuePairExpression(kvp);
+        }
+        public override void Display()
+        {
+            Dict.Select(i => new KeyValuePairExpression(i)).DisplayList();
         }
         public bool Equals(DictionaryExpression other)
         {

@@ -5,70 +5,62 @@ using System.Text;
 using Cygnus.Errors;
 namespace Cygnus.LexicalAnalyzer
 {
-    public sealed class Lexical : IDisposable
+    public sealed class Lexical
     {
-        TextReader CodeReader;
         TokenDefinition[] tokenDefinitions;
         public LinkedList<Token> tokenList;
         public Stack<TokenType> BracketStack;
-        public Lexical(string Code, TokenDefinition[] TokenDefinitions)
+        public string Code { get; private set; }
+        public Lexical(string Code)
         {
-            CodeReader = new StringReader(Code);
             BracketStack = new Stack<TokenType>();
-            Initialize(TokenDefinitions);
+            Initialize(Code);
         }
-        public Lexical(string Code, TokenDefinition[] TokenDefinitions, Stack<TokenType> BracketStack)
+        public Lexical(string Code, Stack<TokenType> BracketStack)
         {
-            CodeReader = new StringReader(Code);
             this.BracketStack = BracketStack;
-            Initialize(TokenDefinitions);
+            Initialize(Code);
         }
-        public Lexical(string FilePath, Encoding encoding, TokenDefinition[] TokenDefinitions)
+        public Lexical(string FilePath, Encoding encoding)
         {
-            CodeReader = new StreamReader(FilePath, encoding);
             BracketStack = new Stack<TokenType>();
-            Initialize(TokenDefinitions);
+            Initialize(File.ReadAllText(FilePath, encoding));
         }
-        void Initialize(TokenDefinition[] TokenDefinitions)
+        void Initialize(string Code)
         {
-            tokenDefinitions = TokenDefinitions;
+            this.Code = Code;
+            tokenDefinitions = TokenDefinition.tokenDefinitions;
             tokenList = new LinkedList<Token>();
-        }
-        private IEnumerable<string> ReadCode()
-        {
-            while (CodeReader.Peek() != -1)
-                yield return CodeReader.ReadLine();
         }
         public void Tokenize()
         {
-            foreach (var line in ReadCode()) Scan(line);
-        }
-        private void Scan(string line)
-        {
+            int index = 0;
             do
             {
                 bool success = false;
                 foreach (var item in tokenDefinitions)
                 {
-                    string content;
-                    int len = item.Match(line, out content);
-                    if (len != -1)
+                    var match = item.Match(Code, index);
+                    if (match.Success)
                     {
-                        line = Eat(line, content, item.tokenType, len);
+                        if ((item.tokenType != TokenType.EndOfLine)
+                            ||
+                            (item.tokenType == TokenType.EndOfLine && BracketStack.Count == 0))
+                            Eat(match.Value, item.tokenType);
+                        index += match.Length;
                         success = true;
                         break;
                     }
                 }
                 if (!success)
                 {
-                    if (line.Length == 0) break;
-                    else throw new LexicalException("Unrecognizable input: {0}", line);
+                    if (index == Code.Length) break;
+                    else throw new LexicalException("Unrecognizable input: {0}", Code.Substring(index));
                 }
-            } while (line.Length != 0);
-            if (tokenList.Last != null && tokenList.Last.Value.tokenType != TokenType.EndOfLine && tokenList.Last.Value.tokenType != TokenType.Comments && BracketStack.Count == 0)
-                tokenList.AddLast(new Token("\\n", TokenType.EndOfLine));
+            } while (index < Code.Length);
+            Append(new Token("\r\n", TokenType.EndOfLine));
         }
-        private string Eat(string line, string content, TokenType tokenType, int len)
+        private void Eat(string content, TokenType tokenType)
         {
             switch (tokenType)
             {
@@ -79,7 +71,7 @@ namespace Cygnus.LexicalAnalyzer
                     if (BackTrack(tokenList.Last))
                         tokenType = TokenType.UnaryMinus; break;
                 case TokenType.Space:
-                    return line.Substring(len);
+                case TokenType.Comments: return;
                 case TokenType.Symbol:
                     CheckKeywords(content, ref tokenType);
                     break;
@@ -93,21 +85,16 @@ namespace Cygnus.LexicalAnalyzer
                         Append(new Token(substr, tokenType));
                         Append(new Token("(", TokenType.LeftParenthesis));
                     }
-                    return line.Substring(len);
+                    return;
                 case TokenType.RightParenthesis://To identify no-arg function
-                    if (No_Arg(content, TokenType.Call, TokenType.RightParenthesis))
-                        return line.Substring(len);
+                    if (No_Arg(content, TokenType.Call, TokenType.RightParenthesis)) return;
                     break;
                 case TokenType.RightBrace://To identify no-arg array
-                    if (No_Arg(content, TokenType.LeftBrace, TokenType.RightBrace))
-                        return line.Substring(len);
+                    if (No_Arg(content, TokenType.LeftBrace, TokenType.RightBrace)) return;
                     break;
-                case TokenType.Comments:
-                    return line.Substring(len);
             }
             var token = new Token(content, tokenType);
             Append(token);
-            return line.Substring(len);
         }
         private void Append(Token token)
         {
@@ -174,10 +161,6 @@ namespace Cygnus.LexicalAnalyzer
                     return false;
                 default: return true;
             }
-        }
-        public void Dispose()
-        {
-            CodeReader.Dispose();
         }
         public void CheckKeywords(string word, ref TokenType tokenType)
         {

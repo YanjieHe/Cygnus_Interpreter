@@ -1,8 +1,12 @@
 ﻿using System;
-
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+using Cygnus.Errors;
+using Cygnus.Extensions;
 namespace Cygnus.SyntaxTree
 {
-    public sealed class ConstantExpression : Expression, IComputable, IEquatable<ConstantExpression>
+    public sealed class ConstantExpression : Expression, IComputable, IEquatable<ConstantExpression>, IEnumerable<Expression>
     {
         public override ExpressionType NodeType
         {
@@ -32,19 +36,33 @@ namespace Cygnus.SyntaxTree
         {
             this.value = value;
             if (value == null)
-                this.type = ConstantType.Null;
+                type = ConstantType.Null;
             else if (value is int)
-                this.type = ConstantType.Integer;
+                type = ConstantType.Integer;
             else if (value is double)
-                this.type = ConstantType.Double;
+                type = ConstantType.Double;
             else if (value is bool)
-                this.type = ConstantType.Boolean;
+                type = ConstantType.Boolean;
             else if (value is char)
-                this.type = ConstantType.Char;
+                type = ConstantType.Char;
             else if (value is string)
-                this.type = ConstantType.String;
+                type = ConstantType.String;
             else
                 throw new NotSupportedException(value.ToString());
+        }
+        public override void Display()
+        {
+            Console.Write(Value ?? "Null");
+        }
+        public double GetDouble()
+        {
+            switch (constantType)
+            {
+                case ConstantType.Integer: return (int)Value;
+                case ConstantType.Double: return (double)Value;
+                default:
+                    throw new NotSupportedException();
+            }
         }
         public override string ToString()
         {
@@ -83,27 +101,28 @@ namespace Cygnus.SyntaxTree
             if (Other.NodeType == ExpressionType.Constant)
             {
                 var other = Other as ConstantExpression;
-                if (type == ConstantType.Integer && other.type == ConstantType.Integer)
+                switch (type | other.type)
                 {
-                    return ((int)value) + ((int)other.value);
+                    case ConstantType.Integer | ConstantType.Integer:
+                        return ((int)value) + ((int)other.value);
+                    case ConstantType.Double | ConstantType.Double:
+                        return ((double)value) + ((double)other.value);
+                    case ConstantType.Integer | ConstantType.Double:
+                        return GetDouble() - other.GetDouble();
+                    case ConstantType.String | ConstantType.Integer:
+                    case ConstantType.String | ConstantType.Double:
+                    case ConstantType.String | ConstantType.Boolean:
+                    case ConstantType.String | ConstantType.Char:
+                    case ConstantType.String | ConstantType.String:
+                    case ConstantType.String | ConstantType.Null:
+                        return value.ToString() + other.value.ToString();
+                    default:
+                        throw new NotSupportedException();
                 }
-                else if (type == ConstantType.Double && other.type == ConstantType.Double)
-                {
-                    return ((double)value) + ((double)other.value);
-                }
-                else if (type == ConstantType.Integer && other.type == ConstantType.Double)
-                {
-                    return ((int)value) + ((double)other.value);
-                }
-                else if (type == ConstantType.Double && other.type == ConstantType.Integer)
-                {
-                    return ((double)value) + ((int)other.value);
-                }
-                else if (type == ConstantType.String || other.type == ConstantType.String)
-                {
-                    return value.ToString() + other.value.ToString();
-                }
-                else throw new NotSupportedException();
+            }
+            else if (Other.NodeType == ExpressionType.Matrix)
+            {
+                return new MatrixExpression(GetDouble() + (Other as MatrixExpression).Data);
             }
             else
                 throw new ArithmeticException();
@@ -114,23 +133,21 @@ namespace Cygnus.SyntaxTree
             if (Other.NodeType == ExpressionType.Constant)
             {
                 var other = Other as ConstantExpression;
-                if (type == ConstantType.Integer && other.type == ConstantType.Integer)
+                switch (type | other.type)
                 {
-                    return ((int)value) - ((int)other.value);
+                    case ConstantType.Integer | ConstantType.Integer:
+                        return ((int)value) - ((int)other.value);
+                    case ConstantType.Double | ConstantType.Double:
+                        return ((double)value) - ((double)other.value);
+                    case ConstantType.Integer | ConstantType.Double:
+                        return GetDouble() - other.GetDouble();
+                    default:
+                        throw new NotSupportedException();
                 }
-                else if (type == ConstantType.Double && other.type == ConstantType.Double)
-                {
-                    return ((double)value) - ((double)other.value);
-                }
-                else if (type == ConstantType.Integer && other.type == ConstantType.Double)
-                {
-                    return ((int)value) - ((double)other.value);
-                }
-                else if (type == ConstantType.Double && other.type == ConstantType.Integer)
-                {
-                    return ((double)value) - ((int)other.value);
-                }
-                else throw new NotSupportedException();
+            }
+            else if (Other.NodeType == ExpressionType.Matrix)
+            {
+                return new MatrixExpression(GetDouble() - (Other as MatrixExpression).Data);
             }
             else
                 throw new ArithmeticException();
@@ -141,50 +158,45 @@ namespace Cygnus.SyntaxTree
             if (Other.NodeType == ExpressionType.Constant)
             {
                 var other = Other as ConstantExpression;
-                if (type == ConstantType.Integer && other.type == ConstantType.Integer)
+                switch (type | other.type)
                 {
-                    return ((int)value) * ((int)other.value);
+                    case ConstantType.Integer | ConstantType.Integer:
+                        return ((int)value) * ((int)other.value);
+                    case ConstantType.Double | ConstantType.Double:
+                        return ((double)value) * ((double)other.value);
+                    case ConstantType.Integer | ConstantType.Double:
+                        return GetDouble() * other.GetDouble();
+                    default:
+                        throw new NotSupportedException();
                 }
-                else if (type == ConstantType.Double && other.type == ConstantType.Double)
-                {
-                    return ((double)value) * ((double)other.value);
-                }
-                else if (type == ConstantType.Integer && other.type == ConstantType.Double)
-                {
-                    return ((int)value) * ((double)other.value);
-                }
-                else if (type == ConstantType.Double && other.type == ConstantType.Integer)
-                {
-                    return ((double)value) * ((int)other.value);
-                }
-                else throw new NotSupportedException();
+            }
+            else if (Other.NodeType == ExpressionType.Matrix)
+            {
+                return new MatrixExpression(GetDouble() * (Other as MatrixExpression).Data);
             }
             else
                 throw new ArithmeticException();
         }
-
         public Expression Divide(Expression Other)
         {
             if (Other.NodeType == ExpressionType.Constant)
             {
                 var other = Other as ConstantExpression;
-                if (type == ConstantType.Integer && other.type == ConstantType.Integer)
+                switch (type | other.type)
                 {
-                    return ((int)value) / ((int)other.value);
+                    case ConstantType.Integer | ConstantType.Integer:
+                        return ((int)value) / ((int)other.value);
+                    case ConstantType.Double | ConstantType.Double:
+                        return ((double)value) / ((double)other.value);
+                    case ConstantType.Integer | ConstantType.Double:
+                        return GetDouble() / other.GetDouble();
+                    default:
+                        throw new NotSupportedException();
                 }
-                else if (type == ConstantType.Double && other.type == ConstantType.Double)
-                {
-                    return ((double)value) / ((double)other.value);
-                }
-                else if (type == ConstantType.Integer && other.type == ConstantType.Double)
-                {
-                    return ((int)value) / ((double)other.value);
-                }
-                else if (type == ConstantType.Double && other.type == ConstantType.Integer)
-                {
-                    return ((double)value) / ((int)other.value);
-                }
-                else throw new NotSupportedException();
+            }
+            else if (Other.NodeType == ExpressionType.Matrix)
+            {
+                return new MatrixExpression(GetDouble() / (Other as MatrixExpression).Data);
             }
             else
                 throw new ArithmeticException();
@@ -195,33 +207,41 @@ namespace Cygnus.SyntaxTree
             if (Other.NodeType == ExpressionType.Constant)
             {
                 var other = Other as ConstantExpression;
-                if (type == ConstantType.Integer && other.type == ConstantType.Integer)
+                switch (type | other.type)
                 {
-                    return (int)Math.Pow(((int)value), ((int)other.value));
+                    case ConstantType.Integer | ConstantType.Integer:
+                        return (int)Math.Pow((int)value, (int)other.value);
+                    case ConstantType.Double | ConstantType.Double:
+                        return Math.Pow(((double)value), ((double)other.value));
+                    case ConstantType.Integer | ConstantType.Double:
+                        return Math.Pow(GetDouble(), other.GetDouble());
+                    default:
+                        throw new NotSupportedException();
                 }
-                else if (type == ConstantType.Double && other.type == ConstantType.Double)
-                {
-                    return Math.Pow(((double)value), ((double)other.value));
-                }
-                else if (type == ConstantType.Integer && other.type == ConstantType.Double)
-                {
-                    return Math.Pow((int)value, (double)other.value);
-                }
-                else if (type == ConstantType.Double && other.type == ConstantType.Integer)
-                {
-                    return Math.Pow(((double)value), ((int)other.value));
-                }
-                else throw new NotSupportedException();
             }
             else
                 throw new ArithmeticException();
         }
+
+        public IEnumerator<Expression> GetEnumerator()
+        {
+            (constantType == ConstantType.String).OrThrows<NotSupportedException>(constantType.ToString());
+            foreach (var item in Value as string)
+                yield return item.ToString();
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            yield return this.AsEnumerable();
+        }
     }
-    public enum ConstantType
+    public enum ConstantType : byte
     {
-        Integer, Double,
-        String, Char,
-        Void, Null,
-        Boolean,
+        Integer = 1,
+        Double = 2,
+        Boolean = 4,
+        Char = 8,
+        String = 16,
+        Void = 32,
+        Null = 64,
     }
 }

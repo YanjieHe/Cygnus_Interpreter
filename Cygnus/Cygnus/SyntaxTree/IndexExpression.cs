@@ -42,6 +42,8 @@ namespace Cygnus.SyntaxTree
                 case ExpressionType.Array:
                 case ExpressionType.List:
                 case ExpressionType.Dictionary:
+                case ExpressionType.Matrix:
+                case ExpressionType.MatrixRow:
                     return Expr as IIndexable;
                 case ExpressionType.Parameter:
                 case ExpressionType.Call:

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MathNet.Numerics.LinearAlgebra;
 namespace Cygnus.SyntaxTree
 {
     public abstract class Expression : IEquatable<Expression>
@@ -23,6 +24,10 @@ namespace Cygnus.SyntaxTree
         {
             return new ConstantExpression(value, ConstantType.Boolean);
         }
+        public static implicit operator Expression(Matrix<double> Data)
+        {
+            return new MatrixExpression(Data);
+        }
         public static ConstantExpression Constant(object obj, ConstantType constantType)
         {
             return new ConstantExpression(obj, constantType);
@@ -42,6 +47,10 @@ namespace Cygnus.SyntaxTree
         public static DictionaryExpression Dictionary(Dictionary<ConstantExpression, Expression> dict)
         {
             return new DictionaryExpression(dict);
+        }
+        public static TableExpression Table(KeyValuePair<string, Expression> kvps)
+        {
+            return new TableExpression(kvps);
         }
         public static CallExpression Call(string Name, params Expression[] Arguments)
         {
@@ -79,41 +88,29 @@ namespace Cygnus.SyntaxTree
         {
             return GetValue<ConstantExpression>(ExpressionType.Constant, scope);
         }
-        public Expression[] AsArray(Scope scope)
+        public ArrayExpression AsArray(Scope scope)
         {
-            return GetValue<ArrayExpression>(ExpressionType.Array, scope).Values;
+            return GetValue<ArrayExpression>(ExpressionType.Array, scope);
         }
-        public List<Expression> AsList(Scope scope)
+        public ListExpression AsList(Scope scope)
         {
-            return GetValue<ListExpression>(ExpressionType.List, scope).Values;
+            return GetValue<ListExpression>(ExpressionType.List, scope);
         }
-        public Dictionary<ConstantExpression, Expression> AsDictionary(Scope scope)
+        public DictionaryExpression AsDictionary(Scope scope)
         {
-            return GetValue<DictionaryExpression>(ExpressionType.Dictionary, scope).Dict;
+            return GetValue<DictionaryExpression>(ExpressionType.Dictionary, scope);
         }
-        public Expression From(object obj)
+        public TableExpression AsTable(Scope scope)
         {
-            return new ConstantExpression(obj);
+            return GetValue<TableExpression>(ExpressionType.Table, scope);
         }
-        public ArrayExpression From(object[] objs)
+        public CallExpression AsCall(Scope scope)
         {
-            int n = objs.Length;
-            var arr = new Expression[n];
-            for (int i = 0; i < n; i++)
-            {
-                arr[i] = From(objs[i]);
-            }
-            return new ArrayExpression(arr);
+            return GetValue<CallExpression>(ExpressionType.Call, scope);
         }
-        public ListExpression From(List<object> objs)
+        public MatrixExpression AsMatrix(Scope scope)
         {
-            int n = objs.Count;
-            var list = new List<Expression>(n);
-            foreach (var item in objs)
-            {
-                list.Add(From(item));
-            }
-            return new ListExpression(list);
+            return GetValue<MatrixExpression>(ExpressionType.Matrix, scope);
         }
         public Expression GetValue(Scope scope)
         {
@@ -150,33 +147,6 @@ namespace Cygnus.SyntaxTree
                     throw new NotSupportedException(string.Format("expected {0} get {1}", expressionType, ToString()));
             }
         }
-        public object GetObjectValue(Scope scope)
-        {
-            switch (NodeType)
-            {
-                case ExpressionType.Constant:
-                    return (this as ConstantExpression).Value;
-                case ExpressionType.Parameter:
-                    return (this as ParameterExpression).Eval(scope).GetObjectValue(scope);
-                case ExpressionType.Binary:
-                case ExpressionType.Unary:
-                    return this.Eval(scope).GetObjectValue(scope);
-                case ExpressionType.Index:
-                    return (this as IndexExpression).Eval(scope).GetObjectValue(scope);
-                case ExpressionType.Array:
-                    return (this as ArrayExpression).Values.ToArray();
-                case ExpressionType.List:
-                    return (this as ListExpression).Values.ToList();
-                case ExpressionType.Dictionary:
-                    return (this as DictionaryExpression).Dict;
-                case ExpressionType.Return:
-                    return (this as ReturnExpression).expression.Eval(scope).GetObjectValue(scope);
-                case ExpressionType.Call:
-                    return (this as CallExpression).Eval(scope).GetObjectValue(scope);
-                default:
-                    throw new NotSupportedException(ToString());
-            }
-        }
         public bool IsVoid(Scope scope)
         {
             switch (NodeType)
@@ -203,6 +173,7 @@ namespace Cygnus.SyntaxTree
                 case ExpressionType.List:
                 case ExpressionType.Dictionary:
                 case ExpressionType.IEnumerable:
+                case ExpressionType.Constant:
                     return this as IEnumerable<Expression>;
                 case ExpressionType.Return:
                     return (this as ReturnExpression).expression.Eval(scope).GetIEnumrableList(scope);
@@ -212,6 +183,10 @@ namespace Cygnus.SyntaxTree
                 default:
                     throw new NotSupportedException(NodeType.ToString());
             }
+        }
+        public virtual void Display()
+        {
+            Console.Write(ToString());
         }
         public override bool Equals(object obj)
         {
@@ -253,5 +228,6 @@ namespace Cygnus.SyntaxTree
         Parameter, Function, Array, List, Dictionary,
         Index, Return, ForEach, IEnumerable, Call,
         Table, IList, KeyValuePair, Continue, CSharpObject,
+        Matrix, MatrixRow,
     }
 }
