@@ -35,9 +35,9 @@ namespace Cygnus.SyntaxTree
                 case Operator.Power:
                     return ArithemeticOp(Left, Right, Op, scope);
                 case Operator.And:
-                    return Left.Eval(scope).As<bool>(scope) && Right.Eval(scope).As<bool>(scope);
+                    return Left.As<bool>(scope) && Right.As<bool>(scope);
                 case Operator.Or:
-                    return Left.Eval(scope).As<bool>(scope) || Right.Eval(scope).As<bool>(scope);
+                    return Left.As<bool>(scope) || Right.As<bool>(scope);
                 case Operator.Less:
                 case Operator.Greater:
                 case Operator.LessOrEquals:
@@ -66,16 +66,11 @@ namespace Cygnus.SyntaxTree
             var right = RightOperand.AsConstant(scope);
             switch (op)
             {
-                case Operator.Add:
-                    return Add(left.type | right.type, left, right);
-                case Operator.Subtract:
-                    return Subtract(left.type | right.type, left, right);
-                case Operator.Multiply:
-                    return Multiply(left.type | right.type, left, right);
-                case Operator.Divide:
-                    return Divide(left.type | right.type, left, right);
-                case Operator.Power:
-                    return Power(left.type | right.type, left, right);
+                case Operator.Add: return Add(left.type | right.type, left, right);
+                case Operator.Subtract: return Subtract(left.type | right.type, left, right);
+                case Operator.Multiply: return Multiply(left.type | right.type, left, right);
+                case Operator.Divide: return Divide(left.type | right.type, left, right);
+                case Operator.Power: return Power(left.type | right.type, left, right);
                 default:
                     throw new NotSupportedException();
             }
@@ -87,38 +82,43 @@ namespace Cygnus.SyntaxTree
             var cmp = Compare(left.type | right.type, left, right);
             switch (op)
             {
-                case Operator.Less:
-                    return cmp < 0;
-                case Operator.Greater:
-                    return cmp > 0;
-                case Operator.LessOrEquals:
-                    return cmp <= 0;
-                case Operator.GreaterOrEquals:
-                    return cmp >= 0;
+                case Operator.Less: return cmp < 0;
+                case Operator.Greater: return cmp > 0;
+                case Operator.LessOrEquals: return cmp <= 0;
+                case Operator.GreaterOrEquals: return cmp >= 0;
                 default:
                     throw new NotSupportedException();
             }
-        }
-        private static Expression EqualsOp(ConstantType DataType, ConstantExpression LeftOperand, ConstantExpression RightOperand)
-        {
-            throw new NotImplementedException();
         }
         private static Expression Add(ConstantType DataType, ConstantExpression LeftOperand, ConstantExpression RightOperand)
         {
             switch (DataType)
             {
+                /* Integer and Double */
                 case ConstantType.Integer | ConstantType.Integer:
                     return LeftOperand.GetStruct<int>() + RightOperand.GetStruct<int>();
                 case ConstantType.Integer | ConstantType.Double:
                     return LeftOperand.GetDouble() + RightOperand.GetDouble();
                 case ConstantType.Double | ConstantType.Double:
                     return LeftOperand.GetStruct<double>() + RightOperand.GetStruct<double>();
+                /* String */
                 case ConstantType.String | ConstantType.Integer:
                 case ConstantType.String | ConstantType.Double:
                 case ConstantType.String | ConstantType.Boolean:
                 case ConstantType.String | ConstantType.String:
+                case ConstantType.String | ConstantType.Vector:
                 case ConstantType.String | ConstantType.Matrix:
                     return LeftOperand.GetClass<string>() + RightOperand.GetClass<string>();
+                /* Vector */
+                case ConstantType.Vector | ConstantType.Vector:
+                    return LeftOperand.GetClass<Vector<double>>() + RightOperand.GetClass<Vector<double>>();
+                case ConstantType.Vector | ConstantType.Integer:
+                case ConstantType.Vector | ConstantType.Double:
+                    if (LeftOperand.type == ConstantType.Vector)
+                        return LeftOperand.GetClass<Vector<double>>() + RightOperand.GetDouble();
+                    else
+                        return LeftOperand.GetDouble() + RightOperand.GetClass<Vector<double>>();
+                /* Matrix */
                 case ConstantType.Matrix | ConstantType.Matrix:
                     return LeftOperand.GetClass<Matrix<double>>() + RightOperand.GetClass<Matrix<double>>();
                 case ConstantType.Matrix | ConstantType.Integer:
@@ -135,12 +135,23 @@ namespace Cygnus.SyntaxTree
         {
             switch (DataType)
             {
+                /* Integer and Double */
                 case ConstantType.Integer | ConstantType.Integer:
                     return LeftOperand.GetStruct<int>() - RightOperand.GetStruct<int>();
                 case ConstantType.Integer | ConstantType.Double:
                     return LeftOperand.GetDouble() - RightOperand.GetDouble();
                 case ConstantType.Double | ConstantType.Double:
                     return LeftOperand.GetStruct<double>() - RightOperand.GetStruct<double>();
+                /* Vector */
+                case ConstantType.Vector | ConstantType.Vector:
+                    return LeftOperand.GetClass<Vector<double>>() - RightOperand.GetClass<Vector<double>>();
+                case ConstantType.Vector | ConstantType.Integer:
+                case ConstantType.Vector | ConstantType.Double:
+                    if (LeftOperand.type == ConstantType.Vector)
+                        return LeftOperand.GetClass<Vector<double>>() - RightOperand.GetDouble();
+                    else
+                        return LeftOperand.GetDouble() - RightOperand.GetClass<Vector<double>>();
+                /* Matrix */
                 case ConstantType.Matrix | ConstantType.Matrix:
                     return LeftOperand.GetClass<Matrix<double>>() - RightOperand.GetClass<Matrix<double>>();
                 case ConstantType.Matrix | ConstantType.Integer:
@@ -157,12 +168,23 @@ namespace Cygnus.SyntaxTree
         {
             switch (DataType)
             {
+                /* Integer and Double */
                 case ConstantType.Integer | ConstantType.Integer:
                     return LeftOperand.GetStruct<int>() * RightOperand.GetStruct<int>();
                 case ConstantType.Integer | ConstantType.Double:
                     return LeftOperand.GetDouble() * RightOperand.GetDouble();
                 case ConstantType.Double | ConstantType.Double:
                     return LeftOperand.GetStruct<double>() * RightOperand.GetStruct<double>();
+                /* Vector */
+                case ConstantType.Vector | ConstantType.Vector:
+                    return LeftOperand.GetClass<Vector<double>>().PointwiseMultiply((RightOperand.GetClass<Vector<double>>()));
+                case ConstantType.Vector | ConstantType.Integer:
+                case ConstantType.Vector | ConstantType.Double:
+                    if (LeftOperand.type == ConstantType.Vector)
+                        return LeftOperand.GetClass<Vector<double>>() * RightOperand.GetDouble();
+                    else
+                        return LeftOperand.GetDouble() * RightOperand.GetClass<Vector<double>>();
+                /* Matrix */
                 case ConstantType.Matrix | ConstantType.Matrix:
                     return LeftOperand.GetClass<Matrix<double>>() * RightOperand.GetClass<Matrix<double>>();
                 case ConstantType.Matrix | ConstantType.Integer:
@@ -179,12 +201,23 @@ namespace Cygnus.SyntaxTree
         {
             switch (DataType)
             {
+                /* Integer and Double */
                 case ConstantType.Integer | ConstantType.Integer:
                     return LeftOperand.GetStruct<int>() / RightOperand.GetStruct<int>();
                 case ConstantType.Integer | ConstantType.Double:
                     return LeftOperand.GetDouble() / RightOperand.GetDouble();
                 case ConstantType.Double | ConstantType.Double:
                     return LeftOperand.GetStruct<double>() / RightOperand.GetStruct<double>();
+                /* Vector */
+                case ConstantType.Vector | ConstantType.Vector:
+                    return LeftOperand.GetClass<Vector<double>>() / RightOperand.GetClass<Vector<double>>();
+                case ConstantType.Vector | ConstantType.Integer:
+                case ConstantType.Vector | ConstantType.Double:
+                    if (LeftOperand.type == ConstantType.Vector)
+                        return LeftOperand.GetClass<Vector<double>>() / RightOperand.GetDouble();
+                    else
+                        return LeftOperand.GetDouble() / RightOperand.GetClass<Vector<double>>();
+                /* Matrix */
                 case ConstantType.Matrix | ConstantType.Matrix:
                     return LeftOperand.GetClass<Matrix<double>>() * (RightOperand.GetClass<Matrix<double>>().Inverse());
                 case ConstantType.Matrix | ConstantType.Integer:
@@ -207,6 +240,14 @@ namespace Cygnus.SyntaxTree
                     return Math.Pow(LeftOperand.GetDouble(), RightOperand.GetDouble());
                 case ConstantType.Double | ConstantType.Double:
                     return Math.Pow(LeftOperand.GetStruct<double>(), RightOperand.GetStruct<double>());
+                /* Vector */
+                case ConstantType.Vector | ConstantType.Integer:
+                case ConstantType.Vector | ConstantType.Double:
+                    if (LeftOperand.type == ConstantType.Vector)
+                        return LeftOperand.GetClass<Vector<double>>().PointwisePower(RightOperand.GetDouble());
+                    else
+                        goto default;
+                /* Matrix */
                 case ConstantType.Matrix | ConstantType.Integer:
                     (LeftOperand.type == ConstantType.Matrix).OrThrows<NotSupportedException>();
                     return LeftOperand.GetClass<Matrix<double>>().Power(RightOperand.GetStruct<int>());

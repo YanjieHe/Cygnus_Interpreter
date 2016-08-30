@@ -172,6 +172,7 @@ namespace Cygnus.SyntaxAnalyzer
             var stack = new Stack<TokenType>();
             if (array[start].tokenType == TokenType.While)
             {
+                While_Position = start;
                 Do_Position = FindTokenType(While_Position + 1, end, TokenType.Do);
 
                 if (Do_Position < 0)

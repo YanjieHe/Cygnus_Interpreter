@@ -10,6 +10,8 @@ using Cygnus.SyntaxAnalyzer;
 using Cygnus.Errors;
 using Cygnus.Executors;
 using System.IO;
+using Cygnus.Settings;
+using Utility = Cygnus.Extensions.UtilityFunctions;
 namespace Cygnus.Libraries
 {
     public static class BuiltInFunctions
@@ -17,7 +19,7 @@ namespace Cygnus.Libraries
         public static Expression Print(Expression[] args, Scope scope)
         {
             var obj = args.Single().GetValue(scope);
-            obj.Display();
+            obj.Display(scope);
             Console.WriteLine();
             return Expression.Void();
         }
@@ -57,6 +59,11 @@ namespace Cygnus.Libraries
             return new TableExpression(args.Cast<ParameterExpression>()
                 .Select(i => new KeyValuePair<string, Expression>(i.Name, Expression.Null())).ToArray());
         }
+        public static Expression InitVector(Expression[] args, Scope scope)
+        {
+            var values = args.Map(i => i.AsConstant(scope).GetDouble());
+            return new VectorExpression(values);
+        }
         public static Expression InitMatrix(Expression[] args, Scope scope)
         {
             var rows = new double[args.Length][];
@@ -73,34 +80,12 @@ namespace Cygnus.Libraries
         public static Expression Import(Expression[] args, Scope scope)
         {
             (args.Length == 2).OrThrows<ParameterException>();
-            var path = GetFilePath(args[0].AsString(scope));
+            var path = Utility.GetFilePath(Directory.GetCurrentDirectory(), args[0].AsString(scope));
             var info = args[1].AsString(scope);//Namespace.Class
             new CSharpAssembly(path, info).Import();
             return Expression.Void();
         }
-        private static string GetFilePath(string path)
-        {
-            if (!Path.IsPathRooted(path))
-            {
-                var file = path;
-                path = SearchFile(Directory.GetCurrentDirectory(), file);
-                if (path == null)
-                    throw new DirectoryNotFoundException(file);
-            }
-            return path;
-        }
-        private static string SearchFile(string path, string file)
-        {
-            foreach (var f in Directory.EnumerateFiles(path))
-                if (Path.GetFileName(f) == file)
-                    return f;
-            foreach (var folder in Directory.EnumerateDirectories(path))
-            {
-                var result = SearchFile(folder, file);
-                if (result != null) return result;
-            }
-            return null;
-        }
+
         public static Expression SetParent(Expression[] args, Scope scope)
         {
             (args.Length == 2).OrThrows<ParameterException>();
@@ -154,27 +139,20 @@ namespace Cygnus.Libraries
         public static Expression ExecuteFile(Expression[] args, Scope scope)
         {
             (args.Length == 1 || args.Length == 2).OrThrows<ParameterException>();
-            var FilePath = GetFilePath(args[0].AsString(scope));
-            var encoding = args.Length == 2 ? GetEncoding(args[1].AsString(scope)) : Encoding.Default;
+            var FilePath = Utility.GetFilePath(WorkSpace.CurrentWorkSpace, args[0].AsString(scope));
+            var encoding = args.Length == 2 ? Utility.GetEncoding(args[1].AsString(scope)) : Encoding.Default;
             return new ExecuteFromFile(FilePath, encoding, scope).Run();
         }
-        private static Encoding GetEncoding(string encoding)
+        public static Expression GetWorkingDirectory(Expression[] args, Scope scope)
         {
-            switch (encoding)
-            {
-                case "default":
-                    return Encoding.Default;
-                case "utf-8":
-                case "utf8":
-                    return Encoding.UTF8;
-                case "unicode":
-                    return Encoding.Unicode;
-                case "ascii":
-                    return Encoding.ASCII;
-                default:
-                    return Encoding.GetEncoding(encoding);
-            }
+            return WorkSpace.CurrentWorkSpace;
         }
+        public static Expression SetWorkingDirectory(Expression[] args, Scope scope)
+        {
+            WorkSpace.CurrentWorkSpace = args.Single().AsString(scope);
+            return Expression.Void();
+        }
+
         public static Expression Scan(Expression[] args, Scope scope)
         {
             (args.Length == 0 || args.Length == 1).OrThrows<ParameterException>();

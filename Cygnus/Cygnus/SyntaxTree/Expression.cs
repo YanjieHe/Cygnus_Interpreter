@@ -25,6 +25,10 @@ namespace Cygnus.SyntaxTree
         {
             return new ConstantExpression(value, ConstantType.Boolean);
         }
+        public static implicit operator Expression(Vector<double> Data)
+        {
+            return new VectorExpression(Data);
+        }
         public static implicit operator Expression(Matrix<double> Data)
         {
             return new MatrixExpression(Data);
@@ -45,7 +49,7 @@ namespace Cygnus.SyntaxTree
         {
             return new DictionaryExpression(dict);
         }
-        public static TableExpression Table(KeyValuePair<string, Expression> kvps)
+        public static TableExpression Table(params KeyValuePair<string, Expression>[] kvps)
         {
             return new TableExpression(kvps);
         }
@@ -107,7 +111,7 @@ namespace Cygnus.SyntaxTree
         }
         public MatrixExpression AsMatrix(Scope scope)
         {
-            return GetValue<MatrixExpression>(ExpressionType.Matrix, scope);
+            return GetValue<ConstantExpression>(ExpressionType.Constant, scope) as MatrixExpression;
         }
         public Expression GetValue(Scope scope)
         {
@@ -157,9 +161,9 @@ namespace Cygnus.SyntaxTree
             (value is IEnumerable<Expression>).OrThrows<NotSupportedException>(NodeType.ToString());
             return value as IEnumerable<Expression>;
         }
-        public virtual void Display()
+        public virtual void Display(Scope scope)
         {
-            Console.Write(ToString());
+            Console.Write(Eval(scope).ToString());
         }
         public override bool Equals(object obj)
         {

@@ -15,13 +15,6 @@ namespace Cygnus.SyntaxTree
         {
             Value = DenseMatrix.OfRowArrays(rows);
         }
-        public override ExpressionType NodeType
-        {
-            get
-            {
-                return ExpressionType.Matrix;
-            }
-        }
         public ConstantExpression Length
         {
             get

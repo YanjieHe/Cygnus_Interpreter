@@ -54,9 +54,13 @@ namespace Cygnus.SyntaxTree
             foreach (var kvp in Dict)
                 yield return new KeyValuePairExpression(kvp);
         }
-        public override void Display()
+        public override void Display(Scope scope)
         {
-            Dict.Select(i => new KeyValuePairExpression(i)).DisplayList();
+            foreach (var key in Dict.Keys)
+            {
+                Dict[key] = Dict[key].Eval(scope);
+            }
+            Dict.Select(i => new KeyValuePairExpression(i)).DisplayList(scope);
         }
         public bool Equals(DictionaryExpression other)
         {

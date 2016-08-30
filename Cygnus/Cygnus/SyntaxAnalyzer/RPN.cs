@@ -196,7 +196,6 @@ namespace Cygnus.SyntaxAnalyzer
                 case Operator.LeftParenthesis:
                 case Operator.Call: return 0;
                 case Operator.LeftBrace:
-                case Operator.LeftBracket:
                 case Operator.Comma: return 1;
                 case Operator.Assgin: return 2;
                 case Operator.Or: return 3;
@@ -217,6 +216,7 @@ namespace Cygnus.SyntaxAnalyzer
                 case Operator.Not: return 10;
                 case Operator.Dot:
                 case Operator.RightBrace:
+                case Operator.LeftBracket:
                 case Operator.RightBracket:
                 case Operator.RightParenthesis: return 11;
                 default:

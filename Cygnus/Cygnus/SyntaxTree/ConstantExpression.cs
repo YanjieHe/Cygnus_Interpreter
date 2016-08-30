@@ -26,7 +26,7 @@ namespace Cygnus.SyntaxTree
         {
             this.type = type;
         }
-        public override void Display()
+        public override void Display(Scope scope)
         {
             Console.Write(Value ?? "Null");
         }
@@ -66,6 +66,8 @@ namespace Cygnus.SyntaxTree
                 else
                     return Value.Equals(other.Value);
             }
+            else if ((type | other.type) == (ConstantType.Integer | ConstantType.Double))
+                return GetDouble().Equals(GetDouble());
             else
                 return false;
         }

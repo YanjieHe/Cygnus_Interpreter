@@ -25,14 +25,14 @@ namespace Cygnus.Extensions
             for (int i = start; i <= end; i++)
                 yield return array[i];
         }
-        public static void DisplayList<T>(this IEnumerable<T> objs) where T : Expression
+        public static void DisplayList<T>(this IEnumerable<T> objs,Scope scope) where T : Expression
         {
             Console.Write("{ ");
             using (var obj = objs.GetEnumerator())
                 if (obj.MoveNext())
                     while (true)
                     {
-                        obj.Current.Display();
+                        obj.Current.Display(scope);
                         if (obj.MoveNext())
                             Console.Write(", ");
                         else break;

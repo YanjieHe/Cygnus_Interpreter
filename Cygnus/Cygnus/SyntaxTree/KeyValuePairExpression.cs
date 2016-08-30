@@ -19,10 +19,10 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.KeyValuePair;
             }
         }
-        public override void Display()
+        public override void Display(Scope scope)
         {
-            Console.Write('['); keyValuePair.Key.Display();
-            Console.Write(", "); keyValuePair.Value.Display();
+            Console.Write('['); keyValuePair.Key.Display(scope);
+            Console.Write(", "); keyValuePair.Value.Display(scope);
             Console.Write(']');
         }
         public Expression this[string Name]

@@ -106,6 +106,7 @@ namespace Cygnus.SyntaxTree
               ["list"] = BuiltInFunctions.InitList,
               ["dict"] = BuiltInFunctions.InitDictionary,
               ["table"] = BuiltInFunctions.InitTable,
+              ["vector"] = BuiltInFunctions.InitVector,
               ["matrix"] = BuiltInFunctions.InitMatrix,
               ["setparent"] = BuiltInFunctions.SetParent,
               ["length"] = BuiltInFunctions.Length,
@@ -116,6 +117,8 @@ namespace Cygnus.SyntaxTree
               ["scan"] = BuiltInFunctions.Scan,
               ["range"] = BuiltInFunctions.Range,
               ["scope"] = BuiltInFunctions.DisplayScope,
+              ["getwd"] = BuiltInFunctions.GetWorkingDirectory,
+              ["setwd"] = BuiltInFunctions.SetWorkingDirectory,
               ["exit"] = BuiltInFunctions.Exit,
 
               /***************     List functions     ***************/

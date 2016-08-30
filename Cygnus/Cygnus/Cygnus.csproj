@@ -63,6 +63,7 @@
     <Compile Include="Executors\InterpreterExecutor.cs" />
     <Compile Include="Extensions\ConsoleExtension.cs" />
     <Compile Include="Extensions\ExpressionExtension.cs" />
+    <Compile Include="Extensions\UtilityFunctions.cs" />
     <Compile Include="LexicalAnalyzer\ControlStatement.cs" />
     <Compile Include="LexicalAnalyzer\FuncTuple.cs" />
     <Compile Include="LexicalAnalyzer\Operator.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Libraries\MatrixFunctions.cs" />
     <Compile Include="Libraries\StringFunctions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings\WorkSpace.cs" />
     <Compile Include="SymbolTable\BuiltInMethodTable.cs" />
     <Compile Include="SymbolTable\FunctionTable.cs" />
     <Compile Include="SyntaxTree\IAssignable.cs" />
@@ -117,6 +119,7 @@
     <Compile Include="SyntaxTree\ReturnExpression.cs" />
     <Compile Include="SyntaxTree\TreeViewer.cs" />
     <Compile Include="SyntaxTree\UnaryExpression.cs" />
+    <Compile Include="SyntaxTree\VectorExpression.cs" />
     <Compile Include="SyntaxTree\WhileExpression.cs" />
   </ItemGroup>
   <ItemGroup>

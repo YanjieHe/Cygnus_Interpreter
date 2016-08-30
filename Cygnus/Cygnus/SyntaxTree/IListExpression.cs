@@ -58,9 +58,13 @@ namespace Cygnus.SyntaxTree
         {
             return GetEnumerator();
         }
-        public override void Display()
+        public override void Display(Scope scope)
         {
-            Values.DisplayList();
+            for (int i = 0; i < Values.Count; i++)
+            {
+                Values[i] = Values[i].Eval(scope);
+            }
+            Values.DisplayList(scope);
         }
         public bool Equals(IListExpression<T> other)
         {
