@@ -54,5 +54,10 @@ namespace Cygnus.Extensions
             if (!Condition)
                 throw (T)Activator.CreateInstance(typeof(T), ErrorText);
         }
+        public static void OrThrows<T>(this bool Condition, string ErrorText, params object[] args) where T : Exception, new()
+        {
+            if (!Condition)
+                throw (T)Activator.CreateInstance(typeof(T), ErrorText, args);
+        }
     }
 }

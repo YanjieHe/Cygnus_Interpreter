@@ -8,10 +8,13 @@ using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace Cygnus.SyntaxTree
 {
-    public class MatrixExpression : Expression, IComputable,IIndexable
+    public class MatrixExpression : ConstantExpression, IIndexable, ITable
     {
-        public Matrix<double> Data { get; private set; }
-
+        public MatrixExpression(Matrix<double> Data) : base(Data, ConstantType.Matrix) { }
+        public MatrixExpression(params double[][] rows) : base(ConstantType.Matrix)
+        {
+            Value = DenseMatrix.OfRowArrays(rows);
+        }
         public override ExpressionType NodeType
         {
             get
@@ -19,10 +22,30 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.Matrix;
             }
         }
-
         public ConstantExpression Length
         {
             get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public Expression this[string Name]
+        {
+            get
+            {
+                switch (Name)
+                {
+                    case "rowcount":
+                        return (Value as Matrix<double>).RowCount;
+                    case "colcount":
+                        return (Value as Matrix<double>).ColumnCount;
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+
+            set
             {
                 throw new NotImplementedException();
             }
@@ -33,7 +56,7 @@ namespace Cygnus.SyntaxTree
             get
             {
                 int row = index.As<int>(scope);
-                return new MatrixRowExpression(Data, row);
+                return new MatrixRowExpression(Value as Matrix<double>, row);
             }
 
             set
@@ -41,84 +64,9 @@ namespace Cygnus.SyntaxTree
                 throw new NotImplementedException();
             }
         }
-
-        public MatrixExpression(Matrix<double> Data)
-        {
-            this.Data = Data;
-        }
-        public MatrixExpression(params double[][] rows)
-        {
-            Data = DenseMatrix.OfRowArrays(rows);
-        }
-        public override string ToString()
-        {
-            return Data.ToString();
-        }
         public override Expression Eval(Scope scope)
         {
             return this;
-        }
-
-        public Expression Add(Expression Other)
-        {
-            if (Other.NodeType == ExpressionType.Matrix)
-            {
-                return new MatrixExpression(Data + ((Other as MatrixExpression).Data));
-            }
-            else if (Other.NodeType == ExpressionType.Constant)
-            {
-                return new MatrixExpression(Data + ((Other as ConstantExpression).GetDouble()));
-            }
-            else throw new ArgumentException();
-        }
-
-        public Expression Subtract(Expression Other)
-        {
-            if (Other.NodeType == ExpressionType.Matrix)
-            {
-                return new MatrixExpression(Data - ((Other as MatrixExpression).Data));
-            }
-            else if (Other.NodeType == ExpressionType.Constant)
-            {
-                return new MatrixExpression(Data - ((Other as ConstantExpression).GetDouble()));
-            }
-            else throw new ArgumentException();
-        }
-        public Expression Multiply(Expression Other)
-        {
-            if (Other.NodeType == ExpressionType.Matrix)
-            {
-                return new MatrixExpression(Data * ((Other as MatrixExpression).Data));
-            }
-            else if (Other.NodeType == ExpressionType.Constant)
-            {
-                return new MatrixExpression(Data * ((Other as ConstantExpression).GetDouble()));
-            }
-            else throw new ArgumentException();
-        }
-
-        public Expression Divide(Expression Other)
-        {
-            if (Other.NodeType == ExpressionType.Matrix)
-            {
-                return new MatrixExpression(Data * ((Other as MatrixExpression).Data).Inverse());
-            }
-            else if (Other.NodeType == ExpressionType.Constant)
-            {
-                return new MatrixExpression(Data / ((Other as ConstantExpression).GetDouble()));
-            }
-            else throw new ArgumentException();
-        }
-
-        public Expression Power(Expression Other)
-        {
-            if (Other.NodeType == ExpressionType.Constant)
-            {
-                return new MatrixExpression(
-                    Data.Power(
-                        (int)((Other as ConstantExpression).Value)));
-            }
-            else throw new ArgumentException();
         }
     }
 }

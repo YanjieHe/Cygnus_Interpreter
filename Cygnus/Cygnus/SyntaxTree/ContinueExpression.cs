@@ -15,7 +15,6 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.Continue;
             }
         }
-
         public override Expression Eval(Scope scope)
         {
             return this;

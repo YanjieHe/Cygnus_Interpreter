@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cygnus.Extensions;
 using MathNet.Numerics.LinearAlgebra;
 namespace Cygnus.SyntaxTree
 {
@@ -31,10 +32,6 @@ namespace Cygnus.SyntaxTree
         public static ConstantExpression Constant(object obj, ConstantType constantType)
         {
             return new ConstantExpression(obj, constantType);
-        }
-        public static ConstantExpression Constant(object obj)
-        {
-            return new ConstantExpression(obj);
         }
         public static ArrayExpression Array(Expression[] array)
         {
@@ -149,40 +146,16 @@ namespace Cygnus.SyntaxTree
         }
         public bool IsVoid(Scope scope)
         {
-            switch (NodeType)
-            {
-                case ExpressionType.Constant:
-                    return (this as ConstantExpression).constantType == ConstantType.Void;
-                case ExpressionType.Return:
-                    return (this as ReturnExpression).expression.IsVoid(scope);
-                case ExpressionType.Parameter:
-                case ExpressionType.Block:
-                case ExpressionType.Binary:
-                case ExpressionType.Unary:
-                case ExpressionType.Call:
-                    return Eval(scope).IsVoid(scope);
-                default:
-                    return false;
-            }
+            var value = GetValue(scope);
+            if (value is ConstantExpression)
+                return (value as ConstantExpression).type == ConstantType.Void;
+            else return false;
         }
         public IEnumerable<Expression> GetIEnumrableList(Scope scope)
         {
-            switch (NodeType)
-            {
-                case ExpressionType.Array:
-                case ExpressionType.List:
-                case ExpressionType.Dictionary:
-                case ExpressionType.IEnumerable:
-                case ExpressionType.Constant:
-                    return this as IEnumerable<Expression>;
-                case ExpressionType.Return:
-                    return (this as ReturnExpression).expression.Eval(scope).GetIEnumrableList(scope);
-                case ExpressionType.Parameter:
-                case ExpressionType.Call:
-                    return Eval(scope).GetIEnumrableList(scope);
-                default:
-                    throw new NotSupportedException(NodeType.ToString());
-            }
+            var value = GetValue(scope);
+            (value is IEnumerable<Expression>).OrThrows<NotSupportedException>(NodeType.ToString());
+            return value as IEnumerable<Expression>;
         }
         public virtual void Display()
         {
@@ -223,11 +196,12 @@ namespace Cygnus.SyntaxTree
     }
     public enum ExpressionType
     {
-        Constant, Block, Unary, Binary,
+        Constant = 1,
+        Block, Unary, Binary,
         IfThen, IfThenElse, While, Break,
         Parameter, Function, Array, List, Dictionary,
         Index, Return, ForEach, IEnumerable, Call,
         Table, IList, KeyValuePair, Continue, CSharpObject,
-        Matrix, MatrixRow,
+        Matrix, MatrixRow, Computable
     }
 }

@@ -97,14 +97,8 @@ namespace Cygnus.SyntaxAnalyzer
             {
                 IF_Position = start;
                 stack.Push(TokenType.If);
-                for (int i = start + 1; i <= end; i++)
-                {
-                    if (array[i].tokenType == TokenType.Then)
-                    {
-                        Then_Position = i;
-                        break;
-                    }
-                }
+
+                Then_Position = FindTokenType(IF_Position + 1, end, TokenType.Then);
                 if (Then_Position < 0)
                     throw new SyntaxException("Missing 'then'");
                 bool success = false;
@@ -178,22 +172,17 @@ namespace Cygnus.SyntaxAnalyzer
             var stack = new Stack<TokenType>();
             if (array[start].tokenType == TokenType.While)
             {
-                While_Position = start;
-                for (int i = start + 1; i <= end; i++)
-                {
-                    if (array[i].tokenType == TokenType.Do)
-                    {
-                        Do_Position = i;
-                        break;
-                    }
-                }
+                Do_Position = FindTokenType(While_Position + 1, end, TokenType.Do);
+
                 if (Do_Position < 0)
                     throw new SyntaxException("Missing 'do'");
                 FindEnd(Do_Position, ref End_Position, end, ref stack);
+
                 var condition = ParseExpression(Block, While_Position + 1, Do_Position - 1);
                 var body = new BlockExpression(Block);
                 ParseBlock(body, Do_Position + 1, End_Position - 1);
                 Block.Append(new WhileExpression(condition, body));
+
                 EndIndex = End_Position;
             }
             else throw new ArgumentException();
@@ -214,22 +203,18 @@ namespace Cygnus.SyntaxAnalyzer
                     In_Position = For_Position + 2;
                 else throw new ArgumentException();
 
-                for (int i = In_Position; i <= end; i++)
-                {
-                    if (array[i].tokenType == TokenType.Do)
-                    {
-                        Do_Position = i;
-                        break;
-                    }
-                }
+                Do_Position = FindTokenType(In_Position + 1, end, TokenType.Do);
                 if (Do_Position < 0)
                     throw new SyntaxException("Missing 'do'");
+
                 FindEnd(Do_Position, ref End_Position, end, ref stack);
+
                 var Iter_List = ParseExpression(Block, In_Position + 1, Do_Position - 1);
                 var body = new BlockExpression(Block);
                 ParseBlock(body, Do_Position + 1, End_Position - 1);
                 var Iter_Variable = new ParameterExpression(array[For_Position + 1].Content as string);
                 Block.Append(new ForEachExpression(Iter_List, body, Iter_Variable));
+
                 EndIndex = End_Position;
             }
             else throw new ArgumentException();
@@ -244,16 +229,11 @@ namespace Cygnus.SyntaxAnalyzer
             if (array[start].tokenType == TokenType.Define)
             {
                 Def_Position = start;
-                for (int i = Def_Position + 1; i <= end; i++)
-                {
-                    if (array[i].tokenType == TokenType.Begin)
-                    {
-                        Begin_Position = i;
-                        break;
-                    }
-                }
+
+                Begin_Position = FindTokenType(Def_Position + 1, end, TokenType.Begin);
                 if (Begin_Position < 0)
                     throw new SyntaxException("Missing 'begin'");
+
                 FindEnd(Begin_Position, ref End_Position, end, ref stack);
                 var body = new BlockExpression(Block);
                 var parameters = array.Slice(Def_Position + 1, Begin_Position - 1);
@@ -314,6 +294,9 @@ namespace Cygnus.SyntaxAnalyzer
                     case TokenType.Integer:
                         stack.Push(new ConstantExpression(item.Content, ConstantType.Integer));
                         break;
+                    case TokenType.Null:
+                        stack.Push(new ConstantExpression(null, ConstantType.Null));
+                        break;
                     case TokenType.UnaryPlus:
                     case TokenType.UnaryMinus:
                     case TokenType.Not:
@@ -362,7 +345,7 @@ namespace Cygnus.SyntaxAnalyzer
                             var tuple = item.Content as FuncTuple;
                             Expression[] arguments = new Expression[tuple.argsCount];
                             for (int i = tuple.argsCount - 1; i >= 0; i--)
-                                arguments[i] = stack.Pop().GetValue(scope);
+                                arguments[i] = stack.Pop();
                             stack.Push(new ArrayExpression(arguments));
                         }
                         break;
@@ -390,9 +373,6 @@ namespace Cygnus.SyntaxAnalyzer
                                 arguments[i] = stack.Pop();
                             stack.Push(new CallExpression(tuple.Name, arguments));
                         }
-                        break;
-                    case TokenType.Null:
-                        stack.Push(new ConstantExpression(null, ConstantType.Null));
                         break;
                     case TokenType.Variable:
                         stack.Push(new ParameterExpression(item.Content as string));
@@ -443,6 +423,7 @@ namespace Cygnus.SyntaxAnalyzer
                             stack.Pop();
                         else if (stack.Peek().tokenType == TokenType.Call)
                             ((FuncTuple)stack.Pop().Content).argsCount = args_stack.Pop();
+                        else throw new ArgumentException();
                         break;
                 }
             }
@@ -500,6 +481,13 @@ namespace Cygnus.SyntaxAnalyzer
                 if (success) break;
             }
             if (!success) throw new SyntaxException("Missing 'end'");
+        }
+        public int FindTokenType(int start, int end, TokenType tokenType)
+        {
+            for (int i = start; i <= end; i++)
+                if (array[i].tokenType == tokenType)
+                    return i;
+            return (-1);
         }
         public static bool IsTerminator(TokenType tokenType)
         {

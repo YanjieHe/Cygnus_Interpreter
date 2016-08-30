@@ -37,14 +37,15 @@ namespace Cygnus.SyntaxTree
             foreach (var line in Children)
             {
                 Result = line.Eval(scope);
-                if (Result.NodeType == ExpressionType.Break)
-                    break;
-                else if (Result.NodeType == ExpressionType.Continue || Result.NodeType == ExpressionType.Return)
-                    return Result;
+                switch (Result.NodeType)
+                {
+                    case ExpressionType.Break:
+                    case ExpressionType.Continue:
+                    case ExpressionType.Return:
+                        return Result;
+                }
             }
-            if (Result == null)
-                return Void();
-            else return Result;
+            return Result ?? Void();
         }
     }
 }

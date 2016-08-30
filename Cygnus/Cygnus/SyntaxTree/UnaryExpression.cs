@@ -1,6 +1,6 @@
 ﻿using System;
 using Cygnus.LexicalAnalyzer;
-
+using MathNet.Numerics.LinearAlgebra;
 namespace Cygnus.SyntaxTree
 {
     public class UnaryExpression : Expression
@@ -29,7 +29,7 @@ namespace Cygnus.SyntaxTree
             if (expression.NodeType == ExpressionType.Constant)
             {
                 var expr = expression as ConstantExpression;
-                switch (expr.constantType)
+                switch (expr.type)
                 {
                     case ConstantType.Integer:
                         if (Op == Operator.UnaryPlus)
@@ -55,9 +55,9 @@ namespace Cygnus.SyntaxTree
             {
                 var expr = expression as MatrixExpression;
                 if (Op == Operator.UnaryPlus)
-                    return new MatrixExpression(+expr.Data);
+                    return new MatrixExpression(+(expr.Value as Matrix<double>));
                 else if (Op == Operator.UnaryMinus)
-                    return new MatrixExpression(-expr.Data);
+                    return new MatrixExpression(-(expr.Value as Matrix<double>));
                 else throw new NotSupportedException();
             }
             else

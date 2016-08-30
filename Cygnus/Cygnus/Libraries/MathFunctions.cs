@@ -7,20 +7,20 @@ namespace Cygnus.Libraries
     {
         public static Expression Exp(Expression[] args, Scope scope)
         {
-            var d = GetDouble(args.Single().AsConstant(scope));
+            var d = args.Single().AsConstant(scope).GetDouble();
             return Math.Exp(d);
         }
         public static Expression Sqrt(Expression[] args, Scope scope)
         {
-            var d = GetDouble(args.Single().AsConstant(scope));
+            var d = args.Single().AsConstant(scope).GetDouble();
             return Math.Sqrt(d);
         }
         public static Expression Abs(Expression[] args, Scope scope)
         {
             var d = args.Single().AsConstant(scope);
-            if (d.constantType == ConstantType.Integer)
+            if (d.type == ConstantType.Integer)
                 return Math.Abs((int)d.Value);
-            else if (d.constantType == ConstantType.Double)
+            else if (d.type == ConstantType.Double)
                 return Math.Abs((double)d.Value);
             else throw new ArgumentException();
         }
@@ -28,13 +28,13 @@ namespace Cygnus.Libraries
         {
             if (args.Length == 1)
             {
-                var d = GetDouble(args[0].GetValue<ConstantExpression>(ExpressionType.Constant, scope));
+                var d = args[0].AsConstant(scope).GetDouble();
                 return Math.Log(d);
             }
             else if (args.Length == 2)
             {
-                var a = GetDouble(args[0].AsConstant(scope));
-                var newBase = GetDouble(args[1].AsConstant(scope));
+                var a = args[0].AsConstant(scope).GetDouble();
+                var newBase = args[1].AsConstant(scope).GetDouble();
                 return Math.Log(a, newBase);
             }
             else throw new ArgumentException();
@@ -48,16 +48,6 @@ namespace Cygnus.Libraries
                 return (a % b);
             }
             else throw new ArgumentException();
-        }
-        public static double GetDouble(ConstantExpression Expr)
-        {
-            switch (Expr.constantType)
-            {
-                case ConstantType.Integer: return (int)Expr.Value;
-                case ConstantType.Double: return (double)Expr.Value;
-                default:
-                    throw new NotSupportedException();
-            }
         }
     }
 }

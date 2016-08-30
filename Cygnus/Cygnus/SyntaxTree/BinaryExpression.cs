@@ -1,6 +1,9 @@
 ﻿using System;
 using Cygnus.LexicalAnalyzer;
-
+using System.Collections.Generic;
+using Cygnus.Extensions;
+using Cygnus.Errors;
+using MathNet.Numerics.LinearAlgebra;
 namespace Cygnus.SyntaxTree
 {
     public class BinaryExpression : Expression
@@ -50,76 +53,175 @@ namespace Cygnus.SyntaxTree
                     throw new NotSupportedException();
             }
             throw new NotSupportedException();
-
         }
         public Expression AssginOp(Expression left, Expression right, Scope scope)
         {
-            switch (left.NodeType)
-            {
-                case ExpressionType.Index:
-                    {
-                        var rvalue = right.Eval(scope);
-                        var lvalue = (IndexExpression)left;
-                        lvalue.SetValue(rvalue, scope);
-                        return left;
-                    }
-                case ExpressionType.Parameter:
-                    {
-                        var rvalue = right.Eval(scope);
-                        ((ParameterExpression)left).Assgin(rvalue, scope);
-                        return left;
-                    }
-                default:
-                    throw new ArgumentException("The left side of the equal-sign cannot be assigned");
-            }
+            (left is IAssignable).OrThrows<ArgumentException>("The left side of the equal-sign cannot be assigned");
+            (left as IAssignable).Assgin(right, scope);
+            return left;
         }
-        public static Expression ArithemeticOp(Expression LeftOperand, Expression RightOperand, Operator op, Scope scope)
-        {
-            var left = LeftOperand.GetValue(scope) as IComputable;
-            var right = RightOperand.GetValue(scope);
-            switch (op)
-            {
-                case Operator.Add:
-                    return left.Add(right);
-                case Operator.Subtract:
-                    return left.Subtract(right);
-                case Operator.Multiply:
-                    return left.Multiply(right);
-                case Operator.Divide:
-                    return left.Divide(right);
-                case Operator.Power:
-                    return left.Power(right);
-                default:
-                    throw new NotSupportedException();
-            }
-        }
-        public static Expression CompareOp(Expression LeftOperand, Expression RightOperand, Operator op, Scope scope)
+        private static Expression ArithemeticOp(Expression LeftOperand, Expression RightOperand, Operator op, Scope scope)
         {
             var left = LeftOperand.AsConstant(scope);
             var right = RightOperand.AsConstant(scope);
-            var cmpLeft = left.Value as IComparable;
-            var cmpRight = right.Value as IComparable;
-            if (cmpLeft == null || cmpRight == null) throw new NotSupportedException();
             switch (op)
             {
-                case Operator.Less:
-                    return cmpLeft.CompareTo(cmpRight) < 0;
-                case Operator.Greater:
-                    return cmpLeft.CompareTo(cmpRight) > 0;
-                case Operator.LessOrEquals:
-                    return cmpLeft.CompareTo(cmpRight) <= 0;
-                case Operator.GreaterOrEquals:
-                    return cmpLeft.CompareTo(cmpRight) >= 0;
+                case Operator.Add:
+                    return Add(left.type | right.type, left, right);
+                case Operator.Subtract:
+                    return Subtract(left.type | right.type, left, right);
+                case Operator.Multiply:
+                    return Multiply(left.type | right.type, left, right);
+                case Operator.Divide:
+                    return Divide(left.type | right.type, left, right);
+                case Operator.Power:
+                    return Power(left.type | right.type, left, right);
                 default:
                     throw new NotSupportedException();
             }
         }
-        public static double GetDouble(ConstantExpression Expr)
+        private static Expression CompareOp(Expression LeftOperand, Expression RightOperand, Operator op, Scope scope)
         {
-            switch (Expr.constantType)
+            var left = LeftOperand.AsConstant(scope);
+            var right = RightOperand.AsConstant(scope);
+            var cmp = Compare(left.type | right.type, left, right);
+            switch (op)
             {
-                case ConstantType.Integer: return (int)Expr.Value;
-                case ConstantType.Double: return (double)Expr.Value;
+                case Operator.Less:
+                    return cmp < 0;
+                case Operator.Greater:
+                    return cmp > 0;
+                case Operator.LessOrEquals:
+                    return cmp <= 0;
+                case Operator.GreaterOrEquals:
+                    return cmp >= 0;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+        private static Expression EqualsOp(ConstantType DataType, ConstantExpression LeftOperand, ConstantExpression RightOperand)
+        {
+            throw new NotImplementedException();
+        }
+        private static Expression Add(ConstantType DataType, ConstantExpression LeftOperand, ConstantExpression RightOperand)
+        {
+            switch (DataType)
+            {
+                case ConstantType.Integer | ConstantType.Integer:
+                    return LeftOperand.GetStruct<int>() + RightOperand.GetStruct<int>();
+                case ConstantType.Integer | ConstantType.Double:
+                    return LeftOperand.GetDouble() + RightOperand.GetDouble();
+                case ConstantType.Double | ConstantType.Double:
+                    return LeftOperand.GetStruct<double>() + RightOperand.GetStruct<double>();
+                case ConstantType.String | ConstantType.Integer:
+                case ConstantType.String | ConstantType.Double:
+                case ConstantType.String | ConstantType.Boolean:
+                case ConstantType.String | ConstantType.String:
+                case ConstantType.String | ConstantType.Matrix:
+                    return LeftOperand.GetClass<string>() + RightOperand.GetClass<string>();
+                case ConstantType.Matrix | ConstantType.Matrix:
+                    return LeftOperand.GetClass<Matrix<double>>() + RightOperand.GetClass<Matrix<double>>();
+                case ConstantType.Matrix | ConstantType.Integer:
+                case ConstantType.Matrix | ConstantType.Double:
+                    if (LeftOperand.type == ConstantType.Matrix)
+                        return LeftOperand.GetClass<Matrix<double>>() + RightOperand.GetDouble();
+                    else
+                        return LeftOperand.GetDouble() + RightOperand.GetClass<Matrix<double>>();
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+        private static Expression Subtract(ConstantType DataType, ConstantExpression LeftOperand, ConstantExpression RightOperand)
+        {
+            switch (DataType)
+            {
+                case ConstantType.Integer | ConstantType.Integer:
+                    return LeftOperand.GetStruct<int>() - RightOperand.GetStruct<int>();
+                case ConstantType.Integer | ConstantType.Double:
+                    return LeftOperand.GetDouble() - RightOperand.GetDouble();
+                case ConstantType.Double | ConstantType.Double:
+                    return LeftOperand.GetStruct<double>() - RightOperand.GetStruct<double>();
+                case ConstantType.Matrix | ConstantType.Matrix:
+                    return LeftOperand.GetClass<Matrix<double>>() - RightOperand.GetClass<Matrix<double>>();
+                case ConstantType.Matrix | ConstantType.Integer:
+                case ConstantType.Matrix | ConstantType.Double:
+                    if (LeftOperand.type == ConstantType.Matrix)
+                        return LeftOperand.GetClass<Matrix<double>>() - RightOperand.GetDouble();
+                    else
+                        return LeftOperand.GetDouble() - RightOperand.GetClass<Matrix<double>>();
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+        private static Expression Multiply(ConstantType DataType, ConstantExpression LeftOperand, ConstantExpression RightOperand)
+        {
+            switch (DataType)
+            {
+                case ConstantType.Integer | ConstantType.Integer:
+                    return LeftOperand.GetStruct<int>() * RightOperand.GetStruct<int>();
+                case ConstantType.Integer | ConstantType.Double:
+                    return LeftOperand.GetDouble() * RightOperand.GetDouble();
+                case ConstantType.Double | ConstantType.Double:
+                    return LeftOperand.GetStruct<double>() * RightOperand.GetStruct<double>();
+                case ConstantType.Matrix | ConstantType.Matrix:
+                    return LeftOperand.GetClass<Matrix<double>>() * RightOperand.GetClass<Matrix<double>>();
+                case ConstantType.Matrix | ConstantType.Integer:
+                case ConstantType.Matrix | ConstantType.Double:
+                    if (LeftOperand.type == ConstantType.Matrix)
+                        return LeftOperand.GetClass<Matrix<double>>() * RightOperand.GetDouble();
+                    else
+                        return LeftOperand.GetDouble() * RightOperand.GetClass<Matrix<double>>();
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+        private static Expression Divide(ConstantType DataType, ConstantExpression LeftOperand, ConstantExpression RightOperand)
+        {
+            switch (DataType)
+            {
+                case ConstantType.Integer | ConstantType.Integer:
+                    return LeftOperand.GetStruct<int>() / RightOperand.GetStruct<int>();
+                case ConstantType.Integer | ConstantType.Double:
+                    return LeftOperand.GetDouble() / RightOperand.GetDouble();
+                case ConstantType.Double | ConstantType.Double:
+                    return LeftOperand.GetStruct<double>() / RightOperand.GetStruct<double>();
+                case ConstantType.Matrix | ConstantType.Matrix:
+                    return LeftOperand.GetClass<Matrix<double>>() * (RightOperand.GetClass<Matrix<double>>().Inverse());
+                case ConstantType.Matrix | ConstantType.Integer:
+                case ConstantType.Matrix | ConstantType.Double:
+                    if (LeftOperand.type == ConstantType.Matrix)
+                        return LeftOperand.GetClass<Matrix<double>>() / RightOperand.GetDouble();
+                    else
+                        return LeftOperand.GetDouble() / RightOperand.GetClass<Matrix<double>>();
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+        private static Expression Power(ConstantType DataType, ConstantExpression LeftOperand, ConstantExpression RightOperand)
+        {
+            switch (DataType)
+            {
+                case ConstantType.Integer | ConstantType.Integer:
+                    return (int)Math.Pow(LeftOperand.GetStruct<int>(), RightOperand.GetStruct<int>());
+                case ConstantType.Integer | ConstantType.Double:
+                    return Math.Pow(LeftOperand.GetDouble(), RightOperand.GetDouble());
+                case ConstantType.Double | ConstantType.Double:
+                    return Math.Pow(LeftOperand.GetStruct<double>(), RightOperand.GetStruct<double>());
+                case ConstantType.Matrix | ConstantType.Integer:
+                    (LeftOperand.type == ConstantType.Matrix).OrThrows<NotSupportedException>();
+                    return LeftOperand.GetClass<Matrix<double>>().Power(RightOperand.GetStruct<int>());
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+        private static int Compare(ConstantType DataType, ConstantExpression LeftOperand, ConstantExpression RightOperand)
+        {
+            if (LeftOperand.type == RightOperand.type)
+                return (LeftOperand.Value as IComparable).CompareTo(RightOperand.Value);
+            switch (DataType)
+            {
+                case ConstantType.Integer | ConstantType.Double:
+                    return LeftOperand.GetDouble().CompareTo(RightOperand.GetDouble());
                 default:
                     throw new NotSupportedException();
             }

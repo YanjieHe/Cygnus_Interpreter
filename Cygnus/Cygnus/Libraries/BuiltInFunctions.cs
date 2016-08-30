@@ -199,6 +199,11 @@ namespace Cygnus.Libraries
             }
             return Expression.Void();
         }
+        public static Expression DisplayScope(Expression[] args, Scope scope)
+        {
+            Console.WriteLine(scope.GlobalScope);
+            return Expression.Void();
+        }
         public static Expression Exit(Expression[] args, Scope scope)
         {
             Environment.Exit(0);

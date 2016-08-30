@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Cygnus.SyntaxTree
 {
-    public class IndexExpression : Expression
+    public class IndexExpression : Expression, IAssignable
     {
         public override ExpressionType NodeType
         {
@@ -19,63 +19,21 @@ namespace Cygnus.SyntaxTree
             this.Index = Index;
             this.indexType = indexType;
         }
-        public void SetValue(Expression value, Scope scope)
-        {
-            switch (indexType)
-            {
-                case IndexType.Bracket:
-                    GetByIndex(ListExpr, scope)[Index.Eval(scope), scope] = value.GetValue(scope);
-                    break;
-                case IndexType.Dot:
-                    ListExpr.GetValue<TableExpression>(ExpressionType.Table, scope)
-                        .Assign((Index as ParameterExpression).Name, value.GetValue(scope));
-                    break;
-                default:
-                    throw new NotSupportedException();
-            }
-        }
         public IIndexable GetByIndex(Expression obj, Scope scope)
         {
-            var Expr = obj.Eval(scope);
-            switch (Expr.NodeType)
-            {
-                case ExpressionType.Array:
-                case ExpressionType.List:
-                case ExpressionType.Dictionary:
-                case ExpressionType.Matrix:
-                case ExpressionType.MatrixRow:
-                    return Expr as IIndexable;
-                case ExpressionType.Parameter:
-                case ExpressionType.Call:
-                case ExpressionType.Binary:
-                case ExpressionType.Unary:
-                case ExpressionType.Index:
-                    return GetByIndex(Expr.Eval(scope), scope);
-                case ExpressionType.Return:
-                    return GetByIndex((Expr as ReturnExpression).expression.Eval(scope), scope);
-                default:
-                    throw new ArgumentException(Expr.ToString() + " Cannot get element by index");
-            }
+            var Expr = obj.GetValue(scope);
+            if (Expr is IIndexable)
+                return Expr as IIndexable;
+            else
+                throw new ArgumentException(Expr.ToString() + " Cannot get element by index");
         }
         public ITable GetByDot(Expression obj, Scope scope)
         {
-            var Expr = obj.Eval(scope);
-            switch (Expr.NodeType)
-            {
-                case ExpressionType.Table:
-                case ExpressionType.KeyValuePair:
-                    return Expr as ITable;
-                case ExpressionType.Parameter:
-                case ExpressionType.Call:
-                case ExpressionType.Binary:
-                case ExpressionType.Unary:
-                case ExpressionType.Index:
-                    return GetByDot(Expr.Eval(scope), scope);
-                case ExpressionType.Return:
-                    return GetByDot((Expr as ReturnExpression).expression.Eval(scope), scope);
-                default:
-                    throw new ArgumentException(Expr.ToString() + " Cannot get element by index");
-            }
+            var Expr = obj.GetValue(scope);
+            if (Expr is ITable)
+                return Expr as ITable;
+            else
+                throw new ArgumentException(Expr.ToString() + " Cannot get element by index");
         }
         public override Expression Eval(Scope scope)
         {
@@ -92,6 +50,20 @@ namespace Cygnus.SyntaxTree
         public override string ToString()
         {
             return string.Format("(Index  Type: {0})", indexType);
+        }
+        public void Assgin(Expression value, Scope scope)
+        {
+            switch (indexType)
+            {
+                case IndexType.Bracket:
+                    GetByIndex(ListExpr, scope)[Index.Eval(scope), scope] = value.GetValue(scope);
+                    break;
+                case IndexType.Dot:
+                    GetByDot(ListExpr, scope)[(Index as ParameterExpression).Name] = value.GetValue(scope);
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
         }
     }
     public enum IndexType

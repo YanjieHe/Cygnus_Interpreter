@@ -43,17 +43,17 @@ namespace Cygnus.Libraries
         }
         public static Expression Mat_Inverse(Expression[] args, Scope scope)
         {
-            return args.Single().AsMatrix(scope).Data.Inverse();
+            return (args.Single().AsMatrix(scope).Value as Matrix<double>).Inverse();
         }
         public static Expression Mat_Dot(Expression[] args, Scope scope)
         {
-            var a = args[0].AsMatrix(scope);
-            var b = args[1].AsMatrix(scope);
-            return a.Data.PointwiseMultiply(b.Data);
+            var a = args[0].AsMatrix(scope).Value as Matrix<double>;
+            var b = args[1].AsMatrix(scope).Value as Matrix<double>;
+            return a.PointwiseMultiply(b);
         }
         public static Expression Mat_Transpose(Expression[] args, Scope scope)
         {
-            return args.Single().AsMatrix(scope).Data.Transpose();
+            return (args.Single().AsMatrix(scope).Value as Matrix<double>).Transpose();
         }
     }
 }

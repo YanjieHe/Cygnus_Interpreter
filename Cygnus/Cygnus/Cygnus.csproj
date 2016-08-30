@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Cygnus</RootNamespace>
     <AssemblyName>Cygnus</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -60,6 +61,7 @@
     <Compile Include="Executors\ExecuteFromString.cs" />
     <Compile Include="Executors\ExecuteInConsole.cs" />
     <Compile Include="Executors\InterpreterExecutor.cs" />
+    <Compile Include="Extensions\ConsoleExtension.cs" />
     <Compile Include="Extensions\ExpressionExtension.cs" />
     <Compile Include="LexicalAnalyzer\ControlStatement.cs" />
     <Compile Include="LexicalAnalyzer\FuncTuple.cs" />
@@ -81,9 +83,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SymbolTable\BuiltInMethodTable.cs" />
     <Compile Include="SymbolTable\FunctionTable.cs" />
+    <Compile Include="SyntaxTree\IAssignable.cs" />
     <Compile Include="SyntaxTree\ContinueExpression.cs" />
     <Compile Include="SyntaxTree\CSharpObjectExpression.cs" />
-    <Compile Include="SyntaxTree\IComputable.cs" />
     <Compile Include="SyntaxTree\IListExpression.cs" />
     <Compile Include="SyntaxTree\IIndexable.cs" />
     <Compile Include="SyntaxTree\ITable.cs" />

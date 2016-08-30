@@ -74,10 +74,8 @@ namespace Cygnus.Executors
                     case TokenType.Call:
                     case TokenType.Do:
                     case TokenType.Begin:
-                        stack.Push(item.tokenType); break;
                     case TokenType.If:
-                        stack.Push(item.tokenType);
-                        break;
+                        stack.Push(item.tokenType); break;
                     case TokenType.RightBrace:
                         if (stack.Peek() != TokenType.LeftBrace) throw new ArgumentException();
                         else stack.Pop(); break;

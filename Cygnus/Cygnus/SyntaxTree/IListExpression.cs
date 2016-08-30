@@ -43,6 +43,10 @@ namespace Cygnus.SyntaxTree
 
         public override Expression Eval(Scope scope)
         {
+            for (int i = 0; i < Values.Count; i++)
+            {
+                Values[i] = Values[i].Eval(scope);
+            }
             return this;
         }
         public IEnumerator<Expression> GetEnumerator()

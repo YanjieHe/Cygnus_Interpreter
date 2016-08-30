@@ -32,12 +32,9 @@ namespace Cygnus.SyntaxTree
             {
                 return Scope.builtInMethodTable[Name](Arguments, scope);
             }
-            Expression funcExpr;
-            if (scope.TryGetValue(Name, out funcExpr))
-            {
-                if (funcExpr.NodeType == ExpressionType.Call)
-                    return new CallExpression(funcExpr.AsCall(scope).Name, Arguments).Eval(scope);
-            }
+            Expression funcExpr = scope.GetVariable(Name);
+            if (funcExpr.NodeType == ExpressionType.Call)
+                return new CallExpression(funcExpr.AsCall(scope).Name, Arguments).Eval(scope);
             throw new NotDefinedException(Name);
         }
     }

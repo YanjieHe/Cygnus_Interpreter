@@ -73,10 +73,9 @@ namespace Cygnus.SyntaxTree
             }
             return true;
         }
-
         public override Expression Eval(Scope scope)
         {
-            return new DictionaryExpression(Dict);
+            return this;
         }
         public override string ToString()
         {

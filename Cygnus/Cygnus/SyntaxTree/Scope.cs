@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Cygnus.SyntaxTree;
+using System;
 using Cygnus.Errors;
 using Cygnus.SymbolTable;
 using Cygnus.Libraries;
@@ -19,6 +19,16 @@ namespace Cygnus.SyntaxTree
             this.Parent = Parent;
             variableTable = new VariableTable();
         }
+        public Scope GlobalScope
+        {
+            get
+            {
+                var current = this;
+                while (current.Parent != null)
+                    current = current.Parent;
+                return current;
+            }
+        }
         public Expression this[string Name]
         {
             set { variableTable[Name] = value; }
@@ -27,20 +37,21 @@ namespace Cygnus.SyntaxTree
         {
             variableTable.Add(Name, Value);
         }
-        public Expression Find(string Name)
+        public void SetVariable(string Name, Expression Value)
+        {
+            variableTable[Name] = Value;
+        }
+        public Expression GetVariable(string Name)
         {
             Scope current = this;
             while (current != null)
             {
                 Expression Value = null;
-                if (current.variableTable.TryGetValue(Name, out Value))
-                    return Value;
+                if (current.variableTable.TryGetValue(Name, out Value)) return Value;
                 current = current.Parent;
             }
             if (functionTable.ContainsKey(Name) || builtInMethodTable.ContainsKey(Name))
-            {
                 return new CallExpression(Name, null);
-            }
             throw new NotDefinedException(Name);
         }
         public Expression Assgin(string Name, Expression Value)
@@ -58,31 +69,18 @@ namespace Cygnus.SyntaxTree
             variableTable[Name] = Value;
             return Value;
         }
-        public bool TryGetValue(string Name, out Expression Value)
-        {
-            Value = null;
-            Scope current = this;
-            while (current != null)
-            {
-                if (current.variableTable.TryGetValue(Name, out Value))
-                    return true;
-                current = current.Parent;
-            }
-            if (functionTable.ContainsKey(Name) || builtInMethodTable.ContainsKey(Name))
-            {
-                Value = new CallExpression(Name, null);
-                return true;
-            }
-            return false;
-        }
         public bool Delete(string Name)
+        {
+            return Find(Name, table => table.Remove(Name));
+        }
+        private bool Find(string Name, Action<VariableTable> action)
         {
             Scope current = this;
             while (current != null)
             {
                 if (current.variableTable.ContainsKey(Name))
                 {
-                    current.variableTable.Remove(Name);
+                    action(current.variableTable);
                     return true;
                 }
                 current = current.Parent;
@@ -91,7 +89,12 @@ namespace Cygnus.SyntaxTree
         }
         public override string ToString()
         {
-            return "Scope = {\r\n" + string.Join("\r\n", variableTable.Select(i => i)) + "\r\n}";
+            return
+                "===================================================\r\n" +
+                "                       Scope                       \r\n" +
+                "===================================================\r\n" +
+                 string.Join(",  ", variableTable.Select(i => i.Key).Concat(functionTable.Select(i => i.Key)).Select(i => i)) + "\r\n" +
+                 "===================================================";
         }
         public static FunctionTable functionTable = new FunctionTable();
         public static readonly BuiltInMethodTable
@@ -112,7 +115,9 @@ namespace Cygnus.SyntaxTree
               ["delete"] = BuiltInFunctions.Delete,
               ["scan"] = BuiltInFunctions.Scan,
               ["range"] = BuiltInFunctions.Range,
+              ["scope"] = BuiltInFunctions.DisplayScope,
               ["exit"] = BuiltInFunctions.Exit,
+
               /***************     List functions     ***************/
               ["append"] = ListFunctions.Append,
               ["remove"] = ListFunctions.Remove,
@@ -135,6 +140,7 @@ namespace Cygnus.SyntaxTree
               ["abs"] = MathFunctions.Abs,
               ["log"] = MathFunctions.Log,
               ["mod"] = MathFunctions.Mod,
+
               /***************     String functions     ***************/
               ["strcat"] = StringFunctions.StrConcat,
               ["strjoin"] = StringFunctions.StrJoin,
@@ -143,6 +149,7 @@ namespace Cygnus.SyntaxTree
               ["strlen"] = StringFunctions.StrLen,
               ["strfind"] = StringFunctions.StrFind,
               ["strreplace"] = StringFunctions.StrReplace,
+
               /***************     Higher-order functions     ***************/
               ["map"] = HigherOrderFunctions.Map,
               ["filter"] = HigherOrderFunctions.Filter,
