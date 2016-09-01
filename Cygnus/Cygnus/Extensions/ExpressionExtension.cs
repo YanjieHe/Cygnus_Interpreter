@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Cygnus.SyntaxTree;
+using Cygnus.LexicalAnalyzer;
 namespace Cygnus.Extensions
 {
     public static class ExpressionExtension
@@ -20,12 +21,7 @@ namespace Cygnus.Extensions
             }
             return array;
         }
-        public static IEnumerable<T> Slice<T>(this T[] array, int start, int end)
-        {
-            for (int i = start; i <= end; i++)
-                yield return array[i];
-        }
-        public static void DisplayList<T>(this IEnumerable<T> objs,Scope scope) where T : Expression
+        public static void DisplayList<T>(this IEnumerable<T> objs, Scope scope) where T : Expression
         {
             Console.Write("{ ");
             using (var obj = objs.GetEnumerator())
@@ -58,6 +54,36 @@ namespace Cygnus.Extensions
         {
             if (!Condition)
                 throw (T)Activator.CreateInstance(typeof(T), ErrorText, args);
+        }
+        public static bool IsCompareOp(this Operator Op)
+        {
+            switch (Op)
+            {
+                case Operator.Less:
+                case Operator.Greater:
+                case Operator.LessOrEquals:
+                case Operator.GreaterOrEquals:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        public static bool In<T>(this T obj, params T[] array)
+        {
+            return array.Contains(obj);
+        }
+        public static bool IsCompareOp(this TokenType Op)
+        {
+            switch (Op)
+            {
+                case TokenType.Less:
+                case TokenType.Greater:
+                case TokenType.LessOrEquals:
+                case TokenType.GreaterOrEquals:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }

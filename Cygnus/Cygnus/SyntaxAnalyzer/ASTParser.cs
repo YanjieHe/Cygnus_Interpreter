@@ -11,509 +11,460 @@ namespace Cygnus.SyntaxAnalyzer
     {
         Lexeme[] array;
         public Scope scope;
+        public Lexeme Current;
+        public int index;
         public BlockExpression program { get; private set; }
         public ASTParser(Lexeme[] array, Scope scope)
         {
             this.array = array;
             this.scope = scope;
             program = new BlockExpression();
+            Init();
         }
         public ASTParser(Lexeme[] array, BlockExpression program)
         {
             this.array = array;
             this.program = program;
+            Init();
         }
-        public void Parse(int start, int end)
+        public void Init()
         {
-            ParseBlock(program, 0, array.Length - 1);
+            this.index = 0;
+            Current = array[index];
         }
-        #region ParseBlock
-        public void ParseBlock(BlockExpression Block, int start, int end)
+        public BlockExpression Parse()
         {
-            int ExprStart = start;
-            int ExprEnd = ExprStart;
-            for (int i = start; i <= end; i++)
+            program.Append(ParseBlock(program, i => false));
+            return program;
+        }
+        public void MoveNext()
+        {
+            index++;
+            Current = array[index];
+        }
+        public void PutBack()
+        {
+            index--;
+            Current = array[index];
+        }
+        public bool CanMove()
+        {
+            return index != array.Length - 1;
+        }
+        public Expression ParseBlock(BlockExpression Parent, Predicate<TokenType> Stop)
+        {
+            var Block = new BlockExpression(Parent);
+            while (index < array.Length - 1 && !Stop(Current.tokenType))
             {
-                switch (array[i].tokenType)
+                //    Console.WriteLine(Current);
+                switch (Current.tokenType)
                 {
-                    case TokenType.If:
-                    case TokenType.ElseIf:
-                        ParseLine(Block, ref ExprStart, ExprEnd);
-                        ParseIf(Block, i, end, ref i);
-                        ExprStart = i; ExprEnd = i;
-                        break;
-                    case TokenType.While:
-                        ParseLine(Block, ref ExprStart, ExprEnd);
-                        ParseWhile(Block, i, end, ref i);
-                        ExprStart = i; ExprEnd = i;
-                        break;
-                    case TokenType.For:
-                        ParseLine(Block, ref ExprStart, ExprEnd);
-                        ParseForEach(Block, i, end, ref i);
-                        ExprStart = i; ExprEnd = i;
-                        break;
                     case TokenType.Define:
-                        ParseLine(Block, ref ExprStart, ExprEnd);
-                        ParseDefFunc(Block, i, end, ref i);
-                        ExprStart = i; ExprEnd = i;
-                        break;
-                    case TokenType.EndOfLine:
-                        ParseLine(Block, ref ExprStart, ExprEnd);
-                        ExprStart++; ExprEnd++;
-                        break;
-                    case TokenType.Break:
-                        ParseLine(Block, ref ExprStart, ExprEnd);
-                        Block.Append(new BreakExpression());
-                        break;
-                    case TokenType.Continue:
-                        ParseLine(Block, ref ExprStart, ExprEnd);
-                        Block.Append(new ContinueExpression());
-                        break;
-                    case TokenType.Return:
-                        ParseLine(Block, ref ExprStart, ExprEnd);
-                        ParseReturn(Block, i, end, ref i);
-                        ExprStart = i; ExprEnd = i;
-                        break;
-                    case TokenType.Pass:
-                        ParseLine(Block, ref ExprStart, ExprEnd);
-                        Block.Append(Expression.Void());
-                        break;
-                    default:
-                        ExprEnd++;
-                        break;
-                }
-            }
-            ParseLine(Block, ref ExprStart, ExprEnd);
-        }
-        #endregion
-
-        #region Parse If
-        public void ParseIf(BlockExpression Block, int start, int end, ref int EndIndex)
-        {
-            int IF_Position = -1, Then_Position = -1, Else_Position = -1, End_Position = -1;
-            var stack = new Stack<TokenType>();
-            var Else_Stack = new Stack<int>();
-            if (array[start].tokenType == TokenType.If || array[start].tokenType == TokenType.ElseIf)
-            {
-                IF_Position = start;
-                stack.Push(TokenType.If);
-
-                Then_Position = FindTokenType(IF_Position + 1, end, TokenType.Then);
-                if (Then_Position < 0)
-                    throw new SyntaxException("Missing 'then'");
-                bool success = false;
-                for (int i = Then_Position; i <= end; i++)
-                {
-                    switch (array[i].tokenType)
-                    {
-                        case TokenType.Do:
-                        case TokenType.Begin:
-                            stack.Push(array[i].tokenType);
-                            break;
-                        case TokenType.Else:
-                        case TokenType.ElseIf:
-                            Else_Stack.Push(i);
-                            stack.Push(array[i].tokenType); break;
-                        case TokenType.End:
-                            var token = stack.Pop();
-                            if (stack.Count == 0)
-                            {
-                                End_Position = i;
-                                success = true;
-                                break;
-                            }
-                            else if (stack.Count == 1 && token == TokenType.Else || token == TokenType.ElseIf)
-                            {
-                                End_Position = i;
-                                success = true;
-                                break;
-                            }
-                            if (token == TokenType.Else || token == TokenType.ElseIf)
-                            {
-                                Else_Stack.Pop();
-                                stack.Pop();
-                            }
-                            break;
-                    }
-                    if (success) break;
-                }
-                if (!success) throw new SyntaxException("Missing 'end'");
-                if (Else_Stack.Count == 0)
-                {
-                    var test = ParseExpression(Block, IF_Position + 1, Then_Position - 1);
-                    var IfTrue = new BlockExpression(Block);
-                    ParseBlock(IfTrue, Then_Position + 1, End_Position - 1);
-                    Block.Append(new IfThenExpression(test, IfTrue));
-                }
-                else if (Else_Stack.Count == 1)
-                {
-                    Else_Position = Else_Stack.Pop();
-                    var test = ParseExpression(Block, IF_Position + 1, Then_Position - 1);
-                    var IfTrue = new BlockExpression(Block);
-                    var IfFalse = new BlockExpression(Block);
-                    ParseBlock(IfTrue, Then_Position + 1, Else_Position - 1);
-                    if (array[Else_Position].tokenType == TokenType.ElseIf)
-                        ParseBlock(IfFalse, Else_Position, End_Position);
-                    else
-                        ParseBlock(IfFalse, Else_Position + 1, End_Position - 1);
-                    Block.Append(new IfThenElseExpression(test, IfTrue, IfFalse));
-                }
-                else throw new Exception();
-                EndIndex = End_Position;
-            }
-            else throw new ArgumentException();
-        }
-        #endregion
-
-        #region Parse While
-        public void ParseWhile(BlockExpression Block, int start, int end, ref int EndIndex)
-        {
-            int While_Position = -1, Do_Position = -1, End_Position = -1;
-            var stack = new Stack<TokenType>();
-            if (array[start].tokenType == TokenType.While)
-            {
-                While_Position = start;
-                Do_Position = FindTokenType(While_Position + 1, end, TokenType.Do);
-
-                if (Do_Position < 0)
-                    throw new SyntaxException("Missing 'do'");
-                FindEnd(Do_Position, ref End_Position, end, ref stack);
-
-                var condition = ParseExpression(Block, While_Position + 1, Do_Position - 1);
-                var body = new BlockExpression(Block);
-                ParseBlock(body, Do_Position + 1, End_Position - 1);
-                Block.Append(new WhileExpression(condition, body));
-
-                EndIndex = End_Position;
-            }
-            else throw new ArgumentException();
-        }
-        #endregion
-
-        #region Parse ForEach
-        public void ParseForEach(BlockExpression Block, int start, int end, ref int EndIndex)
-        {
-            int For_Position = -1, In_Position = -1, Do_Position = -1, End_Position = -1;
-            var stack = new Stack<TokenType>();
-            if (array[start].tokenType == TokenType.For)
-            {
-                For_Position = start;
-                if (array[For_Position + 1].tokenType != TokenType.Variable)
-                    throw new ArgumentException();
-                if (array[For_Position + 2].tokenType == TokenType.In)
-                    In_Position = For_Position + 2;
-                else throw new ArgumentException();
-
-                Do_Position = FindTokenType(In_Position + 1, end, TokenType.Do);
-                if (Do_Position < 0)
-                    throw new SyntaxException("Missing 'do'");
-
-                FindEnd(Do_Position, ref End_Position, end, ref stack);
-
-                var Iter_List = ParseExpression(Block, In_Position + 1, Do_Position - 1);
-                var body = new BlockExpression(Block);
-                ParseBlock(body, Do_Position + 1, End_Position - 1);
-                var Iter_Variable = new ParameterExpression(array[For_Position + 1].Content as string);
-                Block.Append(new ForEachExpression(Iter_List, body, Iter_Variable));
-
-                EndIndex = End_Position;
-            }
-            else throw new ArgumentException();
-        }
-        #endregion
-
-        #region Parse Define Function
-        public void ParseDefFunc(BlockExpression Block, int start, int end, ref int EndIndex)
-        {
-            int Def_Position = -1, Begin_Position = -1, End_Position = -1;
-            var stack = new Stack<TokenType>();
-            if (array[start].tokenType == TokenType.Define)
-            {
-                Def_Position = start;
-
-                Begin_Position = FindTokenType(Def_Position + 1, end, TokenType.Begin);
-                if (Begin_Position < 0)
-                    throw new SyntaxException("Missing 'begin'");
-
-                FindEnd(Begin_Position, ref End_Position, end, ref stack);
-                var body = new BlockExpression(Block);
-                var parameters = array.Slice(Def_Position + 1, Begin_Position - 1);
-                var funcTuple = (array[Def_Position + 1].Content as FuncTuple);
-                int argsCount = parameters.Count(j => j.tokenType == TokenType.Variable);
-                var arguments = new ParameterExpression[argsCount];
-                int k = 0;
-                foreach (var item in parameters.Where(j => j.tokenType == TokenType.Variable))
-                {
-                    arguments[k] = new ParameterExpression(item.Content as string);
-                    k++;
-                }
-                var funcScope = new Scope(scope);
-                var FUNCTION = new FunctionExpression(funcTuple.Name, body, funcScope, arguments);
-                Scope.functionTable[FUNCTION.Name] = FUNCTION;
-                ParseBlock(body, Begin_Position + 1, End_Position - 1);
-                Block.Append(Expression.Void());
-                EndIndex = End_Position;
-            }
-            else throw new ArgumentException();
-        }
-        #endregion
-
-        #region Parse Expression
-        public void ParseLine(BlockExpression Block, ref int start, int end)
-        {
-            if (start != end)
-            {
-                Block.Append(ParseExpression(Block, start, end));
-                start = end;
-            }
-        }
-        public Expression ParseExpression(BlockExpression Block, int start, int end)
-        {
-            CountArguments(start, end);
-            return ParseReversePolishNotation(ConvertToRPN(array.Slice(start, end)));
-        }
-        private IEnumerable<Lexeme> ConvertToRPN(IEnumerable<Lexeme> sequence)
-        {
-            return new RPN(sequence).Analyze().Operands;
-        }
-        private Expression ParseReversePolishNotation(IEnumerable<Lexeme> ReversePolishNotation)
-        {
-            var stack = new Stack<Expression>();
-            foreach (var item in ReversePolishNotation)
-            {
-                switch (item.tokenType)
-                {
-                    case TokenType.String:
-                        stack.Push(new ConstantExpression(item.Content, ConstantType.String));
-                        break;
-                    case TokenType.Char:
-                        stack.Push(new ConstantExpression(item.Content, ConstantType.Char));
-                        break;
-                    case TokenType.Double:
-                        stack.Push(new ConstantExpression(item.Content, ConstantType.Double));
-                        break;
-                    case TokenType.Integer:
-                        stack.Push(new ConstantExpression(item.Content, ConstantType.Integer));
-                        break;
-                    case TokenType.Null:
-                        stack.Push(new ConstantExpression(null, ConstantType.Null));
-                        break;
-                    case TokenType.UnaryPlus:
-                    case TokenType.UnaryMinus:
-                    case TokenType.Not:
-                        {
-                            var value = stack.Pop();
-                            stack.Push(new UnaryExpression((Operator)item.Content, value));
-                        }
-                        break;
-                    case TokenType.Add:
-                    case TokenType.Subtract:
-                    case TokenType.Multiply:
-                    case TokenType.Divide:
-                    case TokenType.Power:
-                    case TokenType.And:
-                    case TokenType.Or:
-                    case TokenType.Equals:
-                    case TokenType.Greater_Than_Or_Equals:
-                    case TokenType.Less_Than_Or_Equals:
-                    case TokenType.Greater_Than:
-                    case TokenType.Less_Than:
-                    case TokenType.Not_Equal_To:
-                    case TokenType.Assign:
-                        {
-                            var right = stack.Pop();
-                            var left = stack.Pop();
-                            stack.Push(new BinaryExpression((Operator)item.Content, left, right));
-                        }
-                        break;
-                    case TokenType.Comma: continue;
-                    case TokenType.Dot:
-                        {
-                            var index = stack.Pop();
-                            var collection = stack.Pop();
-                            stack.Push(new IndexExpression(collection, index, IndexType.Dot));
-                        }
-                        break;
-                    case TokenType.LeftBracket:
-                        {
-                            var index = stack.Pop();
-                            var collection = stack.Pop();
-                            stack.Push(new IndexExpression(collection, index, IndexType.Bracket));
-                        }
-                        break;
-                    case TokenType.LeftBrace:
-                        {
-                            var tuple = item.Content as FuncTuple;
-                            Expression[] arguments = new Expression[tuple.argsCount];
-                            for (int i = tuple.argsCount - 1; i >= 0; i--)
-                                arguments[i] = stack.Pop();
-                            stack.Push(new ArrayExpression(arguments));
-                        }
-                        break;
-                    case TokenType.True:
-                        stack.Push(new ConstantExpression(true, ConstantType.Boolean));
-                        break;
-                    case TokenType.False:
-                        stack.Push(new ConstantExpression(false, ConstantType.Boolean));
+                        Block.Append(ParseDefFunc(Block));
                         break;
                     case TokenType.Repeat:
                         break;
                     case TokenType.Until:
                         break;
                     case TokenType.Return:
-                        {
-                            var value = stack.Pop();
-                            stack.Push(new ReturnExpression(value));
-                        }
+                        Block.Append(ParseReturn());
                         break;
-                    case TokenType.Call:
-                        {
-                            var tuple = item.Content as FuncTuple;
-                            Expression[] arguments = new Expression[tuple.argsCount];
-                            for (int i = tuple.argsCount - 1; i >= 0; i--)
-                                arguments[i] = stack.Pop();
-                            stack.Push(new CallExpression(tuple.Name, arguments));
-                        }
+                    case TokenType.If:
+                    case TokenType.ElseIf:
+                        Block.Append(ParseIf(Block));
                         break;
-                    case TokenType.Variable:
-                        stack.Push(new ParameterExpression(item.Content as string));
+                    case TokenType.For:
+                        Block.Append(ParseForEach(Block));
                         break;
-                    case TokenType.Void:
-                        stack.Push(new ConstantExpression(null, ConstantType.Void));
+                    case TokenType.While:
+                        Block.Append(ParseWhile(Block));
+                        break;
+                    case TokenType.Try:
+                        break;
+                    case TokenType.Catch:
+                        break;
+                    case TokenType.Finally:
+                        break;
+                    case TokenType.EndOfLine:
+                        if (CanMove()) MoveNext();
+                        else return Block;
+                        break;
+                    case TokenType.Comments:
                         break;
                     default:
-                        throw new SyntaxException("Wrong element for expression: '{0}'", item);
-                }
-            }
-            return stack.Pop();
-        }
-        public void CountArguments(int start, int end)
-        {
-            Stack<Lexeme> stack = new Stack<Lexeme>();
-            Stack<int> args_stack = new Stack<int>();
-            for (int i = start; i <= end; i++)
-            {
-                switch (array[i].tokenType)
-                {
-                    case TokenType.Call:
-                    case TokenType.LeftBrace:
-                    case TokenType.LeftParenthesis:
-                        stack.Push(array[i]);
-                        args_stack.Push(1);
-                        break;
-                    case TokenType.No_Arg:
-                        {
-                            args_stack.Pop();
-                            args_stack.Push(0);
-                            break;
-                        }
-                    case TokenType.Comma:
-                        {
-                            int n = args_stack.Pop();
-                            args_stack.Push(n + 1);
-                        }
-                        break;
-                    case TokenType.RightBrace:
-                        var leftbrace = stack.Pop();
-                        if (leftbrace.tokenType == TokenType.LeftBrace)
-                            ((FuncTuple)leftbrace.Content).argsCount = args_stack.Pop();
-                        else throw new ArgumentException();
-                        break;
-                    case TokenType.RightParenthesis:
-                        if (stack.Peek().tokenType == TokenType.LeftParenthesis)
-                            stack.Pop();
-                        else if (stack.Peek().tokenType == TokenType.Call)
-                            ((FuncTuple)stack.Pop().Content).argsCount = args_stack.Pop();
-                        else throw new ArgumentException();
+                        Block.Append(ParseExpression());
+                        if (CanMove()) MoveNext();
+                        else return Block;
                         break;
                 }
             }
+            return Block;
         }
 
-        #endregion
-
-        #region Parse Return 
-        public void ParseReturn(BlockExpression Block, int start, int end, ref int EndIndex)
+        public Expression ParseIf(BlockExpression Parent)
         {
-            int Return_Position = -1, End_Position = -1;
-            if (array[start].tokenType == TokenType.Return)
+            if (Current.tokenType == TokenType.If || Current.tokenType == TokenType.ElseIf)
             {
-                Return_Position = start;
-                for (int i = start + 1; i <= end; i++)
+                MoveNext();
+                Expression Test = ParseExpression();
+                while (Current.tokenType == TokenType.EndOfLine)
+                    MoveNext();
+                (Current.tokenType == TokenType.Then).OrThrows<SyntaxException>("Expecting 'Then'");
+                MoveNext();
+                Expression IfTrue = ParseBlock(Parent, i => i.In(TokenType.Else, TokenType.ElseIf, TokenType.End));
+                if (Current.tokenType == TokenType.End)
                 {
-                    if (IsTerminator(array[i].tokenType))
+                    MoveNext();
+                    return Expression.IfThen(Test, IfTrue);
+                }
+                else if (Current.tokenType == TokenType.Else)
+                {
+                    MoveNext();
+                    Expression IfFalse = ParseBlock(Parent, i => i == TokenType.End);
+                    MoveNext();
+                    return Expression.IfThenElse(Test, IfTrue, IfFalse);
+                }
+                else if (Current.tokenType == TokenType.ElseIf)
+                {
+                    Expression IfFalse = ParseBlock(Parent, i => i == TokenType.End);
+                    MoveNext();
+                    return Expression.IfThenElse(Test, IfTrue, IfFalse);
+                }
+            }
+            throw new Exception();
+        }
+        public Expression ParseWhile(BlockExpression Parent)
+        {
+            if (Current.tokenType == TokenType.While)
+            {
+                MoveNext();
+                Expression Condition = ParseExpression();
+                while (Current.tokenType == TokenType.EndOfLine)
+                    MoveNext();
+                (Current.tokenType == TokenType.Do).OrThrows<SyntaxException>("Expecting 'Do'");
+                MoveNext();
+                Expression Body = ParseBlock(Parent, i => i == TokenType.End);
+                MoveNext();
+                return Expression.While(Condition, Body);
+            }
+            throw new Exception();
+        }
+        public Expression ParseForEach(BlockExpression Parent)
+        {
+            if (Current.tokenType == TokenType.For)
+            {
+                MoveNext();
+                (Current.tokenType == TokenType.Variable).OrThrows<SyntaxException>("Expecting Iteration Variable");
+                var Iter_Variable = Expression.Variable(Current.Content as string);
+                MoveNext();
+                (Current.tokenType == TokenType.In).OrThrows<SyntaxException>("Expecting 'In'");
+                MoveNext();
+                Expression Collection = ParseExpression();
+                while (Current.tokenType == TokenType.EndOfLine)
+                    MoveNext();
+                (Current.tokenType == TokenType.Do).OrThrows<SyntaxException>("Expecting 'Do'");
+                MoveNext();
+                Expression Body = ParseBlock(Parent, i => i == TokenType.End);
+                MoveNext();
+                return Expression.ForEach(Iter_Variable, Collection, Body);
+            }
+            throw new Exception();
+        }
+        public Expression ParseDefFunc(BlockExpression Parent)
+        {
+            if (Current.tokenType == TokenType.Define)
+            {
+                MoveNext();
+                (Current.tokenType == TokenType.Call).OrThrows<SyntaxException>("Expecting function name");
+                var Name = Current.Content as string;
+                MoveNext();
+                var argslist = new List<ParameterExpression>();
+                while (Current.tokenType != TokenType.Begin)
+                {
+                    if (Current.tokenType == TokenType.Variable)
+                        argslist.Add(Expression.Parameter(Current.Content as string));
+                    MoveNext();
+                }
+                MoveNext();
+                Expression Body = ParseBlock(Parent, i => i == TokenType.End);
+                MoveNext();
+                var FUNCTION = Expression.Function(Name, Body, new Scope(scope), argslist.ToArray());
+                Scope.functionTable[Name] = FUNCTION;
+                return Expression.Void();
+            }
+            throw new Exception();
+        }
+        public Expression ParseReturn()
+        {
+            if (Current.tokenType == TokenType.Return)
+            {
+                MoveNext();
+                return Expression.Return(ParseExpression());
+            }
+            throw new Exception();
+        }
+        public Expression ParseExpression()
+        {
+            Expression val = ParseAssign();
+            return val;
+        }
+        public Expression ParseAssign()
+        {
+            Expression value = null;
+            value = ParseOr();
+            if (Current.tokenType == TokenType.Assign)
+            {
+                MoveNext();
+                value = Expression.Assign(value, ParseExpression());
+            }
+            return value;
+        }
+        public Expression ParseOr()
+        {
+            Expression value;
+            value = ParseAnd();
+            while (Current.tokenType == TokenType.Or)
+            {
+                MoveNext();
+                value = Expression.Or(value, ParseAnd());
+            }
+            return value;
+        }
+        public Expression ParseAnd()
+        {
+            Expression value;
+            value = ParseEquals();
+            while (Current.tokenType == TokenType.And)
+            {
+                MoveNext();
+                value = Expression.And(value, ParseEquals());
+            }
+            return value;
+        }
+        public Expression ParseEquals()
+        {
+            Expression value;
+
+            value = ParseCompare();
+
+            while (Current.tokenType.In(TokenType.Equals, TokenType.NotEqualTo))
+            {
+                TokenType op = Current.tokenType;
+                MoveNext();
+                if (op == TokenType.Equals)
+                    value = new BinaryExpression(Operator.Equals, value, ParseCompare());
+                else if (op == TokenType.NotEqualTo)
+                    value = new BinaryExpression(Operator.NotEqualTo, value, ParseCompare());
+            }
+            return value;
+        }
+        public Expression ParseCompare()
+        {
+            Expression value;
+
+            value = Parse_Add_Subtract();
+
+            while (Current.tokenType.IsCompareOp())
+            {
+                TokenType op = Current.tokenType;
+                MoveNext();
+
+                switch (op)
+                {
+                    case TokenType.Less:
+                        value = Expression.LessThan(value, Parse_Add_Subtract()); break;
+                    case TokenType.Greater:
+                        value = Expression.GreaterThan(value, Parse_Add_Subtract()); break;
+                    case TokenType.LessOrEquals:
+                        value = Expression.LessOrEquals(value, Parse_Add_Subtract()); break;
+                    case TokenType.GreaterOrEquals:
+                        value = Expression.GreaterOrEquals(value, Parse_Add_Subtract()); break;
+                    default:
+                        break;
+                }
+            }
+            return value;
+        }
+        public Expression Parse_Add_Subtract()
+        {
+            Expression value;
+            value = Parse_Mul_Div();
+            while (Current.tokenType.In(TokenType.Add, TokenType.Subtract))
+            {
+                TokenType op = Current.tokenType;
+                MoveNext();
+
+
+                if (op == TokenType.Add)
+                    value = Expression.Add(value, Parse_Mul_Div());
+                else if (op == TokenType.Subtract)
+                    value = Expression.Subtract(value, Parse_Mul_Div());
+            }
+            return value;
+        }
+        public Expression Parse_Mul_Div()
+        {
+            Expression value;
+
+            value = ParsePower();
+            while (Current.tokenType.In(TokenType.Multiply, TokenType.Divide))
+            {
+                TokenType op = Current.tokenType;
+                MoveNext();
+
+                if (op == TokenType.Multiply)
+                    value = Expression.Multiply(value, ParsePower());
+                else if (op == TokenType.Divide)
+                    value = Expression.Divide(value, ParsePower());
+            }
+            return value;
+        }
+        public Expression ParsePower()
+        {
+            Expression value;
+
+            value = ParseUnary();
+            while (Current.tokenType == TokenType.Power)
+            {
+                TokenType op = Current.tokenType;
+                MoveNext();
+
+                value = Expression.Power(value, ParseUnary());
+            }
+            return value;
+        }
+        public Expression ParseUnary()
+        {
+            Expression value = null;
+            while (Current.tokenType.In(TokenType.Add, TokenType.Subtract, TokenType.Not))
+            {
+                TokenType op = Current.tokenType;
+                MoveNext();
+
+                if (op == TokenType.Add)
+                    value = Expression.UnaryPlus(ParseExpression());
+                else if (op == TokenType.Subtract)
+                    value = Expression.UnaryMinus(ParseExpression());
+                else if (op == TokenType.Not)
+                    value = Expression.Not(ParseExpression());
+            }
+            return value ?? ParseIndex();
+        }
+        public Expression ParseIndex()
+        {
+            Expression value = ParseCall();
+
+            while (Current.tokenType.In(TokenType.Dot, TokenType.LeftBracket))
+            {
+                TokenType op = Current.tokenType;
+                MoveNext();
+
+                if (op == TokenType.Dot)
+                {
+                    value = Expression.Property(value, Current.Content as string);
+                    MoveNext();
+                }
+                else if (op == TokenType.LeftBracket)
+                {
+                    value = Expression.Index(value, ParseExpression());
+                    if (Current.tokenType == TokenType.RightBracket)
                     {
-                        End_Position = i;
-                        break;
+                        MoveNext();
+                    }
+                    else
+                    {
+                        throw new Exception("[]括号不匹配\n");
                     }
                 }
-                if (End_Position < 0)
-                    End_Position = end;
-                var expression = ParseExpression(Block, Return_Position + 1, End_Position);
-                Block.Append(new ReturnExpression(expression));
-                EndIndex = End_Position;
             }
-            else throw new ArgumentException();
+            return value;
         }
-        #endregion
-
-        public void FindEnd(int StartPosition, ref int EndPosition, int end, ref Stack<TokenType> stack)
+        public Expression ParseCall()
         {
-            bool success = false;
-            for (int i = StartPosition; i <= end; i++)
+            Expression value = null;
+            if (Current.tokenType == TokenType.Call)
             {
-                switch (array[i].tokenType)
+                var Name = Current.Content as string;
+                MoveNext();
+                List<Expression> argsList = new List<Expression>();
+                while (Current.tokenType != TokenType.RightParenthesis)
                 {
-                    case TokenType.If:
-                    case TokenType.Do:
-                    case TokenType.Begin:
-                        stack.Push(array[i].tokenType);
-                        break;
-                    case TokenType.End:
-                        var token = stack.Pop();
-                        if (stack.Count == 0)
-                        {
-                            EndPosition = i;
-                            success = true;
-                            break;
-                        }
-                        break;
+                    argsList.Add(ParseExpression());
+                    if (Current.tokenType == TokenType.Comma)
+                    {
+                        MoveNext();
+                    }
                 }
-                if (success) break;
+                MoveNext();
+                value = Expression.Call(Name, argsList.ToArray());
             }
-            if (!success) throw new SyntaxException("Missing 'end'");
+            return value ?? ParseInitArray();
         }
-        public int FindTokenType(int start, int end, TokenType tokenType)
+        public Expression ParseInitArray()
         {
-            for (int i = start; i <= end; i++)
-                if (array[i].tokenType == tokenType)
-                    return i;
-            return (-1);
-        }
-        public static bool IsTerminator(TokenType tokenType)
-        {
-            switch (tokenType)
+            Expression value = null;
+            if (Current.tokenType == TokenType.LeftBrace)
             {
-                case TokenType.Define:
-                case TokenType.Begin:
-                case TokenType.Repeat:
-                case TokenType.Until:
-                case TokenType.Return:
-                case TokenType.Do:
-                case TokenType.End:
-                case TokenType.If:
-                case TokenType.Then:
-                case TokenType.Else:
-                case TokenType.ElseIf:
-                case TokenType.For:
-                case TokenType.While:
-                case TokenType.Break:
-                case TokenType.In:
-                case TokenType.EndOfLine:
-                    return true;
-                default:
-                    return false;
+                var name = Current.Content;
+                MoveNext();
+                List<Expression> argsList = new List<Expression>();
+                while (Current.tokenType != TokenType.RightBrace)
+                {
+                    argsList.Add(ParseExpression());
+                    if (Current.tokenType == TokenType.Comma)
+                    {
+                        MoveNext();
+                    }
+                }
+                MoveNext();
+                value = Expression.Array(argsList.ToArray());
             }
+            return value ?? ParseFactor();
+        }
+        public Expression ParseFactor()
+        {
+            Expression value;
+            if (Current.tokenType == TokenType.LeftParenthesis)
+            {
+                MoveNext();
+                value = ParseExpression();
+                (Current.tokenType == TokenType.RightParenthesis).OrThrows<SyntaxException>("Mismatch '(' ')'");
+                goto Finish;
+            }
+            else
+            {
+                switch (Current.tokenType)
+                {
+                    case TokenType.Integer:
+                        value = (int)Current.Content; goto Finish;
+                    case TokenType.Double:
+                        value = (double)Current.Content; goto Finish;
+                    case TokenType.True:
+                        value = true; goto Finish;
+                    case TokenType.False:
+                        value = false; goto Finish;
+                    case TokenType.Null:
+                        value = Expression.Null(); goto Finish;
+                    case TokenType.Void:
+                        value = Expression.Void(); goto Finish;
+                    case TokenType.Break:
+                        value = Expression.Break(); goto Finish;
+                    case TokenType.Continue:
+                        value = Expression.Continue(); goto Finish;
+                    case TokenType.Pass:
+                        value = Expression.Pass(); goto Finish;
+                    case TokenType.String:
+                        value = Current.Content as string; goto Finish;
+                    case TokenType.Variable:
+                        value = Expression.Variable(Current.Content as string); goto Finish;
+                    default:
+                        // 既不是数字也不是'(', 也不是标识符
+                        throw new Exception("unkown charactor: \n" + Current);
+                }
+            }
+        Finish:
+            MoveNext();
+            return value;
         }
     }
 }

@@ -4,10 +4,10 @@
     {
        
         public ParameterExpression[] Arguments { get; private set; }
-        public BlockExpression Body { get; private set; }
+        public Expression Body { get; private set; }
         public string Name { get; private set; }
         public Scope funcScope { get; private set; }
-        public FunctionExpression(string Name, BlockExpression Body, Scope scope, ParameterExpression[] Arguments)
+        public FunctionExpression(string Name, Expression Body, Scope scope, ParameterExpression[] Arguments)
         {
             this.Name = Name;
             this.Body = Body;

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Cygnus.SymbolTable;
+﻿using System.Collections.Generic;
 
 namespace Cygnus.SyntaxTree
 {
@@ -16,19 +11,19 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.ForEach;
             }
         }
-        public Expression list { get; private set; }
-        public BlockExpression Block { get; private set; }
+        public Expression Collection { get; private set; }
+        public Expression Body { get; private set; }
         public ParameterExpression Iterator { get; private set; }
-        public ForEachExpression(IEnumerable<Expression> list, BlockExpression Block, ParameterExpression Iterator)
+        public ForEachExpression(ParameterExpression Iterator, IEnumerable<Expression> Collection, Expression Body)
         {
-            this.list = new IEnumerableExpression(list);
-            this.Block = Block;
+            this.Collection = new IEnumerableExpression(Collection);
+            this.Body = Body;
             this.Iterator = Iterator;
         }
-        public ForEachExpression(Expression Expr_list, BlockExpression Block, ParameterExpression Iterator)
+        public ForEachExpression(ParameterExpression Iterator, Expression Collection, Expression Body)
         {
-            this.list = Expr_list;
-            this.Block = Block;
+            this.Collection = Collection;
+            this.Body = Body;
             this.Iterator = Iterator;
         }
         public override string ToString()
@@ -38,11 +33,11 @@ namespace Cygnus.SyntaxTree
         public override Expression Eval(Scope scope)
         {
             Expression Result = null;
-            IEnumerable<Expression> Iter_List = list.Eval(scope).GetIEnumrableList(scope);
-            foreach (var item in Iter_List)
+            IEnumerable<Expression> Collection = this.Collection.Eval(scope).GetIEnumrableList(scope);
+            foreach (var item in Collection)
             {
                 Iterator.Assgin(item, scope);
-                Result = Block.Eval(scope);
+                Result = Body.Eval(scope);
                 switch (Result.NodeType)
                 {
                     case ExpressionType.Break:
@@ -53,7 +48,7 @@ namespace Cygnus.SyntaxTree
                         return Result;
                 }
             }
-            EndForEach:
+        EndForEach:
             return Void();
         }
     }

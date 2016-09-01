@@ -9,9 +9,7 @@ namespace Cygnus.SyntaxAnalyzer
         public AST() { }
         public BlockExpression Parse(Lexeme[] array, Scope GlobalScope)
         {
-            var ASTparser = new ASTParser(array, GlobalScope);
-            ASTparser.Parse(0, array.Length - 1);
-            return ASTparser.program;
+            return new ASTParser(array, GlobalScope).Parse();
         }
         public void Display(BlockExpression Root)
         {

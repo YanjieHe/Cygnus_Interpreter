@@ -64,12 +64,12 @@ namespace Cygnus.LexicalAnalyzer
         {
             switch (tokenType)
             {
-                case TokenType.Add:
-                    if (BackTrack(tokenList.Last))
-                        tokenType = TokenType.UnaryPlus; break;
-                case TokenType.Subtract:
-                    if (BackTrack(tokenList.Last))
-                        tokenType = TokenType.UnaryMinus; break;
+                //case TokenType.Add:
+                //    if (BackTrack(tokenList.Last))
+                //        tokenType = TokenType.UnaryPlus; break;
+                //case TokenType.Subtract:
+                //    if (BackTrack(tokenList.Last))
+                //        tokenType = TokenType.UnaryMinus; break;
                 case TokenType.Space:
                 case TokenType.Comments: return;
                 case TokenType.Symbol:
@@ -86,12 +86,6 @@ namespace Cygnus.LexicalAnalyzer
                         Append(new Token("(", TokenType.LeftParenthesis));
                     }
                     return;
-                case TokenType.RightParenthesis://To identify no-arg function
-                    if (No_Arg(content, TokenType.Call, TokenType.RightParenthesis)) return;
-                    break;
-                case TokenType.RightBrace://To identify no-arg array
-                    if (No_Arg(content, TokenType.LeftBrace, TokenType.RightBrace)) return;
-                    break;
             }
             var token = new Token(content, tokenType);
             Append(token);
@@ -133,34 +127,9 @@ namespace Cygnus.LexicalAnalyzer
             }
             tokenList.AddLast(token);
         }
-        private bool No_Arg(string content, TokenType leftPart, TokenType rightPart)
-        {
-            if (tokenList.Last.Value.tokenType == leftPart)
-            {
-                Append(new Token("no-arg", TokenType.No_Arg));
-                Append(new Token(content, rightPart));
-                return true;
-            }
-            else return false;
-        }
         public void Display()
         {
             foreach (var item in tokenList) Console.WriteLine(item);
-        }
-        public bool BackTrack(LinkedListNode<Token> node)
-        {
-            if (node == null) return true;
-            switch (node.Value.tokenType)
-            {
-                case TokenType.Double:
-                case TokenType.Integer:
-                case TokenType.RightParenthesis:
-                case TokenType.RightBracket:
-                case TokenType.Variable:
-                case TokenType.String:
-                    return false;
-                default: return true;
-            }
         }
         public void CheckKeywords(string word, ref TokenType tokenType)
         {

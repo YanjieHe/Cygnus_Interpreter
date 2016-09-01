@@ -12,6 +12,7 @@
             this.IfTrue = IfTrue;
             this.IfFalse = IfFalse;
         }
+
         public override ExpressionType NodeType
         {
             get
@@ -19,6 +20,7 @@
                 return ExpressionType.IfThenElse;
             }
         }
+
         public override string ToString()
         {
             return "(IfThenElse)";

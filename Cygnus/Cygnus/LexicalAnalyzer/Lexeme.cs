@@ -25,6 +25,14 @@ namespace Cygnus.LexicalAnalyzer
                     return Regex.Unescape(token.Content.Substring(1, token.Content.Length - 2));
                 case TokenType.Char:
                     return Regex.Unescape(token.Content.Substring(1, token.Content.Length - 2))[0];
+                case TokenType.Double:
+                    return double.Parse(token.Content);
+                case TokenType.Integer:
+                    return int.Parse(token.Content);
+                case TokenType.True: return true;
+                case TokenType.False: return false;
+                case TokenType.Variable: return token.Content;
+                /* Binary Operators */
                 case TokenType.Add:
                 case TokenType.Subtract:
                 case TokenType.Multiply:
@@ -34,86 +42,47 @@ namespace Cygnus.LexicalAnalyzer
                 case TokenType.Or:
                 case TokenType.Not:
                 case TokenType.Equals:
-                case TokenType.Greater_Than_Or_Equals:
-                case TokenType.Less_Than_Or_Equals:
-                case TokenType.Greater_Than:
-                case TokenType.Less_Than:
-                case TokenType.Not_Equal_To:
+                case TokenType.GreaterOrEquals:
+                case TokenType.LessOrEquals:
+                case TokenType.Greater:
+                case TokenType.Less:
+                case TokenType.NotEqualTo:
                 case TokenType.Assign:
                     return ParseBinaryOperator(token);
-                case TokenType.Double:
-                    return double.Parse(token.Content);
-                case TokenType.Integer:
-                    return int.Parse(token.Content);
+                /* Unary Operators */
                 case TokenType.UnaryPlus:
                 case TokenType.UnaryMinus:
                     return ParseUnaryOperator(token);
+
                 case TokenType.Comma:
-                    return Operator.Comma;
                 case TokenType.Dot:
-                    return Operator.Dot;
                 case TokenType.LeftParenthesis:
-                    return Operator.LeftParenthesis;
                 case TokenType.RightParenthesis:
-                    return Operator.RightParenthesis;
                 case TokenType.LeftBracket:
-                    return Operator.LeftBracket;
                 case TokenType.RightBracket:
-                    return Operator.RightBracket;
                 case TokenType.LeftBrace:
-                    return new FuncTuple(token.Content, 0);
                 case TokenType.RightBrace:
-                    return Operator.RightBrace;
-                case TokenType.True:
-                    return true;
-                case TokenType.False:
-                    return false;
                 case TokenType.Repeat:
-                    break;
                 case TokenType.Until:
-                    break;
                 case TokenType.Return:
-                    return ControlStatement.Return;
                 case TokenType.Continue:
-                    return ControlStatement.Continue;
                 case TokenType.Do:
-                    return ControlStatement.Do;
                 case TokenType.End:
-                    return ControlStatement.End;
                 case TokenType.If:
-                    return ControlStatement.If;
                 case TokenType.Then:
-                    return ControlStatement.Then;
                 case TokenType.Else:
-                    return ControlStatement.Else;
                 case TokenType.ElseIf:
-                    return ControlStatement.ElseIf;
                 case TokenType.For:
-                    return ControlStatement.For;
                 case TokenType.While:
-                    return ControlStatement.While;
                 case TokenType.Break:
-                    return ControlStatement.Break;
                 case TokenType.EndOfLine:
-                    return ControlStatement.Terminator;
-                case TokenType.Call:
-                    return new FuncTuple(token.Content, 0);
                 case TokenType.In:
-                    return ControlStatement.In;
                 case TokenType.Pass:
-                    return ControlStatement.Pass;
-                case TokenType.Null:
-                    return null;
-                case TokenType.Void:
-                    return "void";
-                case TokenType.No_Arg:
-                    return "No_Arg";
                 case TokenType.Define:
-                    return ControlStatement.Define;
                 case TokenType.Begin:
-                    return ControlStatement.Begin;
-                case TokenType.Variable:
-                    return token.Content;
+                case TokenType.Null:
+                case TokenType.Void: return null;
+                case TokenType.Call: return token.Content;
                 default:
                     throw new NotSupportedException(token.ToString());
             }
@@ -142,14 +111,14 @@ namespace Cygnus.LexicalAnalyzer
                 case TokenType.Or: return Operator.Or;
                 case TokenType.Not: return Operator.Not;
 
-                case TokenType.Less_Than: return Operator.Less;
-                case TokenType.Greater_Than: return Operator.Greater;
-                case TokenType.Less_Than_Or_Equals: return Operator.LessOrEquals;
-                case TokenType.Greater_Than_Or_Equals: return Operator.GreaterOrEquals;
+                case TokenType.Less: return Operator.Less;
+                case TokenType.Greater: return Operator.Greater;
+                case TokenType.LessOrEquals: return Operator.LessOrEquals;
+                case TokenType.GreaterOrEquals: return Operator.GreaterOrEquals;
                 case TokenType.Equals: return Operator.Equals;
-                case TokenType.Not_Equal_To: return Operator.NotEqualTo;
+                case TokenType.NotEqualTo: return Operator.NotEqualTo;
 
-                case TokenType.Assign: return Operator.Assgin;
+                case TokenType.Assign: return Operator.Assign;
                 default: throw new Exception();
             }
         }

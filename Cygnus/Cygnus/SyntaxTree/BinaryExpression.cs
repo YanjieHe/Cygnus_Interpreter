@@ -47,7 +47,7 @@ namespace Cygnus.SyntaxTree
                     return Left.Eval(scope).Equals(Right.Eval(scope));
                 case Operator.NotEqualTo:
                     return !Left.Eval(scope).Equals(Right.Eval(scope));
-                case Operator.Assgin:
+                case Operator.Assign:
                     return AssginOp(Left, Right, scope);
                 default:
                     throw new NotSupportedException();

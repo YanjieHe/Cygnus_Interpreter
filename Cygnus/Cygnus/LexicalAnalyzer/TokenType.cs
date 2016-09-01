@@ -11,11 +11,11 @@
 
         /* Comparison Operators */
         Equals,
-        Greater_Than_Or_Equals,
-        Less_Than_Or_Equals,
-        Greater_Than,
-        Less_Than,
-        Not_Equal_To,
+        GreaterOrEquals,
+        LessOrEquals,
+        Greater,
+        Less,
+        NotEqualTo,
         /* Arithmetic Operators*/
         UnaryPlus, UnaryMinus,
         Add, Subtract, Multiply, Divide, Power,

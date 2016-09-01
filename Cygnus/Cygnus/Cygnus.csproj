@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{8B4CE68E-DF0B-4AD7-97FD-F7C510BEA413}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Cygnus</RootNamespace>
     <AssemblyName>Cygnus</AssemblyName>
@@ -32,9 +32,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MathNet.Numerics, Version=3.13.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -64,8 +61,6 @@
     <Compile Include="Extensions\ConsoleExtension.cs" />
     <Compile Include="Extensions\ExpressionExtension.cs" />
     <Compile Include="Extensions\UtilityFunctions.cs" />
-    <Compile Include="LexicalAnalyzer\ControlStatement.cs" />
-    <Compile Include="LexicalAnalyzer\FuncTuple.cs" />
     <Compile Include="LexicalAnalyzer\Operator.cs" />
     <Compile Include="LexicalAnalyzer\TokenType.cs" />
     <Compile Include="LexicalAnalyzer\Lexical.cs" />
@@ -81,12 +76,13 @@
     <Compile Include="Libraries\MathFunctions.cs" />
     <Compile Include="Libraries\MatrixFunctions.cs" />
     <Compile Include="Libraries\StringFunctions.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\WorkSpace.cs" />
     <Compile Include="SymbolTable\BuiltInMethodTable.cs" />
     <Compile Include="SymbolTable\FunctionTable.cs" />
+    <Compile Include="SyntaxTree\GotoExpression.cs" />
     <Compile Include="SyntaxTree\IAssignable.cs" />
-    <Compile Include="SyntaxTree\ContinueExpression.cs" />
     <Compile Include="SyntaxTree\CSharpObjectExpression.cs" />
     <Compile Include="SyntaxTree\IListExpression.cs" />
     <Compile Include="SyntaxTree\IIndexable.cs" />
@@ -98,11 +94,9 @@
     <Compile Include="SymbolTable\VariableTable.cs" />
     <Compile Include="SyntaxAnalyzer\AST.cs" />
     <Compile Include="SyntaxAnalyzer\ASTParser.cs" />
-    <Compile Include="SyntaxAnalyzer\RPN.cs" />
     <Compile Include="SyntaxTree\ArrayExpression.cs" />
     <Compile Include="SyntaxTree\BinaryExpression.cs" />
     <Compile Include="SyntaxTree\BlockExpression.cs" />
-    <Compile Include="SyntaxTree\BreakExpression.cs" />
     <Compile Include="SyntaxTree\TableExpression.cs" />
     <Compile Include="SyntaxTree\ConstantExpression.cs" />
     <Compile Include="SyntaxTree\DictionaryExpression.cs" />
@@ -116,7 +110,6 @@
     <Compile Include="SyntaxTree\IndexExpression.cs" />
     <Compile Include="SyntaxTree\ListExpression.cs" />
     <Compile Include="SyntaxTree\ParameterExpression.cs" />
-    <Compile Include="SyntaxTree\ReturnExpression.cs" />
     <Compile Include="SyntaxTree\TreeViewer.cs" />
     <Compile Include="SyntaxTree\UnaryExpression.cs" />
     <Compile Include="SyntaxTree\VectorExpression.cs" />

@@ -60,7 +60,7 @@ namespace Cygnus.SyntaxTree
                         PrintTree(item, depth + 1);
                     break;
                 case ExpressionType.Return:
-                    PrintTree(((ReturnExpression)Node).expression, depth + 1);
+                    PrintTree(((GotoExpression)Node).Value, depth + 1);
                     break;
                 case ExpressionType.Array:
                     {
@@ -70,8 +70,8 @@ namespace Cygnus.SyntaxTree
                     break;
                 case ExpressionType.ForEach:
                     {
-                        PrintTree(((ForEachExpression)Node).list, depth + 1);
-                        PrintTree(((ForEachExpression)Node).Block, depth + 1);
+                        PrintTree(((ForEachExpression)Node).Collection, depth + 1);
+                        PrintTree(((ForEachExpression)Node).Body, depth + 1);
                     }
                     break;
             }

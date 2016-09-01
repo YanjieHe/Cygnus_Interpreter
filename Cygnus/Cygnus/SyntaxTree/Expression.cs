@@ -77,6 +77,118 @@ namespace Cygnus.SyntaxTree
         {
             return new ConstantExpression(null, ConstantType.Null);
         }
+        public static ParameterExpression Variable(string Name)
+        {
+            return new ParameterExpression(Name);
+        }
+        public static ParameterExpression Parameter(string Name)
+        {
+            return new ParameterExpression(Name);
+        }
+        public static GotoExpression Return(Expression expression)
+        {
+            return new GotoExpression(GotoExpressionKind.Return, expression);
+        }
+        public static FunctionExpression Function(string Name, Expression Body, Scope scope, ParameterExpression[] arguments)
+        {
+            return new FunctionExpression(Name, Body, scope, arguments);
+        }
+        public static BinaryExpression Assign(Expression Left, Expression Right)
+        {
+            return new BinaryExpression(LexicalAnalyzer.Operator.Assign, Left, Right);
+        }
+        public static BinaryExpression LessThan(Expression Left, Expression Right)
+        {
+            return new BinaryExpression(LexicalAnalyzer.Operator.Less, Left, Right);
+        }
+        public static BinaryExpression GreaterThan(Expression Left, Expression Right)
+        {
+            return new BinaryExpression(LexicalAnalyzer.Operator.Greater, Left, Right);
+        }
+        public static BinaryExpression LessOrEquals(Expression Left, Expression Right)
+        {
+            return new BinaryExpression(LexicalAnalyzer.Operator.LessOrEquals, Left, Right);
+        }
+        public static BinaryExpression GreaterOrEquals(Expression Left, Expression Right)
+        {
+            return new BinaryExpression(LexicalAnalyzer.Operator.GreaterOrEquals, Left, Right);
+        }
+        public static BinaryExpression Add(Expression Left, Expression Right)
+        {
+            return new BinaryExpression(LexicalAnalyzer.Operator.Add, Left, Right);
+        }
+        public static BinaryExpression Subtract(Expression Left, Expression Right)
+        {
+            return new BinaryExpression(LexicalAnalyzer.Operator.Subtract, Left, Right);
+        }
+        public static BinaryExpression Multiply(Expression Left, Expression Right)
+        {
+            return new BinaryExpression(LexicalAnalyzer.Operator.Multiply, Left, Right);
+        }
+        public static BinaryExpression Divide(Expression Left, Expression Right)
+        {
+            return new BinaryExpression(LexicalAnalyzer.Operator.Divide, Left, Right);
+        }
+        public static BinaryExpression Power(Expression Left, Expression Right)
+        {
+            return new BinaryExpression(LexicalAnalyzer.Operator.Power, Left, Right);
+        }
+        public static UnaryExpression UnaryPlus(Expression Value)
+        {
+            return new UnaryExpression(LexicalAnalyzer.Operator.UnaryPlus, Value);
+        }
+        public static UnaryExpression UnaryMinus(Expression Value)
+        {
+            return new UnaryExpression(LexicalAnalyzer.Operator.UnaryMinus, Value);
+        }
+        public static IndexExpression Property(Expression table, string property)
+        {
+            return new IndexExpression(table, new ParameterExpression(property), IndexType.Dot);
+        }
+        public static IndexExpression Index(Expression array, Expression index)
+        {
+            return new IndexExpression(array, index, IndexType.Bracket);
+        }
+        public static IfThenExpression IfThen(Expression Test, Expression IfTrue)
+        {
+            return new IfThenExpression(Test, IfTrue);
+        }
+        public static IfThenElseExpression IfThenElse(Expression Test, Expression IfTrue, Expression IfFalse)
+        {
+            return new IfThenElseExpression(Test, IfTrue, IfFalse);
+        }
+        public static GotoExpression Break()
+        {
+            return new GotoExpression(GotoExpressionKind.Break);
+        }
+        public static WhileExpression While(Expression Condition, Expression Body)
+        {
+            return new WhileExpression(Condition, Body);
+        }
+        public static ForEachExpression ForEach(ParameterExpression Item, Expression Collection, Expression Body)
+        {
+            return new ForEachExpression(Item, Collection, Body);
+        }
+        public static GotoExpression Continue()
+        {
+            return new GotoExpression(GotoExpressionKind.Continue);
+        }
+        public static ConstantExpression Pass()
+        {
+            return Expression.Void();
+        }
+        public static BinaryExpression And(Expression Left, Expression Right)
+        {
+            return new BinaryExpression(LexicalAnalyzer.Operator.And, Left, Right);
+        }
+        public static BinaryExpression Or(Expression Left, Expression Right)
+        {
+            return new BinaryExpression(LexicalAnalyzer.Operator.Or, Left, Right);
+        }
+        public static UnaryExpression Not(Expression Value)
+        {
+            return new UnaryExpression(LexicalAnalyzer.Operator.Not, Value);
+        }
         public T As<T>(Scope scope) where T : struct
         {
             return (T)GetValue<ConstantExpression>(ExpressionType.Constant, scope).Value;
@@ -118,7 +230,7 @@ namespace Cygnus.SyntaxTree
             switch (NodeType)
             {
                 case ExpressionType.Return:
-                    return (this as ReturnExpression).expression.Eval(scope).GetValue(scope);
+                    return (this as GotoExpression).Value.Eval(scope).GetValue(scope);
                 case ExpressionType.Call:
                 case ExpressionType.Parameter:
                 case ExpressionType.Block:
@@ -136,7 +248,7 @@ namespace Cygnus.SyntaxTree
             switch (NodeType)
             {
                 case ExpressionType.Return:
-                    return (this as ReturnExpression).expression.Eval(scope).GetValue<T>(expressionType, scope);
+                    return (this as GotoExpression).Value.Eval(scope).GetValue<T>(expressionType, scope);
                 case ExpressionType.Parameter:
                 case ExpressionType.Call:
                 case ExpressionType.Block:
@@ -206,6 +318,6 @@ namespace Cygnus.SyntaxTree
         Parameter, Function, Array, List, Dictionary,
         Index, Return, ForEach, IEnumerable, Call,
         Table, IList, KeyValuePair, Continue, CSharpObject,
-        Matrix, MatrixRow, Computable
+        Matrix, MatrixRow, Computable, Goto
     }
 }
