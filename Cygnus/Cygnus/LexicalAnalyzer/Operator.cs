@@ -26,8 +26,8 @@ namespace Cygnus.LexicalAnalyzer
         Greater = 0x800,
         LessOrEquals = 0x1000,
         GreaterOrEquals = 0x2000,
-        Equals = 0x4000,
-        NotEqualTo = 0x8000,
+        Equal = 0x4000,
+        NotEqual = 0x8000,
         /* Others */
         Call, Assign,
     }

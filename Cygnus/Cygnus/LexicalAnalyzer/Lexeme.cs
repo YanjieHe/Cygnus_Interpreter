@@ -41,12 +41,12 @@ namespace Cygnus.LexicalAnalyzer
                 case TokenType.And:
                 case TokenType.Or:
                 case TokenType.Not:
-                case TokenType.Equals:
+                case TokenType.Equal:
                 case TokenType.GreaterOrEquals:
                 case TokenType.LessOrEquals:
                 case TokenType.Greater:
                 case TokenType.Less:
-                case TokenType.NotEqualTo:
+                case TokenType.NotEqual:
                 case TokenType.Assign:
                     return ParseBinaryOperator(token);
                 /* Unary Operators */
@@ -115,8 +115,8 @@ namespace Cygnus.LexicalAnalyzer
                 case TokenType.Greater: return Operator.Greater;
                 case TokenType.LessOrEquals: return Operator.LessOrEquals;
                 case TokenType.GreaterOrEquals: return Operator.GreaterOrEquals;
-                case TokenType.Equals: return Operator.Equals;
-                case TokenType.NotEqualTo: return Operator.NotEqualTo;
+                case TokenType.Equal: return Operator.Equal;
+                case TokenType.NotEqual: return Operator.NotEqual;
 
                 case TokenType.Assign: return Operator.Assign;
                 default: throw new Exception();

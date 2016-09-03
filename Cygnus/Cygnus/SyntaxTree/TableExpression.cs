@@ -1,11 +1,18 @@
 ﻿using System.Collections.Generic;
 using Cygnus.Errors;
+using Cygnus.DataStructures;
+using System;
+using System.Linq;
 namespace Cygnus.SyntaxTree
 {
-    public class TableExpression : Expression, ITable
+    public class TableExpression : Expression, IIndexable
     {
         public TableExpression Parent { get; set; }
-        public Dictionary<string, Expression> Properties { get; private set; }
+        public Table<Expression> table { get; private set; }
+        public TableExpression(params Expression[]values)
+        {
+            table = new Table<Expression>(values);
+        }
         public override ExpressionType NodeType
         {
             get
@@ -13,52 +20,50 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.Table;
             }
         }
-        public Expression this[string Name]
+
+        public ConstantExpression Length
         {
             get
             {
-                return Find(Name);
+                return Constant(table.Count(),ConstantType.Integer);
+            }
+        }
+
+        public Expression this[Expression index, Scope scope]
+        {
+            get
+            {
+                var i = index.AsConstant(scope);
+                switch (i.type)
+                {
+                    case ConstantType.Integer:
+                        return table[(int)i.Value];
+                    case ConstantType.Double:
+                    case ConstantType.Boolean:
+                    case ConstantType.Char:
+                    case ConstantType.String:
+                        return table[i.Value];
+                    default:
+                        throw new NotImplementedException();
+                }
             }
 
             set
             {
-                Assign(Name, value);
+                var i = index.AsConstant(scope);
+                switch (i.type)
+                {
+                    case ConstantType.Integer:
+                        table[(int)i.Value] = value.GetValue(scope); break;
+                    case ConstantType.Double:
+                    case ConstantType.Boolean:
+                    case ConstantType.Char:
+                    case ConstantType.String:
+                        table[i.Value] = value.GetValue(scope); break;
+                    default:
+                        throw new NotImplementedException();
+                }
             }
-        }
-
-        public Expression Find(string key)
-        {
-            TableExpression current = this;
-            while (current != null)
-            {
-                Expression Value = null;
-                if (current.Properties.TryGetValue(key, out Value))
-                    return Value;
-                current = current.Parent;
-            }
-            throw new NotDefinedException(key);
-        }
-        public Expression Assign(string key, Expression value)
-        {
-            TableExpression current = this;
-            while (current != null)
-            {
-                if (current.Properties.ContainsKey(key))
-                    return current.Properties[key] = value;
-                current = current.Parent;
-            }
-            throw new NotDefinedException(key);
-        }
-        public TableExpression(params KeyValuePair<string, Expression>[] properties)
-        {
-            Properties = new Dictionary<string, Expression>(properties.Length);
-            foreach (var kvp in properties)
-                Properties.Add(kvp.Key, kvp.Value);
-        }
-        public TableExpression Append(string Name,Expression property)
-        {
-            Properties.Add(Name, property);
-            return this;
         }
         public override Expression Eval(Scope scope)
         {

@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyImporter\CSharpAssembly.cs" />
+    <Compile Include="DataStructures\Table.cs" />
     <Compile Include="Errors\InterpreterException.cs" />
     <Compile Include="Errors\LexicalException.cs" />
     <Compile Include="Errors\NotDefinedException.cs" />
@@ -84,22 +85,17 @@
     <Compile Include="SyntaxTree\GotoExpression.cs" />
     <Compile Include="SyntaxTree\IAssignable.cs" />
     <Compile Include="SyntaxTree\CSharpObjectExpression.cs" />
-    <Compile Include="SyntaxTree\IListExpression.cs" />
     <Compile Include="SyntaxTree\IIndexable.cs" />
-    <Compile Include="SyntaxTree\ITable.cs" />
-    <Compile Include="SyntaxTree\KeyValuePairExpression.cs" />
     <Compile Include="SyntaxTree\MatrixExpression.cs" />
     <Compile Include="SyntaxTree\MatrixRowExpression.cs" />
     <Compile Include="SyntaxTree\Scope.cs" />
     <Compile Include="SymbolTable\VariableTable.cs" />
     <Compile Include="SyntaxAnalyzer\AST.cs" />
     <Compile Include="SyntaxAnalyzer\ASTParser.cs" />
-    <Compile Include="SyntaxTree\ArrayExpression.cs" />
     <Compile Include="SyntaxTree\BinaryExpression.cs" />
     <Compile Include="SyntaxTree\BlockExpression.cs" />
     <Compile Include="SyntaxTree\TableExpression.cs" />
     <Compile Include="SyntaxTree\ConstantExpression.cs" />
-    <Compile Include="SyntaxTree\DictionaryExpression.cs" />
     <Compile Include="SyntaxTree\Expression.cs" />
     <Compile Include="SyntaxTree\ForEachExpression.cs" />
     <Compile Include="SyntaxTree\CallExpression.cs" />
@@ -108,7 +104,6 @@
     <Compile Include="SyntaxTree\IfThenElseExpression.cs" />
     <Compile Include="SyntaxTree\IfThenExpression.cs" />
     <Compile Include="SyntaxTree\IndexExpression.cs" />
-    <Compile Include="SyntaxTree\ListExpression.cs" />
     <Compile Include="SyntaxTree\ParameterExpression.cs" />
     <Compile Include="SyntaxTree\TreeViewer.cs" />
     <Compile Include="SyntaxTree\UnaryExpression.cs" />

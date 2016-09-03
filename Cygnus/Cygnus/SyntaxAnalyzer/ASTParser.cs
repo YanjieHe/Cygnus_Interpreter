@@ -247,14 +247,14 @@ namespace Cygnus.SyntaxAnalyzer
 
             value = ParseCompare();
 
-            while (Current.tokenType.In(TokenType.Equals, TokenType.NotEqualTo))
+            while (Current.tokenType.In(TokenType.Equal, TokenType.NotEqual))
             {
                 TokenType op = Current.tokenType;
                 MoveNext();
-                if (op == TokenType.Equals)
-                    value = new BinaryExpression(Operator.Equals, value, ParseCompare());
-                else if (op == TokenType.NotEqualTo)
-                    value = new BinaryExpression(Operator.NotEqualTo, value, ParseCompare());
+                if (op == TokenType.Equal)
+                    value = new BinaryExpression(Operator.Equal, value, ParseCompare());
+                else if (op == TokenType.NotEqual)
+                    value = new BinaryExpression(Operator.NotEqual, value, ParseCompare());
             }
             return value;
         }
@@ -366,7 +366,7 @@ namespace Cygnus.SyntaxAnalyzer
                 }
                 else if (op == TokenType.LeftBracket)
                 {
-                    value = Expression.Index(value, ParseExpression());
+                    value = Expression.MakeIndex(value, ParseExpression());
                     if (Current.tokenType == TokenType.RightBracket)
                     {
                         MoveNext();
@@ -398,9 +398,9 @@ namespace Cygnus.SyntaxAnalyzer
                 MoveNext();
                 value = Expression.Call(Name, argsList.ToArray());
             }
-            return value ?? ParseInitArray();
+            return value ?? ParseInitTable();
         }
-        public Expression ParseInitArray()
+        public Expression ParseInitTable()
         {
             Expression value = null;
             if (Current.tokenType == TokenType.LeftBrace)
@@ -417,7 +417,7 @@ namespace Cygnus.SyntaxAnalyzer
                     }
                 }
                 MoveNext();
-                value = Expression.Array(argsList.ToArray());
+                value = new TableExpression(argsList.ToArray());
             }
             return value ?? ParseFactor();
         }

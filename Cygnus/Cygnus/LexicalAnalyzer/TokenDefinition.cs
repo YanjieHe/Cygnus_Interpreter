@@ -24,12 +24,12 @@ namespace Cygnus.LexicalAnalyzer
                    new TokenDefinition(new TokenMatcher( @"--\[\[(.*)\]\]",RegexOptions.Singleline), TokenType.Comments),
                    new TokenDefinition(@"%(.*)", TokenType.Comments),
 
-                   new TokenDefinition(@"==", TokenType.Equals),
+                   new TokenDefinition(@"==", TokenType.Equal),
                    new TokenDefinition(@">=", TokenType.GreaterOrEquals),
                    new TokenDefinition(@"<=", TokenType.LessOrEquals),
                    new TokenDefinition(@">", TokenType.Greater),
                    new TokenDefinition(@"<", TokenType.Less),
-                   new TokenDefinition(@"!=", TokenType.NotEqualTo),
+                   new TokenDefinition(@"!=", TokenType.NotEqual),
                    new TokenDefinition(@"=", TokenType.Assign),
 
                    new TokenDefinition(@"[0-9]+\.[0-9]+", TokenType.Double),

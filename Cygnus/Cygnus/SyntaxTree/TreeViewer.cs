@@ -62,12 +62,12 @@ namespace Cygnus.SyntaxTree
                 case ExpressionType.Return:
                     PrintTree(((GotoExpression)Node).Value, depth + 1);
                     break;
-                case ExpressionType.Array:
-                    {
-                        foreach (var item in ((ArrayExpression)Node).Values)
-                            PrintTree(item, depth + 1);
-                    }
-                    break;
+                //case ExpressionType.Array:
+                //    {
+                //        foreach (var item in ((ArrayExpression)Node).Values)
+                //            PrintTree(item, depth + 1);
+                //    }
+                //    break;
                 case ExpressionType.ForEach:
                     {
                         PrintTree(((ForEachExpression)Node).Collection, depth + 1);

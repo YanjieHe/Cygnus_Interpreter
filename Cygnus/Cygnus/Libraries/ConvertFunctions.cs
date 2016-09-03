@@ -17,13 +17,5 @@ namespace Cygnus.Libraries
         {
             return Convert.ToString(args.Single().AsConstant(scope).Value);
         }
-        public static Expression ToArray(Expression[] args, Scope scope)
-        {
-            return Expression.Array(args[0].GetIEnumrableList(scope).ToArray());
-        }
-        public static Expression ToList(Expression[] args, Scope scope)
-        {
-            return Expression.List(args[0].GetIEnumrableList(scope).ToList());
-        }
     }
 }

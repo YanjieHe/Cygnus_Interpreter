@@ -8,7 +8,7 @@ using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace Cygnus.SyntaxTree
 {
-    public class MatrixExpression : ConstantExpression, IIndexable, ITable
+    public class MatrixExpression : ConstantExpression, IIndexable
     {
         public MatrixExpression(Matrix<double> Data) : base(Data, ConstantType.Matrix) { }
         public MatrixExpression(params double[][] rows) : base(ConstantType.Matrix)

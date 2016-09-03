@@ -23,41 +23,11 @@ namespace Cygnus.Libraries
             Console.WriteLine();
             return Expression.Void();
         }
-        public static Expression InitArray(Expression[] args, Scope scope)
-        {
-            int n = args.Single().As<int>(scope);
-            var arr = new Expression[n];
-            for (int i = 0; i < n; i++)
-                arr[i] = Expression.Null();
-            return new ArrayExpression(arr);
-        }
-        public static Expression InitList(Expression[] args, Scope scope)
-        {
-            if (args.Length == 1 && args.Single().IsVoid(scope))
-                return Expression.List(new List<Expression>());
-            else
-                return Expression.List(args.Select(i => i.GetValue(scope)).ToList());
-        }
-        public static Expression InitDictionary(Expression[] args, Scope scope)
-        {
-            if (args.Length == 1 && args.Single().IsVoid(scope))
-                return new DictionaryExpression(new Dictionary<ConstantExpression, Expression>());
-            else
-                return new DictionaryExpression(args.Map(i =>
-                {
-                    var kvparr = i.AsArray(scope).Values;
-                    if (kvparr.Length != 2)
-                        throw new ArgumentException("The length of key-value pair must be 2");
-                    else
-                        return new KeyValuePair<ConstantExpression, Expression>
-                        (kvparr[0].AsConstant(scope), kvparr[1].GetValue(scope));
-                }
-                ));
-        }
         public static Expression InitTable(Expression[] args, Scope scope)
         {
-            return new TableExpression(args.Cast<ParameterExpression>()
-                .Select(i => new KeyValuePair<string, Expression>(i.Name, Expression.Null())).ToArray());
+            throw new NotImplementedException();
+            //return new TableExpression(args.Cast<ParameterExpression>()
+            //    .Select(i => new KeyValuePair<string, Expression>(i.Name, Expression.Null())).ToArray());
         }
         public static Expression InitVector(Expression[] args, Scope scope)
         {
@@ -66,12 +36,13 @@ namespace Cygnus.Libraries
         }
         public static Expression InitMatrix(Expression[] args, Scope scope)
         {
-            var rows = new double[args.Length][];
-            for (int i = 0; i < args.Length; i++)
-            {
-                rows[i] = args[i].AsArray(scope).Values.Map(j => j.AsConstant(scope).GetDouble());
-            }
-            return new MatrixExpression(rows);
+            throw new NotImplementedException();
+            //var rows = new double[args.Length][];
+            //for (int i = 0; i < args.Length; i++)
+            //{
+            //    rows[i] = args[i].AsArray(scope).Values.Map(j => j.AsConstant(scope).GetDouble());
+            //}
+            //return new MatrixExpression(rows);
         }
         public static Expression Length(Expression[] args, Scope scope)
         {

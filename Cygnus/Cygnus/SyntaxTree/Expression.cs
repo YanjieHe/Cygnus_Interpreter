@@ -37,21 +37,10 @@ namespace Cygnus.SyntaxTree
         {
             return new ConstantExpression(obj, constantType);
         }
-        public static ArrayExpression Array(Expression[] array)
-        {
-            return new ArrayExpression(array);
-        }
-        public static ListExpression List(List<Expression> list)
-        {
-            return new ListExpression(list);
-        }
-        public static DictionaryExpression Dictionary(Dictionary<ConstantExpression, Expression> dict)
-        {
-            return new DictionaryExpression(dict);
-        }
         public static TableExpression Table(params KeyValuePair<string, Expression>[] kvps)
         {
-            return new TableExpression(kvps);
+            throw new NotImplementedException();
+            //return new TableExpression(kvps);
         }
         public static CallExpression Call(string Name, params Expression[] Arguments)
         {
@@ -141,11 +130,11 @@ namespace Cygnus.SyntaxTree
         {
             return new UnaryExpression(LexicalAnalyzer.Operator.UnaryMinus, Value);
         }
-        public static IndexExpression Property(Expression table, string property)
+        public static IndexExpression Property(Expression Member, string property)
         {
-            return new IndexExpression(table, new ParameterExpression(property), IndexType.Dot);
+            return new IndexExpression(Member, new ParameterExpression(property), IndexType.Dot);
         }
-        public static IndexExpression Index(Expression array, Expression index)
+        public static IndexExpression MakeIndex(Expression array, Expression index)
         {
             return new IndexExpression(array, index, IndexType.Bracket);
         }
@@ -200,18 +189,6 @@ namespace Cygnus.SyntaxTree
         public ConstantExpression AsConstant(Scope scope)
         {
             return GetValue<ConstantExpression>(ExpressionType.Constant, scope);
-        }
-        public ArrayExpression AsArray(Scope scope)
-        {
-            return GetValue<ArrayExpression>(ExpressionType.Array, scope);
-        }
-        public ListExpression AsList(Scope scope)
-        {
-            return GetValue<ListExpression>(ExpressionType.List, scope);
-        }
-        public DictionaryExpression AsDictionary(Scope scope)
-        {
-            return GetValue<DictionaryExpression>(ExpressionType.Dictionary, scope);
         }
         public TableExpression AsTable(Scope scope)
         {
@@ -296,12 +273,6 @@ namespace Cygnus.SyntaxTree
                 {
                     case ExpressionType.Constant:
                         return (this as ConstantExpression).Equals(other as ConstantExpression);
-                    case ExpressionType.Array:
-                        return (this as ArrayExpression).Equals(other as ArrayExpression);
-                    case ExpressionType.List:
-                        return (this as ListExpression).Equals(other as ListExpression);
-                    case ExpressionType.Dictionary:
-                        return (this as DictionaryExpression).Equals(other as DictionaryExpression);
                     case ExpressionType.IEnumerable:
                         return (this as IEnumerableExpression).Equals(other as IEnumerableExpression);
                     default:
@@ -318,6 +289,6 @@ namespace Cygnus.SyntaxTree
         Parameter, Function, Array, List, Dictionary,
         Index, Return, ForEach, IEnumerable, Call,
         Table, IList, KeyValuePair, Continue, CSharpObject,
-        Matrix, MatrixRow, Computable, Goto
+        Matrix, MatrixRow, Computable, Goto,Collection,
     }
 }

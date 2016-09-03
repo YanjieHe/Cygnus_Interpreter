@@ -13,14 +13,14 @@ namespace Cygnus.SyntaxTree
                 return ExpressionType.IEnumerable;
             }
         }
-        public IEnumerable<Expression> list { get; private set; }
-        public IEnumerableExpression(IEnumerable<Expression> list)
+        public IEnumerable<Expression> Collection { get; private set; }
+        public IEnumerableExpression(IEnumerable<Expression> Collection)
         {
-            this.list = list;
+            this.Collection = Collection;
         }
         public IEnumerator<Expression> GetEnumerator()
         {
-            foreach (var item in list)
+            foreach (var item in Collection)
                 yield return item;
         }
         IEnumerator IEnumerable.GetEnumerator()

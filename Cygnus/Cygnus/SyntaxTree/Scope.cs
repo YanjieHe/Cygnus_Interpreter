@@ -102,9 +102,6 @@ namespace Cygnus.SyntaxTree
           {
               /***************     Basic functions     ***************/
               ["print"] = BuiltInFunctions.Print,
-              ["array"] = BuiltInFunctions.InitArray,
-              ["list"] = BuiltInFunctions.InitList,
-              ["dict"] = BuiltInFunctions.InitDictionary,
               ["table"] = BuiltInFunctions.InitTable,
               ["vector"] = BuiltInFunctions.InitVector,
               ["matrix"] = BuiltInFunctions.InitMatrix,
@@ -122,20 +119,18 @@ namespace Cygnus.SyntaxTree
               ["exit"] = BuiltInFunctions.Exit,
 
               /***************     List functions     ***************/
-              ["append"] = ListFunctions.Append,
-              ["remove"] = ListFunctions.Remove,
-              ["remove_at"] = ListFunctions.RemoveAt,
-              ["insert"] = ListFunctions.Insert,
+              //["append"] = ListFunctions.Append,
+              //["remove"] = ListFunctions.Remove,
+              //["remove_at"] = ListFunctions.RemoveAt,
+              //["insert"] = ListFunctions.Insert,
 
               /***************     Dictionary functions     ***************/
-              ["has_key"] = DictionaryFunctions.Has_Key,
+              //["has_key"] = DictionaryFunctions.Has_Key,
 
               /***************     Convert Type functions     ***************/
               ["int"] = ConvertFunctions.ToInt,
               ["double"] = ConvertFunctions.ToDouble,
               ["str"] = ConvertFunctions.Str,
-              ["to_array"] = ConvertFunctions.ToArray,
-              ["to_list"] = ConvertFunctions.ToList,
 
               /***************     Math functions     ***************/
               ["exp"] = MathFunctions.Exp,
@@ -147,7 +142,7 @@ namespace Cygnus.SyntaxTree
               /***************     String functions     ***************/
               ["strcat"] = StringFunctions.StrConcat,
               ["strjoin"] = StringFunctions.StrJoin,
-              ["strsplit"] = StringFunctions.StrSplit,
+              //["strsplit"] = StringFunctions.StrSplit,
               ["strformat"] = StringFunctions.StrFormat,
               ["strlen"] = StringFunctions.StrLen,
               ["strfind"] = StringFunctions.StrFind,

@@ -43,9 +43,9 @@ namespace Cygnus.SyntaxTree
                 case Operator.LessOrEquals:
                 case Operator.GreaterOrEquals:
                     return CompareOp(Left, Right, Op, scope);
-                case Operator.Equals:
+                case Operator.Equal:
                     return Left.Eval(scope).Equals(Right.Eval(scope));
-                case Operator.NotEqualTo:
+                case Operator.NotEqual:
                     return !Left.Eval(scope).Equals(Right.Eval(scope));
                 case Operator.Assign:
                     return AssginOp(Left, Right, scope);

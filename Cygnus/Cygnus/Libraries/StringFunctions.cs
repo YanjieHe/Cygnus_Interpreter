@@ -16,15 +16,15 @@ namespace Cygnus.Libraries
             return string.Join(args.First().AsString(scope),
                 args.Skip(1).Select(i => i.AsConstant(scope).Value.ToString()));
         }
-        public static Expression StrSplit(Expression[] args, Scope scope)
-        {
-            return
-                new ArrayExpression(
-                    args.First().AsString(scope)
-                    .Split(args.Skip(1)
-                    .Select(i => i.AsString(scope).Single()).ToArray())
-                    .Select(i => (Expression)i).ToArray());
-        }
+        //public static Expression StrSplit(Expression[] args, Scope scope)
+        //{
+        //    return
+        //        new ArrayExpression(
+        //            args.First().AsString(scope)
+        //            .Split(args.Skip(1)
+        //            .Select(i => i.AsString(scope).Single()).ToArray())
+        //            .Select(i => (Expression)i).ToArray());
+        //}
         public static Expression StrFormat(Expression[] args, Scope scope)
         {
             return string.Format(args.First().AsString(scope),

@@ -10,12 +10,12 @@
         Null, Void,
 
         /* Comparison Operators */
-        Equals,
+        Equal,
         GreaterOrEquals,
         LessOrEquals,
         Greater,
         Less,
-        NotEqualTo,
+        NotEqual,
         /* Arithmetic Operators*/
         UnaryPlus, UnaryMinus,
         Add, Subtract, Multiply, Divide, Power,
@@ -42,6 +42,6 @@
         /* Others */
         Assign, Call, Symbol,
         Space, Variable, EndOfLine,
-        Comments, No_Arg,
+        Comments,
     };
 }
