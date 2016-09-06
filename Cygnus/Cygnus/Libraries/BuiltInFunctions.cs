@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Cygnus.SyntaxTree;
+using Cygnus.Expressions;
 using Cygnus.Extensions;
 using Cygnus.AssemblyImporter;
 using Cygnus.LexicalAnalyzer;
@@ -12,6 +12,7 @@ using Cygnus.Executors;
 using System.IO;
 using Cygnus.Settings;
 using Utility = Cygnus.Extensions.UtilityFunctions;
+using Cygnus.DataStructures;
 namespace Cygnus.Libraries
 {
     public static class BuiltInFunctions
@@ -19,9 +20,18 @@ namespace Cygnus.Libraries
         public static Expression Print(Expression[] args, Scope scope)
         {
             var obj = args.Single().GetValue(scope);
-            obj.Display(scope);
-            Console.WriteLine();
+            if (obj is IDisplayable)
+            {
+                (obj as IDisplayable).Display(scope);
+                Console.WriteLine();
+            }
+            else
+                Console.WriteLine(obj);
             return Expression.Void();
+        }
+        public static Expression InitList(Expression[] args, Scope scope)
+        {
+            return new CygnusList(args.Select(i => i.AsConstant(scope).Value).ToList());
         }
         public static Expression InitTable(Expression[] args, Scope scope)
         {
@@ -29,11 +39,11 @@ namespace Cygnus.Libraries
             //return new TableExpression(args.Cast<ParameterExpression>()
             //    .Select(i => new KeyValuePair<string, Expression>(i.Name, Expression.Null())).ToArray());
         }
-        public static Expression InitVector(Expression[] args, Scope scope)
-        {
-            var values = args.Map(i => i.AsConstant(scope).GetDouble());
-            return new VectorExpression(values);
-        }
+        //public static Expression InitVector(Expression[] args, Scope scope)
+        //{
+        //    var values = args.Map(i => i.AsConstant(scope).GetDouble());
+        //    return new VectorExpression(values);
+        //}
         public static Expression InitMatrix(Expression[] args, Scope scope)
         {
             throw new NotImplementedException();
@@ -46,7 +56,8 @@ namespace Cygnus.Libraries
         }
         public static Expression Length(Expression[] args, Scope scope)
         {
-            return (args.Single().GetValue(scope) as IIndexable).Length;
+            throw new NotImplementedException();
+            //return (args.Single().GetValue(scope) as IIndexable).Length;
         }
         public static Expression Import(Expression[] args, Scope scope)
         {
@@ -57,14 +68,14 @@ namespace Cygnus.Libraries
             return Expression.Void();
         }
 
-        public static Expression SetParent(Expression[] args, Scope scope)
-        {
-            (args.Length == 2).OrThrows<ParameterException>();
-            var table = args[0].AsTable(scope);
-            var parent_table = args[1].GetValue<TableExpression>(ExpressionType.Table, scope);
-            table.Parent = parent_table;
-            return Expression.Void();
-        }
+        //public static Expression SetParent(Expression[] args, Scope scope)
+        //{
+        //    (args.Length == 2).OrThrows<ParameterException>();
+        //    var table = args[0].AsTable(scope);
+        //    var parent_table = args[1].GetValue<TableExpression>(ExpressionType.Table, scope);
+        //    table.Parent = parent_table;
+        //    return Expression.Void();
+        //}
         public static Expression Range(Expression[] args, Scope scope)
         {
             switch (args.Length)
@@ -73,7 +84,7 @@ namespace Cygnus.Libraries
                     return
                Expression.IEnumerable(
                Enumerable.Range(0, args[0].As<int>(scope))
-               .Select(i => Expression.Constant(i, ConstantType.Integer)));
+               .Select(i => new CygnusInteger(i)));
                 case 2:
                     {
                         int start = args[0].As<int>(scope);
@@ -81,7 +92,7 @@ namespace Cygnus.Libraries
                         return
                        Expression.IEnumerable(
                            Enumerable.Range(start, end - start)
-                           .Select(i => Expression.Constant(i, ConstantType.Integer)));
+                           .Select(i => new CygnusInteger(i)));
                     }
                 case 3:
                     {
@@ -91,7 +102,7 @@ namespace Cygnus.Libraries
                         return
                             Expression.IEnumerable(
                                 GetRange(start, end, step)
-                                .Select(i => Expression.Constant(i, ConstantType.Integer)));
+                                .Select(i => new CygnusInteger(i)));
                     }
                 default:
                     throw new ParameterException();
@@ -141,9 +152,7 @@ namespace Cygnus.Libraries
             {
                 if (!scope.Delete(item))
                 {
-                    if (Scope.functionTable.ContainsKey(item))
-                        Scope.functionTable.Remove(item);
-                    else throw new NotDefinedException(item);
+                    throw new NotDefinedException(item);
                 }
             }
             return Expression.Void();

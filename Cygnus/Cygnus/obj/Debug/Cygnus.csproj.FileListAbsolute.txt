@@ -18,3 +18,8 @@ D:\myCode\CSharpCode\Cygnus_Scope\Cygnus\Cygnus\bin\Debug\MathNet.Numerics.xml
 D:\myCode\CSharpCode\Cygnus_Scope\Cygnus\Cygnus\obj\Debug\Cygnus.exe
 D:\myCode\CSharpCode\Cygnus_Scope\Cygnus\Cygnus\obj\Debug\Cygnus.pdb
 D:\myCode\CSharpCode\Cygnus_Scope\Cygnus\Cygnus\obj\Debug\Cygnus.csprojResolveAssemblyReference.cache
+D:\myCode\CSharpCode\Cygnus_github\Cygnus\Cygnus\bin\Debug\Cygnus.dll.config
+D:\myCode\CSharpCode\Cygnus_github\Cygnus\Cygnus\bin\Debug\Cygnus.dll
+D:\myCode\CSharpCode\Cygnus_github\Cygnus\Cygnus\bin\Debug\Cygnus.pdb
+D:\myCode\CSharpCode\Cygnus_github\Cygnus\Cygnus\obj\Debug\Cygnus.dll
+D:\myCode\CSharpCode\Cygnus_github\Cygnus\Cygnus\obj\Debug\Cygnus.pdb

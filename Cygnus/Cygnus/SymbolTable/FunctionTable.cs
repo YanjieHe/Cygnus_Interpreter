@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Cygnus.SyntaxTree;
+using Cygnus.Expressions;
 namespace Cygnus.SymbolTable
 {
     public class FunctionTable : Dictionary<string, FunctionExpression>

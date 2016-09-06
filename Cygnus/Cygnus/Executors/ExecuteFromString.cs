@@ -1,6 +1,6 @@
 ﻿using System;
 using Cygnus.LexicalAnalyzer;
-using Cygnus.SyntaxTree;
+using Cygnus.Expressions;
 namespace Cygnus.Executors
 {
     public class ExecuteFromString : InterpreterExecutor

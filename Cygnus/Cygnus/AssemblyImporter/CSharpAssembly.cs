@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using Cygnus.SyntaxTree;
+using Cygnus.Expressions;
 using Cygnus.SymbolTable;
 namespace Cygnus.AssemblyImporter
 {

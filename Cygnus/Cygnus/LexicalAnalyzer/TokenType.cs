@@ -37,7 +37,7 @@
         If, Then, Else, ElseIf,
         For, In, While, Break, Continue,
         Try, Catch, Finally,
-        Pass,
+        Pass, Class,This,
 
         /* Others */
         Assign, Call, Symbol,

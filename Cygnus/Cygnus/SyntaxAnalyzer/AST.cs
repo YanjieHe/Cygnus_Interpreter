@@ -1,5 +1,5 @@
 ﻿using System;
-using Cygnus.SyntaxTree;
+using Cygnus.Expressions;
 using Cygnus.LexicalAnalyzer;
 using Cygnus.SymbolTable;
 namespace Cygnus.SyntaxAnalyzer

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Cygnus.SyntaxTree;
+using Cygnus.Expressions;
 using Cygnus.LexicalAnalyzer;
 namespace Cygnus.Extensions
 {
@@ -21,7 +21,7 @@ namespace Cygnus.Extensions
             }
             return array;
         }
-        public static void DisplayList<T>(this IEnumerable<T> objs, Scope scope) where T : Expression
+        public static void DisplayList<T>(this IEnumerable<T> objs, Scope scope) where T : IDisplayable
         {
             Console.Write("{ ");
             using (var obj = objs.GetEnumerator())

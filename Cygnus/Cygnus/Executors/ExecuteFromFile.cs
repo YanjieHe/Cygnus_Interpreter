@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 using Cygnus.LexicalAnalyzer;
-using Cygnus.SyntaxTree;
+using Cygnus.Expressions;
 
 namespace Cygnus.Executors
 {

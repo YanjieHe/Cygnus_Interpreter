@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{8B4CE68E-DF0B-4AD7-97FD-F7C510BEA413}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Cygnus</RootNamespace>
     <AssemblyName>Cygnus</AssemblyName>
@@ -33,11 +33,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MathNet.Numerics, Version=3.13.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MathNet.Numerics.3.13.0\lib\net40\MathNet.Numerics.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -49,6 +48,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyImporter\CSharpAssembly.cs" />
+    <Compile Include="DataStructures\CygnusArray.cs" />
+    <Compile Include="DataStructures\CygnusBoolean.cs" />
+    <Compile Include="DataStructures\CygnusClass.cs" />
+    <Compile Include="DataStructures\CygnusDouble.cs" />
+    <Compile Include="DataStructures\CygnusIEnumerable.cs" />
+    <Compile Include="DataStructures\CygnusInteger.cs" />
+    <Compile Include="DataStructures\CygnusList.cs" />
+    <Compile Include="DataStructures\CygnusObject.cs" />
+    <Compile Include="DataStructures\CygnusString.cs" />
+    <Compile Include="DataStructures\CygnusType.cs" />
+    <Compile Include="DataStructures\CygnusVoid.cs" />
+    <Compile Include="DataStructures\IAssignable.cs" />
+    <Compile Include="DataStructures\IComputable.cs" />
+    <Compile Include="DataStructures\IDotAccessible.cs" />
+    <Compile Include="DataStructures\IIndexable.cs" />
     <Compile Include="DataStructures\Table.cs" />
     <Compile Include="Errors\InterpreterException.cs" />
     <Compile Include="Errors\LexicalException.cs" />
@@ -59,8 +73,11 @@
     <Compile Include="Executors\ExecuteFromString.cs" />
     <Compile Include="Executors\ExecuteInConsole.cs" />
     <Compile Include="Executors\InterpreterExecutor.cs" />
+    <Compile Include="Expressions\ClassExpression.cs" />
+    <Compile Include="Expressions\DotExpression.cs" />
     <Compile Include="Extensions\ConsoleExtension.cs" />
     <Compile Include="Extensions\ExpressionExtension.cs" />
+    <Compile Include="Extensions\IDisplayable.cs" />
     <Compile Include="Extensions\UtilityFunctions.cs" />
     <Compile Include="LexicalAnalyzer\Operator.cs" />
     <Compile Include="LexicalAnalyzer\TokenType.cs" />
@@ -77,42 +94,36 @@
     <Compile Include="Libraries\MathFunctions.cs" />
     <Compile Include="Libraries\MatrixFunctions.cs" />
     <Compile Include="Libraries\StringFunctions.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\WorkSpace.cs" />
     <Compile Include="SymbolTable\BuiltInMethodTable.cs" />
+    <Compile Include="SymbolTable\ClassTable.cs" />
     <Compile Include="SymbolTable\FunctionTable.cs" />
-    <Compile Include="SyntaxTree\GotoExpression.cs" />
-    <Compile Include="SyntaxTree\IAssignable.cs" />
-    <Compile Include="SyntaxTree\CSharpObjectExpression.cs" />
-    <Compile Include="SyntaxTree\IIndexable.cs" />
-    <Compile Include="SyntaxTree\MatrixExpression.cs" />
-    <Compile Include="SyntaxTree\MatrixRowExpression.cs" />
-    <Compile Include="SyntaxTree\Scope.cs" />
+    <Compile Include="Expressions\GotoExpression.cs" />
+    <Compile Include="Expressions\CSharpObjectExpression.cs" />
+    <Compile Include="Expressions\MemberExpression.cs" />
+    <Compile Include="Expressions\NewArrayExpression.cs" />
+    <Compile Include="Expressions\Scope.cs" />
     <Compile Include="SymbolTable\VariableTable.cs" />
     <Compile Include="SyntaxAnalyzer\AST.cs" />
     <Compile Include="SyntaxAnalyzer\ASTParser.cs" />
-    <Compile Include="SyntaxTree\BinaryExpression.cs" />
-    <Compile Include="SyntaxTree\BlockExpression.cs" />
-    <Compile Include="SyntaxTree\TableExpression.cs" />
-    <Compile Include="SyntaxTree\ConstantExpression.cs" />
-    <Compile Include="SyntaxTree\Expression.cs" />
-    <Compile Include="SyntaxTree\ForEachExpression.cs" />
-    <Compile Include="SyntaxTree\CallExpression.cs" />
-    <Compile Include="SyntaxTree\FunctionExpression.cs" />
-    <Compile Include="SyntaxTree\IEnumerableExpression.cs" />
-    <Compile Include="SyntaxTree\IfThenElseExpression.cs" />
-    <Compile Include="SyntaxTree\IfThenExpression.cs" />
-    <Compile Include="SyntaxTree\IndexExpression.cs" />
-    <Compile Include="SyntaxTree\ParameterExpression.cs" />
-    <Compile Include="SyntaxTree\TreeViewer.cs" />
-    <Compile Include="SyntaxTree\UnaryExpression.cs" />
-    <Compile Include="SyntaxTree\VectorExpression.cs" />
-    <Compile Include="SyntaxTree\WhileExpression.cs" />
+    <Compile Include="Expressions\BinaryExpression.cs" />
+    <Compile Include="Expressions\BlockExpression.cs" />
+    <Compile Include="Expressions\ConstantExpression.cs" />
+    <Compile Include="Expressions\Expression.cs" />
+    <Compile Include="Expressions\ForEachExpression.cs" />
+    <Compile Include="Expressions\CallExpression.cs" />
+    <Compile Include="Expressions\FunctionExpression.cs" />
+    <Compile Include="Expressions\IfThenElseExpression.cs" />
+    <Compile Include="Expressions\IfThenExpression.cs" />
+    <Compile Include="Expressions\IndexExpression.cs" />
+    <Compile Include="Expressions\ParameterExpression.cs" />
+    <Compile Include="Expressions\TreeViewer.cs" />
+    <Compile Include="Expressions\UnaryExpression.cs" />
+    <Compile Include="Expressions\WhileExpression.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

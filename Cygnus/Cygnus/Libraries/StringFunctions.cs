@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Cygnus.SyntaxTree;
+using Cygnus.Expressions;
 using System;
 using Cygnus.Errors;
 using Cygnus.Extensions;

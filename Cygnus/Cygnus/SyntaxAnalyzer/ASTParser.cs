@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cygnus.LexicalAnalyzer;
 using Cygnus.Errors;
-using Cygnus.SyntaxTree;
+using Cygnus.Expressions;
 using Cygnus.Extensions;
 namespace Cygnus.SyntaxAnalyzer
 {
@@ -51,16 +51,15 @@ namespace Cygnus.SyntaxAnalyzer
         {
             return index != array.Length - 1;
         }
-        public Expression ParseBlock(BlockExpression Parent, Predicate<TokenType> Stop)
+        public Expression ParseBlock(BlockExpression Parent, Predicate<TokenType> Stop, Scope CurrentScope = null)
         {
             var Block = new BlockExpression(Parent);
             while (index < array.Length - 1 && !Stop(Current.tokenType))
             {
-                //    Console.WriteLine(Current);
                 switch (Current.tokenType)
                 {
                     case TokenType.Define:
-                        Block.Append(ParseDefFunc(Block));
+                        Block.Append(ParseDefFunc(Block, CurrentScope ?? scope));
                         break;
                     case TokenType.Repeat:
                         break;
@@ -78,6 +77,9 @@ namespace Cygnus.SyntaxAnalyzer
                         break;
                     case TokenType.While:
                         Block.Append(ParseWhile(Block));
+                        break;
+                    case TokenType.Class:
+                        Block.Append(ParseDefClass(Block));
                         break;
                     case TokenType.Try:
                         break;
@@ -170,7 +172,7 @@ namespace Cygnus.SyntaxAnalyzer
             }
             throw new Exception();
         }
-        public Expression ParseDefFunc(BlockExpression Parent)
+        public Expression ParseDefFunc(BlockExpression Parent, Scope CurrentScope)
         {
             if (Current.tokenType == TokenType.Define)
             {
@@ -188,9 +190,40 @@ namespace Cygnus.SyntaxAnalyzer
                 MoveNext();
                 Expression Body = ParseBlock(Parent, i => i == TokenType.End);
                 MoveNext();
-                var FUNCTION = Expression.Function(Name, Body, new Scope(scope), argslist.ToArray());
-                Scope.functionTable[Name] = FUNCTION;
+                var FUNCTION = Expression.Function(Name, Body, new Scope(CurrentScope), argslist.ToArray());
+                CurrentScope.SetFunction(Name, FUNCTION);
                 return Expression.Void();
+            }
+            throw new Exception();
+        }
+        public Expression ParseDefClass(BlockExpression Parent)
+        {
+            if (Current.tokenType == TokenType.Class)
+            {
+                MoveNext();
+                if (Current.tokenType == TokenType.Variable)
+                {
+                    var Name = Current.Content as string;
+                    MoveNext();
+                    var ParentsList = new List<ParameterExpression>();
+                    while (Current.tokenType != TokenType.Begin)
+                    {
+                        if (Current.tokenType == TokenType.Variable)
+                            ParentsList.Add(Expression.Parameter(Current.Content as string));
+                        MoveNext();
+                    }
+                    MoveNext();
+                    var ClassScope = new Scope(scope);
+                    Expression Body = ParseBlock(Parent, i => i == TokenType.End, ClassScope);
+                    MoveNext();
+                    Body.Eval(ClassScope);
+                    var Class = new ClassExpression(Name, ClassScope);
+                    Scope.classtable[Name] = Class;
+                    return Expression.Void();
+                }
+                else
+                    throw new SyntaxException("Expecting function name");
+
             }
             throw new Exception();
         }
@@ -361,8 +394,28 @@ namespace Cygnus.SyntaxAnalyzer
 
                 if (op == TokenType.Dot)
                 {
-                    value = Expression.Property(value, Current.Content as string);
-                    MoveNext();
+                    if (Current.tokenType == TokenType.Variable)
+                    {
+                        value = new DotExpression(value, Current.Content as string, false);
+                        MoveNext();
+                    }
+                    else if (Current.tokenType == TokenType.Call)
+                    {
+                        var Name = Current.Content as string;
+                        MoveNext();
+                        List<Expression> argsList = new List<Expression>();
+                        while (Current.tokenType != TokenType.RightParenthesis)
+                        {
+                            argsList.Add(ParseExpression());
+                            if (Current.tokenType == TokenType.Comma)
+                            {
+                                MoveNext();
+                            }
+                        }
+                        MoveNext();
+                        value = new DotExpression(value, Name, true, argsList.ToArray());
+                    }
+                    else throw new ArgumentException();
                 }
                 else if (op == TokenType.LeftBracket)
                 {
@@ -373,7 +426,7 @@ namespace Cygnus.SyntaxAnalyzer
                     }
                     else
                     {
-                        throw new Exception("[]括号不匹配\n");
+                        throw new Exception("Mismatch '[' ']'");
                     }
                 }
             }
@@ -396,11 +449,17 @@ namespace Cygnus.SyntaxAnalyzer
                     }
                 }
                 MoveNext();
-                value = Expression.Call(Name, argsList.ToArray());
+                if (Scope.classtable.ContainsKey(Name))
+                {
+                    value = Scope.classtable[Name].Update(argsList.ToArray(), scope);
+                    // value = new ClassExpression(Name, argsList.ToArray());
+                }
+                else
+                    value = Expression.Call(Name, argsList.ToArray());
             }
-            return value ?? ParseInitTable();
+            return value ?? ParseNewArrayInit();
         }
-        public Expression ParseInitTable()
+        public Expression ParseNewArrayInit()
         {
             Expression value = null;
             if (Current.tokenType == TokenType.LeftBrace)
@@ -417,7 +476,7 @@ namespace Cygnus.SyntaxAnalyzer
                     }
                 }
                 MoveNext();
-                value = new TableExpression(argsList.ToArray());
+                value = Expression.NewArray(argsList.ToArray());
             }
             return value ?? ParseFactor();
         }
@@ -458,8 +517,7 @@ namespace Cygnus.SyntaxAnalyzer
                     case TokenType.Variable:
                         value = Expression.Variable(Current.Content as string); goto Finish;
                     default:
-                        // 既不是数字也不是'(', 也不是标识符
-                        throw new Exception("unkown charactor: \n" + Current);
+                        throw new LexicalException("Not supported token {0}", Current);
                 }
             }
         Finish:

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Cygnus.Errors;
+using Cygnus.Extensions;
 namespace Cygnus.LexicalAnalyzer
 {
     public sealed class Lexical
@@ -64,14 +65,8 @@ namespace Cygnus.LexicalAnalyzer
         {
             switch (tokenType)
             {
-                //case TokenType.Add:
-                //    if (BackTrack(tokenList.Last))
-                //        tokenType = TokenType.UnaryPlus; break;
-                //case TokenType.Subtract:
-                //    if (BackTrack(tokenList.Last))
-                //        tokenType = TokenType.UnaryMinus; break;
                 case TokenType.Space:
-                case TokenType.Comments: return;
+                case TokenType.Comments: return;//Omit the space and comments
                 case TokenType.Symbol:
                     CheckKeywords(content, ref tokenType);
                     break;
@@ -92,11 +87,11 @@ namespace Cygnus.LexicalAnalyzer
         }
         private void Append(Token token)
         {
-            if (token.tokenType == TokenType.LeftBracket || token.tokenType == TokenType.LeftBrace || token.tokenType == TokenType.LeftParenthesis || token.tokenType == TokenType.Call)
+            if (token.tokenType.In(TokenType.LeftBracket, TokenType.LeftBrace, TokenType.LeftParenthesis, TokenType.Call))
             {
                 BracketStack.Push(token.tokenType);
             }
-            else if (token.tokenType == TokenType.RightBracket || token.tokenType == TokenType.RightBrace || token.tokenType == TokenType.RightParenthesis)
+            else if (token.tokenType.In(TokenType.RightBracket, TokenType.RightBrace, TokenType.RightParenthesis))
             {
                 switch (token.tokenType)
                 {
@@ -106,30 +101,30 @@ namespace Cygnus.LexicalAnalyzer
                             BracketStack.Pop();
                             break;
                         }
-                        else throw new SyntaxException("Mismatch for brackets");
+                        else throw new SyntaxException("Mismatch brackets");
                     case TokenType.RightBrace:
                         if (BracketStack.Peek() == TokenType.LeftBrace)
                         {
                             BracketStack.Pop();
                             break;
                         }
-                        else throw new SyntaxException("Mismatch for braces");
+                        else throw new SyntaxException("Mismatch braces");
                     case TokenType.RightParenthesis:
-                        if (BracketStack.Peek() == TokenType.LeftParenthesis || BracketStack.Peek() == TokenType.Call)
+                        if (BracketStack.Peek().In(TokenType.LeftParenthesis, TokenType.Call))
                         {
                             BracketStack.Pop();
                             break;
                         }
-                        else throw new SyntaxException("Mismatch for parenthesises");
+                        else throw new SyntaxException("Mismatch parenthesises");
                     default:
-                        throw new SyntaxException("Mismatch for {0}", token.tokenType);
+                        throw new SyntaxException("Mismatch {0}", token.tokenType);
                 }
             }
             tokenList.AddLast(token);
         }
         public void Display()
         {
-            foreach (var item in tokenList) Console.WriteLine(item);
+            ConsoleExtension.Join("\r\n", tokenList);
         }
         public void CheckKeywords(string word, ref TokenType tokenType)
         {
@@ -187,6 +182,10 @@ namespace Cygnus.LexicalAnalyzer
                     tokenType = TokenType.Try; break;
                 case "catch":
                     tokenType = TokenType.Catch; break;
+                case "class":
+                    tokenType = TokenType.Class; break;
+                //case "this":
+                //    tokenType = TokenType.This; break;
                 default:
                     tokenType = TokenType.Variable; break;
             }

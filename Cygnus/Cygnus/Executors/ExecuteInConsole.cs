@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Cygnus.LexicalAnalyzer;
 using Cygnus.SyntaxAnalyzer;
-using Cygnus.SyntaxTree;
+using Cygnus.Expressions;
 namespace Cygnus.Executors
 {
     public class ExecuteInConsole : InterpreterExecutor

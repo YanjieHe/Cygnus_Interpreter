@@ -32,7 +32,7 @@ namespace Cygnus.LexicalAnalyzer
                    new TokenDefinition(@"!=", TokenType.NotEqual),
                    new TokenDefinition(@"=", TokenType.Assign),
 
-                   new TokenDefinition(@"[0-9]+\.[0-9]+", TokenType.Double),
+                   new TokenDefinition(@"[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?",TokenType.Double),
                    new TokenDefinition(@"[0-9]+", TokenType.Integer),
 
                    new TokenDefinition(@"\+", TokenType.Add),

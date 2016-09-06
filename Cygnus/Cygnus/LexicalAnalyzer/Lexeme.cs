@@ -79,6 +79,7 @@ namespace Cygnus.LexicalAnalyzer
                 case TokenType.In:
                 case TokenType.Pass:
                 case TokenType.Define:
+                case TokenType.Class:
                 case TokenType.Begin:
                 case TokenType.Null:
                 case TokenType.Void: return null;

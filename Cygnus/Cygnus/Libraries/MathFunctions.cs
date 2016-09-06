@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Cygnus.SyntaxTree;
+using Cygnus.Expressions;
 namespace Cygnus.Libraries
 {
     public static class MathFunctions
@@ -17,12 +17,13 @@ namespace Cygnus.Libraries
         }
         public static Expression Abs(Expression[] args, Scope scope)
         {
-            var d = args.Single().AsConstant(scope);
-            if (d.type == ConstantType.Integer)
-                return Math.Abs((int)d.Value);
-            else if (d.type == ConstantType.Double)
-                return Math.Abs((double)d.Value);
-            else throw new ArgumentException();
+            //var d = args.Single().AsConstant(scope);
+            //if (d.type == ConstantType.Integer)
+            //    return Math.Abs((int)d.Value);
+            //else if (d.type == ConstantType.Double)
+            //    return Math.Abs((double)d.Value);
+            //else throw new ArgumentException();
+            throw new NotImplementedException();
         }
         public static Expression Log(Expression[] args, Scope scope)
         {
