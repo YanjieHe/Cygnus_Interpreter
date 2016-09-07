@@ -201,7 +201,7 @@ namespace Cygnus.SyntaxAnalyzer
             if (Current.tokenType == TokenType.Class)
             {
                 MoveNext();
-                if (Current.tokenType == TokenType.Variable)
+                if (Current.tokenType == TokenType.Variable || Current.tokenType == TokenType.Call)
                 {
                     var Name = Current.Content as string;
                     MoveNext();
@@ -217,12 +217,13 @@ namespace Cygnus.SyntaxAnalyzer
                     Expression Body = ParseBlock(Parent, i => i == TokenType.End, ClassScope);
                     MoveNext();
                     Body.Eval(ClassScope);
-                    var Class = new ClassExpression(Name, ClassScope);
+                    var Class = new ClassExpression(Name, ClassScope,
+             ParentsList.Count > 0 ? Scope.classtable[ParentsList.Single().Name].cygnusClass : null);
                     Scope.classtable[Name] = Class;
                     return Expression.Void();
                 }
                 else
-                    throw new SyntaxException("Expecting function name");
+                    throw new SyntaxException("Expecting class name");
 
             }
             throw new Exception();
@@ -285,9 +286,9 @@ namespace Cygnus.SyntaxAnalyzer
                 TokenType op = Current.tokenType;
                 MoveNext();
                 if (op == TokenType.Equal)
-                    value = new BinaryExpression(Operator.Equal, value, ParseCompare());
+                    value = new BinaryExpression(ExpressionType.Equal, value, ParseCompare());
                 else if (op == TokenType.NotEqual)
-                    value = new BinaryExpression(Operator.NotEqual, value, ParseCompare());
+                    value = new BinaryExpression(ExpressionType.NotEqual, value, ParseCompare());
             }
             return value;
         }
@@ -451,7 +452,8 @@ namespace Cygnus.SyntaxAnalyzer
                 MoveNext();
                 if (Scope.classtable.ContainsKey(Name))
                 {
-                    value = Scope.classtable[Name].Update(argsList.ToArray(), scope);
+                    // value = Scope.classtable[Name].Update(argsList.ToArray(), scope);
+                    value = new ClassInitExpression(Name, argsList.ToArray());
                     // value = new ClassExpression(Name, argsList.ToArray());
                 }
                 else
@@ -504,6 +506,7 @@ namespace Cygnus.SyntaxAnalyzer
                         value = false; goto Finish;
                     case TokenType.Null:
                         value = Expression.Null(); goto Finish;
+                    //value = null; goto Finish;
                     case TokenType.Void:
                         value = Expression.Void(); goto Finish;
                     case TokenType.Break:

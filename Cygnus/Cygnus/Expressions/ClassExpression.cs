@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Cygnus.DataStructures;
 namespace Cygnus.Expressions
 {
-    public class ClassExpression : Expression,IDotAccessible
+    public class ClassExpression : Expression, IDotAccessible
     {
         public override ExpressionType NodeType
         {
@@ -16,9 +16,11 @@ namespace Cygnus.Expressions
             }
         }
         public CygnusClass cygnusClass { get; private set; }
-        public ClassExpression(string ClassName, Scope ClassScope)
+        public CygnusClass Parent { get; private set; }
+        public ClassExpression(string ClassName, Scope ClassScope, CygnusClass Parent = null)
         {
-            cygnusClass = new CygnusClass(ClassName, ClassScope);
+            this.Parent = Parent;
+            cygnusClass = new CygnusClass(ClassName, ClassScope, this.Parent);
         }
         public ClassExpression(CygnusClass cygnusClass)
         {

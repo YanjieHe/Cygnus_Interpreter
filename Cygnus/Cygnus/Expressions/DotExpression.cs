@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Cygnus.DataStructures;
+using CE = Cygnus.Extensions.ConsoleExtension;
 namespace Cygnus.Expressions
 {
     public class DotExpression : Expression, IAssignable
@@ -30,11 +31,9 @@ namespace Cygnus.Expressions
         {
             if (IsMethod)
             {
-                //CygnusClass ThisClass = expression.Eval(scope).AsConstant(scope).Value as CygnusClass;
-                CygnusClass ThisClass = (expression.Eval(scope) as ClassExpression).cygnusClass;
+                CygnusClass ThisClass = expression.AsConstant(scope).Value as CygnusClass;
                 var func = (ThisClass.GetByDot(field, IsMethod) as FunctionExpression);
-                //func.InClass = ThisClass;
-                return func.Update(new Expression[] { ThisClass }.Concat(Arguments).ToArray(), scope).Eval(scope);
+                return func.Update(new Expression[] { ThisClass }.Concat(Arguments).ToArray(), scope).Eval(scope).GetValue(scope);
             }
             else
                 return GetByDot(expression, scope).GetByDot(field, IsMethod).Eval(scope);
@@ -53,7 +52,8 @@ namespace Cygnus.Expressions
         }
         public void Assgin(Expression value, Scope scope)
         {
-            GetByDot(expression, scope).SetByDot(value.AsConstant(scope).Value, field, IsMethod);
+            GetByDot(expression, scope)
+                .SetByDot(value.AsConstant(scope).Value, field, IsMethod);
         }
     }
 }

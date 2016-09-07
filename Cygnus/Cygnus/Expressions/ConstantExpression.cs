@@ -7,7 +7,7 @@ using Cygnus.Extensions;
 using Cygnus.DataStructures;
 namespace Cygnus.Expressions
 {
-    public class ConstantExpression : Expression, IEquatable<ConstantExpression>, IEnumerable<Expression>, IDotAccessible
+    public class ConstantExpression : Expression, IDotAccessible
     {
         public override ExpressionType NodeType
         {
@@ -31,20 +31,11 @@ namespace Cygnus.Expressions
         public override void Display(Scope scope)
         {
             Value.Display(scope);
-            //    Console.Write(Value ?? "Null");
         }
         public double GetDouble()
         {
             return type == CygnusType.Integer ? (Value as CygnusInteger).Value : (Value as CygnusDouble).Value;
         }
-        //public T GetStruct<T>() where T : struct
-        //{
-        //    return (T)Value;
-        //}
-        //public T GetClass<T>() where T : class
-        //{
-        //    return Value as T;
-        //}
         public override string ToString()
         {
             return string.Format("(Constant: {0}  Type: {1})", Value, type);
@@ -60,36 +51,10 @@ namespace Cygnus.Expressions
         {
             return Value.GetHashCode();
         }
-        public bool Equals(ConstantExpression other)
-        {
-            //if (type == other.type)
-            //{
-            //    if (type == ConstantType.Null || type == ConstantType.Void)
-            //        return true;
-            //    else
-            //        return Value.Equals(other.Value);
-            //}
-            //else if ((type | other.type) == (ConstantType.Integer | ConstantType.Double))
-            //    return GetDouble().Equals(GetDouble());
-            //else
-            //    return false;
-            throw new NotImplementedException();
-        }
         public override Expression Eval(Scope scope)
         {
             return new ConstantExpression(Value);
         }
-        public IEnumerator<Expression> GetEnumerator()
-        {
-            (type == CygnusType.String).OrThrows<NotSupportedException>(type.ToString());
-            foreach (var item in (Value as CygnusString).Value)
-                yield return item.ToString();
-        }
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            yield return this.AsEnumerable();
-        }
-
         public Expression GetByDot(string field, bool IsMethod)
         {
             return (Value as IDotAccessible).GetByDot(field, IsMethod);

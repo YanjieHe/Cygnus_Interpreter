@@ -1,6 +1,10 @@
 ﻿using System;
-
-namespace Cygnus.Expressions
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Cygnus.Expressions;
+namespace Cygnus.SyntaxAnalyzer
 {
     public class ASTViewer
     {
@@ -62,12 +66,6 @@ namespace Cygnus.Expressions
                 case ExpressionType.Return:
                     PrintTree(((GotoExpression)Node).Value, depth + 1);
                     break;
-                //case ExpressionType.Array:
-                //    {
-                //        foreach (var item in ((ArrayExpression)Node).Values)
-                //            PrintTree(item, depth + 1);
-                //    }
-                //    break;
                 case ExpressionType.ForEach:
                     {
                         PrintTree(((ForEachExpression)Node).Collection, depth + 1);

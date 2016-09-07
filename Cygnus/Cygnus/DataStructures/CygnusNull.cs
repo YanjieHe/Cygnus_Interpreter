@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace Cygnus.DataStructures
 {
-    public class CygnusVoid : CygnusObject
+    public class CygnusNull : CygnusObject
     {
         public override CygnusType type
         {
             get
             {
-                return CygnusType.Void;
+                return CygnusType.Null;
             }
         }
-        public CygnusVoid() { }
+        public CygnusNull() { }
     }
 }

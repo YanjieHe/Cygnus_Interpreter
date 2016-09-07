@@ -28,7 +28,7 @@ namespace Cygnus.Executors
             var lex_array = Lexeme.Generate(lex.tokenList);
             var ast = new AST();
             BlockExpression Root = ast.Parse(lex_array, GlobalScope);
-            //ast.Display(Root);
+            // ast.Display(Root);
             Console.ForegroundColor = ConsoleColor.Green;
             Expression Result = Root.Eval(GlobalScope).GetValue(GlobalScope);
             // Console.WriteLine(Result);

@@ -7,13 +7,20 @@ using Cygnus.Expressions;
 using Cygnus.Extensions;
 namespace Cygnus.DataStructures
 {
-    public abstract class CygnusObject : IDisplayable
+    public abstract class CygnusObject : IDisplayable, IEquatable<CygnusObject>
     {
         public abstract CygnusType type { get; }
-
+        public bool IsNull()
+        {
+            return type.Equals(CygnusType.Null);
+        }
         public virtual void Display(Scope scope)
         {
             Console.Write(type);
+        }
+        public virtual bool Equals(CygnusObject other)
+        {
+            throw new NotImplementedException();
         }
 
         public virtual CygnusObject FromObject(CygnusObject obj)

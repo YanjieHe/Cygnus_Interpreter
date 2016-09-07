@@ -55,6 +55,7 @@
     <Compile Include="DataStructures\CygnusIEnumerable.cs" />
     <Compile Include="DataStructures\CygnusInteger.cs" />
     <Compile Include="DataStructures\CygnusList.cs" />
+    <Compile Include="DataStructures\CygnusNull.cs" />
     <Compile Include="DataStructures\CygnusObject.cs" />
     <Compile Include="DataStructures\CygnusString.cs" />
     <Compile Include="DataStructures\CygnusType.cs" />
@@ -63,7 +64,6 @@
     <Compile Include="DataStructures\IComputable.cs" />
     <Compile Include="DataStructures\IDotAccessible.cs" />
     <Compile Include="DataStructures\IIndexable.cs" />
-    <Compile Include="DataStructures\Table.cs" />
     <Compile Include="Errors\InterpreterException.cs" />
     <Compile Include="Errors\LexicalException.cs" />
     <Compile Include="Errors\NotDefinedException.cs" />
@@ -74,7 +74,9 @@
     <Compile Include="Executors\ExecuteInConsole.cs" />
     <Compile Include="Executors\InterpreterExecutor.cs" />
     <Compile Include="Expressions\ClassExpression.cs" />
+    <Compile Include="Expressions\ClassInitExpression.cs" />
     <Compile Include="Expressions\DotExpression.cs" />
+    <Compile Include="Expressions\ExpressionType.cs" />
     <Compile Include="Extensions\ConsoleExtension.cs" />
     <Compile Include="Extensions\ExpressionExtension.cs" />
     <Compile Include="Extensions\IDisplayable.cs" />
@@ -100,8 +102,6 @@
     <Compile Include="SymbolTable\ClassTable.cs" />
     <Compile Include="SymbolTable\FunctionTable.cs" />
     <Compile Include="Expressions\GotoExpression.cs" />
-    <Compile Include="Expressions\CSharpObjectExpression.cs" />
-    <Compile Include="Expressions\MemberExpression.cs" />
     <Compile Include="Expressions\NewArrayExpression.cs" />
     <Compile Include="Expressions\Scope.cs" />
     <Compile Include="SymbolTable\VariableTable.cs" />
@@ -118,9 +118,9 @@
     <Compile Include="Expressions\IfThenExpression.cs" />
     <Compile Include="Expressions\IndexExpression.cs" />
     <Compile Include="Expressions\ParameterExpression.cs" />
-    <Compile Include="Expressions\TreeViewer.cs" />
     <Compile Include="Expressions\UnaryExpression.cs" />
     <Compile Include="Expressions\WhileExpression.cs" />
+    <Compile Include="SyntaxAnalyzer\ASTViewer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

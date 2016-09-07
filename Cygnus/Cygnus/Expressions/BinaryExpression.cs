@@ -8,10 +8,10 @@ namespace Cygnus.Expressions
 {
     public class BinaryExpression : Expression
     {
-        public Operator Op;
+        public ExpressionType Op;
         public Expression Left { get; private set; }
         public Expression Right { get; private set; }
-        public BinaryExpression(Operator Op, Expression Left, Expression Right)
+        public BinaryExpression(ExpressionType Op, Expression Left, Expression Right)
         {
             this.Op = Op;
             this.Left = Left;
@@ -28,26 +28,26 @@ namespace Cygnus.Expressions
         {
             switch (Op)
             {
-                case Operator.Add:
-                case Operator.Subtract:
-                case Operator.Multiply:
-                case Operator.Divide:
-                case Operator.Power:
+                case ExpressionType.Add:
+                case ExpressionType.Subtract:
+                case ExpressionType.Multiply:
+                case ExpressionType.Divide:
+                case ExpressionType.Power:
                     return ArithemeticOp(Left, Right, Op, scope);
-                case Operator.And:
+                case ExpressionType.And:
                     return Left.AsBool(scope) && Right.AsBool(scope);
-                case Operator.Or:
+                case ExpressionType.Or:
                     return Left.AsBool(scope) || Right.AsBool(scope);
-                case Operator.Less:
-                case Operator.Greater:
-                case Operator.LessOrEquals:
-                case Operator.GreaterOrEquals:
+                case ExpressionType.Less:
+                case ExpressionType.Greater:
+                case ExpressionType.LessOrEquals:
+                case ExpressionType.GreaterOrEquals:
                     return CompareOp(Left, Right, Op, scope);
-                case Operator.Equal:
-                    return Left.Eval(scope).Equals(Right.Eval(scope));
-                case Operator.NotEqual:
-                    return !Left.Eval(scope).Equals(Right.Eval(scope));
-                case Operator.Assign:
+                case ExpressionType.Equal:
+                    return EqualsOp(Left, Right, scope);
+                case ExpressionType.NotEqual:
+                    return !EqualsOp(Left, Right, scope);
+                case ExpressionType.Assign:
                     return AssginOp(Left, Right, scope);
                 default:
                     throw new NotSupportedException();
@@ -60,7 +60,7 @@ namespace Cygnus.Expressions
             (left as IAssignable).Assgin(right, scope);
             return left;
         }
-        private static Expression ArithemeticOp(Expression LeftOperand, Expression RightOperand, Operator op, Scope scope)
+        private static Expression ArithemeticOp(Expression LeftOperand, Expression RightOperand, ExpressionType op, Scope scope)
         {
             var left = LeftOperand.AsConstant(scope).Value;
             var right = RightOperand.AsConstant(scope).Value;
@@ -78,16 +78,16 @@ namespace Cygnus.Expressions
             }
             switch (op)
             {
-                case Operator.Add: return new ConstantExpression((left as IComputable).Add(right));
-                case Operator.Subtract: return new ConstantExpression((left as IComputable).Subtract(right));
-                case Operator.Multiply: return new ConstantExpression((left as IComputable).Multiply(right));
-                case Operator.Divide: return new ConstantExpression((left as IComputable).Divide(right));
-                case Operator.Power: return new ConstantExpression((left as IComputable).Power(right));
+                case ExpressionType.Add: return new ConstantExpression((left as IComputable).Add(right));
+                case ExpressionType.Subtract: return new ConstantExpression((left as IComputable).Subtract(right));
+                case ExpressionType.Multiply: return new ConstantExpression((left as IComputable).Multiply(right));
+                case ExpressionType.Divide: return new ConstantExpression((left as IComputable).Divide(right));
+                case ExpressionType.Power: return new ConstantExpression((left as IComputable).Power(right));
                 default:
                     throw new NotSupportedException();
             }
         }
-        private static Expression CompareOp(Expression LeftOperand, Expression RightOperand, Operator op, Scope scope)
+        private static Expression CompareOp(Expression LeftOperand, Expression RightOperand, ExpressionType op, Scope scope)
         {
             var left = LeftOperand.AsConstant(scope).Value;
             var right = RightOperand.AsConstant(scope).Value;
@@ -106,12 +106,37 @@ namespace Cygnus.Expressions
             var cmp = (left as IComparable).CompareTo(right);
             switch (op)
             {
-                case Operator.Less: return cmp < 0;
-                case Operator.Greater: return cmp > 0;
-                case Operator.LessOrEquals: return cmp <= 0;
-                case Operator.GreaterOrEquals: return cmp >= 0;
+                case ExpressionType.Less: return cmp < 0;
+                case ExpressionType.Greater: return cmp > 0;
+                case ExpressionType.LessOrEquals: return cmp <= 0;
+                case ExpressionType.GreaterOrEquals: return cmp >= 0;
                 default:
                     throw new NotSupportedException();
+            }
+        }
+        private static bool EqualsOp(Expression LeftOperand, Expression RightOperand, Scope scope)
+        {
+            var left = LeftOperand.AsConstant(scope).Value;
+            var right = RightOperand.AsConstant(scope).Value;
+            if (left.IsNull() && right.IsNull())
+                return true;
+            else if (left.IsNull() || right.IsNull())
+                return false;
+            else
+            {
+                if (left.type != right.type)
+                {
+                    if (left.type.Width > right.type.Width)
+                    {
+                        right = left.FromObject(right);
+                    }
+                    else if (left.type.Width < right.type.Width)
+                    {
+                        left = right.FromObject(left);
+                    }
+                    else throw new NotImplementedException();
+                }
+                return left.Equals(right);
             }
         }
         public override string ToString()

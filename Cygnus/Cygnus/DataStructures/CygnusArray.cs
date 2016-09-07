@@ -15,7 +15,7 @@ namespace Cygnus.DataStructures
         {
             get
             {
-                return new CygnusType("array", 10);
+                return CygnusType.Array;
             }
         }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using InnerType = System.Boolean;
+using ThisType = Cygnus.DataStructures.CygnusBoolean;
 using Cygnus.Expressions;
 namespace Cygnus.DataStructures
 {
@@ -20,6 +21,11 @@ namespace Cygnus.DataStructures
         public CygnusBoolean(InnerType Value)
         {
             this.Value = Value;
+        }
+        public override bool Equals(CygnusObject other)
+        {
+            if (other == null) return false;
+            else return Value.Equals((other as ThisType).Value);
         }
         public override string ToString()
         {

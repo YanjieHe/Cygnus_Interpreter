@@ -13,7 +13,7 @@ namespace Cygnus.DataStructures
         {
             get
             {
-                return new CygnusType("IEnumerable", 10);
+                return CygnusType.IEnumerable;
             }
         }
         public IEnumerable<CygnusObject> Collection { get; private set; }

@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using InnerType = System.String;
 using ThisType = Cygnus.DataStructures.CygnusString;
 using Cygnus.Expressions;
+using System.Collections;
+
 namespace Cygnus.DataStructures
 {
-    public class CygnusString : CygnusObject, IComputable,IComparable
+    public class CygnusString : CygnusObject, IComputable, IComparable, IEnumerable<CygnusObject>
     {
         public override CygnusType type
         {
@@ -21,6 +23,11 @@ namespace Cygnus.DataStructures
         public CygnusString(InnerType Value)
         {
             this.Value = Value;
+        }
+        public override bool Equals(CygnusObject other)
+        {
+            if (other == null) return false;
+            else return Value.Equals((other as ThisType).Value);
         }
         public override CygnusObject FromObject(CygnusObject obj)
         {
@@ -72,6 +79,19 @@ namespace Cygnus.DataStructures
         public int CompareTo(object obj)
         {
             return Value.CompareTo((obj as ThisType).Value);
+        }
+
+        public IEnumerator<CygnusObject> GetEnumerator()
+        {
+            foreach (var item in Value)
+            {
+                yield return item.ToString();
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            yield return this.AsEnumerable();
         }
     }
 }

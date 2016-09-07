@@ -13,8 +13,8 @@ namespace Cygnus.Expressions
             }
         }
         public Expression Value { get; private set; }
-        public Operator Op { get; private set; }
-        public UnaryExpression(Operator Op, Expression Value)
+        public ExpressionType Op { get; private set; }
+        public UnaryExpression(ExpressionType Op, Expression Value)
         {
             this.Op = Op;
             this.Value = Value;
@@ -25,10 +25,10 @@ namespace Cygnus.Expressions
 
             switch (Op)
             {
-                case Operator.UnaryPlus:
+                case ExpressionType.UnaryPlus:
                     return new ConstantExpression(value.UnaryPlus());
-                case Operator.UnaryMinus:
-                case Operator.Not:
+                case ExpressionType.UnaryMinus:
+                case ExpressionType.Not:
                     return new ConstantExpression(value.Negate());
                 default:
                     throw new NotSupportedException();

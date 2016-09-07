@@ -30,11 +30,11 @@ namespace Cygnus.Expressions
         {
             return new ConstantExpression(value);
         }
-        //public static implicit operator Expression(Vector<double> Data)
+        //public static implicit ExpressionType Expression(Vector<double> Data)
         //{
         //    return new VectorExpression(Data);
         //}
-        //public static implicit operator Expression(Matrix<double> Data)
+        //public static implicit ExpressionType Expression(Matrix<double> Data)
         //{
         //    return new MatrixExpression(Data);
         //}
@@ -59,21 +59,14 @@ namespace Cygnus.Expressions
         {
             return new ConstantExpression(new CygnusIEnumerable(Collection));
         }
-        public static CSharpObjectExpression CSharpObject(object obj, Type type)
-        {
-            return new CSharpObjectExpression(obj, type);
-        }
-        public static CSharpObjectExpression CSharpObject(object obj)
-        {
-            return new CSharpObjectExpression(obj);
-        }
         public static ConstantExpression Void()
         {
             return new ConstantExpression(new CygnusVoid());
         }
         public static ConstantExpression Null()
         {
-            throw new NotImplementedException();
+            return new ConstantExpression(new CygnusNull());
+            //throw new NotImplementedException();
             //return new ConstantExpression(null, ConstantType.Null);
         }
         public static ParameterExpression Variable(string Name)
@@ -94,51 +87,51 @@ namespace Cygnus.Expressions
         }
         public static BinaryExpression Assign(Expression Left, Expression Right)
         {
-            return new BinaryExpression(Operator.Assign, Left, Right);
+            return new BinaryExpression(ExpressionType.Assign, Left, Right);
         }
         public static BinaryExpression LessThan(Expression Left, Expression Right)
         {
-            return new BinaryExpression(Operator.Less, Left, Right);
+            return new BinaryExpression(ExpressionType.Less, Left, Right);
         }
         public static BinaryExpression GreaterThan(Expression Left, Expression Right)
         {
-            return new BinaryExpression(Operator.Greater, Left, Right);
+            return new BinaryExpression(ExpressionType.Greater, Left, Right);
         }
         public static BinaryExpression LessOrEquals(Expression Left, Expression Right)
         {
-            return new BinaryExpression(Operator.LessOrEquals, Left, Right);
+            return new BinaryExpression(ExpressionType.LessOrEquals, Left, Right);
         }
         public static BinaryExpression GreaterOrEquals(Expression Left, Expression Right)
         {
-            return new BinaryExpression(Operator.GreaterOrEquals, Left, Right);
+            return new BinaryExpression(ExpressionType.GreaterOrEquals, Left, Right);
         }
         public static BinaryExpression Add(Expression Left, Expression Right)
         {
-            return new BinaryExpression(Operator.Add, Left, Right);
+            return new BinaryExpression(ExpressionType.Add, Left, Right);
         }
         public static BinaryExpression Subtract(Expression Left, Expression Right)
         {
-            return new BinaryExpression(Operator.Subtract, Left, Right);
+            return new BinaryExpression(ExpressionType.Subtract, Left, Right);
         }
         public static BinaryExpression Multiply(Expression Left, Expression Right)
         {
-            return new BinaryExpression(Operator.Multiply, Left, Right);
+            return new BinaryExpression(ExpressionType.Multiply, Left, Right);
         }
         public static BinaryExpression Divide(Expression Left, Expression Right)
         {
-            return new BinaryExpression(Operator.Divide, Left, Right);
+            return new BinaryExpression(ExpressionType.Divide, Left, Right);
         }
         public static BinaryExpression Power(Expression Left, Expression Right)
         {
-            return new BinaryExpression(Operator.Power, Left, Right);
+            return new BinaryExpression(ExpressionType.Power, Left, Right);
         }
         public static UnaryExpression UnaryPlus(Expression Value)
         {
-            return new UnaryExpression(Operator.UnaryPlus, Value);
+            return new UnaryExpression(ExpressionType.UnaryPlus, Value);
         }
         public static UnaryExpression UnaryMinus(Expression Value)
         {
-            return new UnaryExpression(Operator.UnaryMinus, Value);
+            return new UnaryExpression(ExpressionType.UnaryMinus, Value);
         }
         public static IndexExpression Property(Expression Member, string property)
         {
@@ -178,15 +171,15 @@ namespace Cygnus.Expressions
         }
         public static BinaryExpression And(Expression Left, Expression Right)
         {
-            return new BinaryExpression(Operator.And, Left, Right);
+            return new BinaryExpression(ExpressionType.And, Left, Right);
         }
         public static BinaryExpression Or(Expression Left, Expression Right)
         {
-            return new BinaryExpression(Operator.Or, Left, Right);
+            return new BinaryExpression(ExpressionType.Or, Left, Right);
         }
         public static UnaryExpression Not(Expression Value)
         {
-            return new UnaryExpression(Operator.Not, Value);
+            return new UnaryExpression(ExpressionType.Not, Value);
         }
         public T As<T>(Scope scope) where T : struct
         {
@@ -231,6 +224,8 @@ namespace Cygnus.Expressions
                 case ExpressionType.Index:
                 case ExpressionType.NewArray:
                 case ExpressionType.Dot:
+                case ExpressionType.Class:
+                case ExpressionType.ClassInit:
                     return Eval(scope).GetValue(scope);
                 default:
                     return this;
@@ -251,6 +246,8 @@ namespace Cygnus.Expressions
                 case ExpressionType.Index:
                 case ExpressionType.NewArray:
                 case ExpressionType.Dot:
+                case ExpressionType.Class:
+                case ExpressionType.ClassInit:
                     return Eval(scope).GetValue<T>(expressionType, scope);
                 default:
                     throw new NotSupportedException(string.Format("expected {0} get {1}", expressionType, ToString()));
@@ -299,15 +296,5 @@ namespace Cygnus.Expressions
             }
         }
     }
-    public enum ExpressionType
-    {
-        Constant = 1,
-        Block, Unary, Binary,
-        IfThen, IfThenElse, While, Break,
-        Parameter, Function, Array, List, Dictionary,
-        Index, Return, ForEach, IEnumerable, Call,
-        Table, IList, KeyValuePair, Continue, CSharpObject,
-        Matrix, MatrixRow, Computable, Goto, Collection, NewArray,
-        Member,Class,Dot,
-    }
+
 }

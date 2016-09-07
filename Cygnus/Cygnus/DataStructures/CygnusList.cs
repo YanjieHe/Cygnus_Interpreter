@@ -13,7 +13,7 @@ namespace Cygnus.DataStructures
         {
             get
             {
-                return new CygnusType("list", 10);
+                return CygnusType.List;
             }
         }
         public List<CygnusObject> list { get; private set; }

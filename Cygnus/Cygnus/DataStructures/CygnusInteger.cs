@@ -23,6 +23,11 @@ namespace Cygnus.DataStructures
         {
             this.Value = Value;
         }
+        public override bool Equals(CygnusObject other)
+        {
+            if (other == null) return false;
+            else return Value.Equals((other as ThisType).Value);
+        }
         public override string ToString()
         {
             return this.Value.ToString();

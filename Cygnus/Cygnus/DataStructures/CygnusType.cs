@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Cygnus.DataStructures
 {
@@ -16,12 +12,16 @@ namespace Cygnus.DataStructures
             this.Width = Width;
         }
         public readonly static CygnusType
-            Void = new CygnusType("void", 0),
             Null = new CygnusType("null", 0),
+            Void = new CygnusType("void", 0),
             Integer = new CygnusType("int", 4),
             Double = new CygnusType("double", 8),
             Boolean = new CygnusType("boolean", 1),
-            String = new CygnusType("string", int.MaxValue);
+            String = new CygnusType("string", int.MaxValue),
+            Array = new CygnusType("array", 10),
+            List = new CygnusType("list", 10),
+            IEnumerable = new CygnusType("IEnumerable", 10);
+
         public override string ToString()
         {
             return string.Format("(Type: {0}, Width = {1})", TypeName, Width);
