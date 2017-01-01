@@ -1,4 +1,9 @@
 # Cygnus Interpreter
+This project is no longer maintain. Actually, it is an origin design of my interpreter, and it has a more mature version.
+
+Welcome to have a look at my project:
+https://github.com/JasonHe0727/Cygni
+
 A simple interpreter for a script language Cygnus, written in C#
 ##What is Cygnus?
 Cygnus is a procedure-oriented, light weight, and interactive programming language, written in C#.
